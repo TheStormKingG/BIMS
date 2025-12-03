@@ -65,7 +65,13 @@ This app can be easily deployed to:
 - **GitHub Pages**
 - Any static hosting service
 
-### Deploy to Vercel
+### Deployed on GitHub Pages
+
+**Live URL:** https://thestormkingg.github.io/BIMS/
+
+The app automatically deploys via GitHub Actions when you push to the `main` branch.
+
+### Deploy to Vercel (Alternative)
 
 1. Push your code to GitHub
 2. Go to [Vercel](https://vercel.com)
