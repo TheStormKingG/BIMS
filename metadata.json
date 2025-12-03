@@ -1,0 +1,7 @@
+{
+  "name": "Bims",
+  "description": "A comprehensive personal finance tracker for Guyanese Dollars (GYD), featuring multi-account management, physical cash denomination tracking, and AI-powered receipt scanning.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
