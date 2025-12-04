@@ -72,6 +72,14 @@ function App() {
     }
   };
 
+  const handleAddFunds = async (bankId: string, amount: number, source: string) => {
+    try {
+      await addBankInTransaction(bankId, amount, source);
+    } catch (err) {
+      alert('Failed to add funds: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
   const renderContent = () => {
     // Show loading state
     if (loading) {
@@ -136,6 +144,7 @@ function App() {
             }))}
             onAddAccount={handleAddBank}
             onRemoveAccount={handleDeleteBank}
+            onAddFunds={handleAddFunds}
           />
         );
       

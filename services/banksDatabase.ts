@@ -113,14 +113,20 @@ export const createBankInTransaction = async (
   if (error) throw error;
   
   // Update the bank's total
-  const bank = await supabase
+  const { data: bankData, error: bankError } = await supabase
     .from('banks')
-    .select('total')
+    .select('bank_name, total')
     .eq('id', destinationBankId)
     .single();
   
-  if (bank.data) {
-    await updateBank(destinationBankId, '', bank.data.total + amount);
+  if (!bankError && bankData) {
+    await supabase
+      .from('banks')
+      .update({ 
+        total: Number(bankData.total) + amount,
+        updated: new Date().toISOString()
+      })
+      .eq('id', destinationBankId);
   }
   
   return data as DBBankIn;
