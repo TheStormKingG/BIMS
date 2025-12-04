@@ -129,7 +129,7 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, onUpdate,
                   required
                 >
                   <option value="">Select source...</option>
-                  <option value="Cash-In">Cash-In (ATM, Payment, etc.)</option>
+                  <option value="Cash-In">Cash-In (Payments, Gifts, Etc.)</option>
                   {banks.length > 0 && (
                     <optgroup label="From Bank Account">
                       {banks.map(bank => (
