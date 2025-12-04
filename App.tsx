@@ -168,8 +168,8 @@ function App() {
       {/* Desktop Navigation (Sidebar) */}
       <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-slate-900 text-white flex-col p-6 z-20">
         <div className="flex items-center gap-3 mb-10">
-           <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-slate-900">G</div>
-           <h1 className="text-xl font-bold tracking-tight">GuyanaSpend</h1>
+           <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-slate-900">S</div>
+           <h1 className="text-xl font-bold tracking-tight">Stashway</h1>
         </div>
         
         <div className="space-y-2">
@@ -191,7 +191,7 @@ function App() {
         
         <div className="mt-auto pt-6 border-t border-white/10">
           <p className="text-xs text-slate-500 text-center">
-            &copy; 2025 GuyanaSpend
+            &copy; 2025 Stashway
           </p>
         </div>
       </nav>
@@ -200,7 +200,7 @@ function App() {
       <main className="p-4 md:p-8 max-w-6xl mx-auto w-full">
          {/* Mobile Header */}
          <div className="md:hidden flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold text-slate-900">GuyanaSpend</h1>
+            <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
             <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
          </div>
 
