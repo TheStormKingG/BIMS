@@ -4,25 +4,71 @@ import {
 } from './types';
 import { NAV_ITEMS } from './constants';
 import { CashWallet } from './components/CashWallet';
+import { Accounts } from './components/Accounts';
 import { useWallet } from './hooks/useWallet';
+import { useBanks } from './hooks/useBanks';
 
 function App() {
   const [activeTab, setActiveTab] = useState('wallet');
   
-  // Use simplified wallet hook
+  // Use wallet hook
   const {
     wallet,
     cashBalance,
-    loading,
-    error,
+    loading: walletLoading,
+    error: walletError,
     updateWallet,
   } = useWallet();
+
+  // Use banks hook
+  const {
+    banks,
+    bankInTransactions,
+    walletInTransactions,
+    totalInBanks,
+    loading: banksLoading,
+    error: banksError,
+    addBank,
+    updateBank,
+    deleteBank,
+    addBankInTransaction,
+    addWalletInTransaction,
+  } = useBanks();
+
+  const loading = walletLoading || banksLoading;
+  const error = walletError || banksError;
 
   const handleUpdateWallet = async (denoms: CashDenominations) => {
     try {
       await updateWallet(denoms);
     } catch (err) {
       alert('Failed to update wallet: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleAddBank = async (name: string, balance: number) => {
+    try {
+      await addBank(name, balance);
+    } catch (err) {
+      alert('Failed to add bank: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleUpdateBank = async (id: string, name: string, balance: number) => {
+    try {
+      await updateBank(id, name, balance);
+    } catch (err) {
+      alert('Failed to update bank: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleDeleteBank = async (id: string) => {
+    if (confirm('Are you sure you want to delete this bank account?')) {
+      try {
+        await deleteBank(id);
+      } catch (err) {
+        alert('Failed to delete bank: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      }
     }
   };
 
@@ -79,8 +125,21 @@ function App() {
           </div>
         );
       
-      case 'dashboard':
       case 'accounts':
+        return (
+          <Accounts 
+            accounts={banks.map(bank => ({
+              id: bank.id,
+              name: bank.bank_name,
+              type: 'BANK' as const,
+              balance: Number(bank.total)
+            }))}
+            onAddAccount={handleAddBank}
+            onRemoveAccount={handleDeleteBank}
+          />
+        );
+      
+      case 'dashboard':
       case 'scan':
       case 'expenses':
         return (
@@ -93,13 +152,25 @@ function App() {
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-2">Coming Soon</h3>
               <p className="text-slate-600 mb-2">This feature is under development.</p>
-              <p className="text-sm text-slate-500">For now, use the Cash Wallet to track your physical cash.</p>
-              <button
-                onClick={() => setActiveTab('wallet')}
-                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                Go to Wallet
-              </button>
+              <p className="text-sm text-slate-500">
+                {activeTab === 'dashboard' && 'Dashboard with analytics and charts'}
+                {activeTab === 'scan' && 'Receipt scanning with AI'}
+                {activeTab === 'expenses' && 'Full transaction ledger'}
+              </p>
+              <div className="flex gap-2 justify-center mt-4">
+                <button
+                  onClick={() => setActiveTab('wallet')}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  Cash Wallet
+                </button>
+                <button
+                  onClick={() => setActiveTab('accounts')}
+                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  Banks
+                </button>
+              </div>
             </div>
           </div>
         );
