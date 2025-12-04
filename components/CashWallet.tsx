@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { GYD_DENOMINATIONS } from '../constants';
-import { CashWallet as CashWalletType, CashDenominations } from '../types';
+import { CashWallet as CashWalletType, CashDenominations, BankAccount } from '../types';
 import { Wallet, ArrowDownToLine, X } from 'lucide-react';
 
 interface CashWalletProps {
   wallet: CashWalletType;
+  banks: BankAccount[];
   onUpdate: (denominations: CashDenominations) => void;
   onAddFunds?: (source: string, denominations: CashDenominations) => void;
 }
 
-export const CashWallet: React.FC<CashWalletProps> = ({ wallet, onUpdate, onAddFunds }) => {
+export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, onUpdate, onAddFunds }) => {
   const [showAddFundsModal, setShowAddFundsModal] = useState(false);
   const [fundSource, setFundSource] = useState('');
   const [fundDenominations, setFundDenominations] = useState<CashDenominations>({
@@ -116,19 +117,34 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, onUpdate, onAddF
             </div>
 
             <form onSubmit={handleSubmitFunds} className="p-6 space-y-6">
-              {/* Source Input */}
+              {/* Source Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Source <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={fundSource}
                   onChange={(e) => setFundSource(e.target.value)}
-                  placeholder="e.g. ATM Withdrawal, Payment Received, Salary"
                   className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
                   required
-                />
+                >
+                  <option value="">Select source...</option>
+                  <option value="Cash-In">Cash-In (ATM, Payment, etc.)</option>
+                  {banks.length > 0 && (
+                    <optgroup label="From Bank Account">
+                      {banks.map(bank => (
+                        <option key={bank.id} value={bank.name}>
+                          {bank.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+                {fundSource && fundSource !== 'Cash-In' && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    💡 Withdrawing from {fundSource}
+                  </p>
+                )}
               </div>
 
               {/* Denomination Inputs */}

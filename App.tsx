@@ -132,7 +132,13 @@ function App() {
       case 'wallet':
         return wallet ? (
           <CashWallet 
-            wallet={wallet} 
+            wallet={wallet}
+            banks={banks.map(bank => ({
+              id: bank.id,
+              name: bank.bank_name,
+              type: 'BANK' as const,
+              balance: Number(bank.total)
+            }))}
             onUpdate={handleUpdateWallet}
             onAddFunds={handleAddWalletFunds}
           />
