@@ -72,11 +72,19 @@ function App() {
     }
   };
 
-  const handleAddFunds = async (bankId: string, amount: number, source: string) => {
+  const handleAddBankFunds = async (bankId: string, amount: number, source: string) => {
     try {
       await addBankInTransaction(bankId, amount, source);
     } catch (err) {
       alert('Failed to add funds: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleAddWalletFunds = async (source: string, denominations: CashDenominations) => {
+    try {
+      await addWalletInTransaction(source, denominations);
+    } catch (err) {
+      alert('Failed to add wallet funds: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
@@ -125,7 +133,8 @@ function App() {
         return wallet ? (
           <CashWallet 
             wallet={wallet} 
-            onUpdate={handleUpdateWallet} 
+            onUpdate={handleUpdateWallet}
+            onAddFunds={handleAddWalletFunds}
           />
         ) : (
           <div className="text-center py-12">
@@ -144,7 +153,7 @@ function App() {
             }))}
             onAddAccount={handleAddBank}
             onRemoveAccount={handleDeleteBank}
-            onAddFunds={handleAddFunds}
+            onAddFunds={handleAddBankFunds}
           />
         );
       
