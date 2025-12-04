@@ -1,7 +1,27 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ReceiptScanResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Get API key from localStorage or environment variable
+const getApiKey = (): string => {
+  // First try localStorage (user can set this)
+  const storedKey = localStorage.getItem('GEMINI_API_KEY');
+  if (storedKey) return storedKey;
+  
+  // Fallback to environment variable (for local dev)
+  const envKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (envKey) return envKey;
+  
+  // Prompt user for API key if not found
+  const userKey = prompt('Please enter your Gemini API Key.\n\nYou can get one free at: https://aistudio.google.com/apikey\n\nThe key will be stored locally in your browser.');
+  if (userKey) {
+    localStorage.setItem('GEMINI_API_KEY', userKey);
+    return userKey;
+  }
+  
+  throw new Error('An API Key must be set when running in a browser');
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
 const modelName = 'gemini-2.5-flash';
 
