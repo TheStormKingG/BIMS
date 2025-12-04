@@ -1,93 +1,28 @@
 import React, { useState } from 'react';
 import { 
-  ReceiptScanResult,
-  Transaction,
   CashDenominations
 } from './types';
 import { NAV_ITEMS } from './constants';
-import { Dashboard } from './components/Dashboard';
 import { CashWallet } from './components/CashWallet';
-import { Scanner } from './components/Scanner';
-import { TransactionList } from './components/TransactionList';
-import { Accounts } from './components/Accounts';
-import { useSupabaseData } from './hooks/useSupabaseData';
+import { useWallet } from './hooks/useWallet';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('wallet');
   
-  // Use Supabase data hook
+  // Use simplified wallet hook
   const {
     wallet,
-    bankAccounts,
-    transactions,
     cashBalance,
-    totalBalance,
     loading,
     error,
-    addAccount,
-    updateAccount,
-    deleteAccount,
     updateWallet,
-    addTransaction,
-    updateTransaction,
-  } = useSupabaseData();
+  } = useWallet();
 
   const handleUpdateWallet = async (denoms: CashDenominations) => {
-    if (wallet) {
-      try {
-        await updateWallet(wallet.id, denoms);
-      } catch (err) {
-        alert('Failed to update wallet: ' + (err instanceof Error ? err.message : 'Unknown error'));
-      }
-    }
-  };
-
-  const handleAddAccount = async (name: string, balance: number) => {
     try {
-      await addAccount(name, balance);
+      await updateWallet(denoms);
     } catch (err) {
-      alert('Failed to add account: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
-
-  const handleRemoveAccount = async (id: string) => {
-    if (confirm('Are you sure you want to delete this account?')) {
-      try {
-        await deleteAccount(id);
-      } catch (err) {
-        alert('Failed to delete account: ' + (err instanceof Error ? err.message : 'Unknown error'));
-      }
-    }
-  };
-
-  const handleSaveTransaction = async (data: ReceiptScanResult, accountId: string) => {
-    try {
-      await addTransaction({
-        merchant: data.merchant,
-        date: data.date,
-        totalAmount: data.total,
-        items: data.items,
-        accountId: accountId,
-        source: 'SCAN_RECEIPT'
-      });
-
-      // Show alert for cash wallet transactions
-      if (wallet && accountId === wallet.id) {
-        alert("Transaction saved! Please manually update your Cash Wallet denominations to match your physical cash.");
-      }
-      
-      // Move to expenses tab after save
-      setActiveTab('expenses');
-    } catch (err) {
-      alert('Failed to save transaction: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
-
-  const handleUpdateTransaction = async (updatedTx: Transaction) => {
-    try {
-      await updateTransaction(updatedTx.id, updatedTx);
-    } catch (err) {
-      alert('Failed to update transaction: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      alert('Failed to update wallet: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
@@ -98,7 +33,7 @@ function App() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-600">Loading data from Supabase...</p>
+            <p className="text-slate-600">Loading wallet from Supabase...</p>
           </div>
         </div>
       );
@@ -116,24 +51,22 @@ function App() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to connect to Supabase</h3>
             <p className="text-slate-600 mb-4">{error}</p>
-            <p className="text-sm text-slate-500">Make sure your Supabase credentials are configured correctly. Check the console for details.</p>
+            <p className="text-sm text-slate-500 mb-4">Make sure you've run the SQL schema in Supabase.</p>
+            <a 
+              href="https://supabase.com/dashboard" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Open Supabase Dashboard
+            </a>
           </div>
         </div>
       );
     }
 
-    // Normal content
-    const allAccounts = wallet ? [wallet, ...bankAccounts] : bankAccounts;
-
+    // Render content based on active tab
     switch (activeTab) {
-      case 'dashboard':
-        return (
-          <Dashboard 
-            accounts={allAccounts} 
-            transactions={transactions} 
-            totalBalance={totalBalance} 
-          />
-        );
       case 'wallet':
         return wallet ? (
           <CashWallet 
@@ -142,31 +75,35 @@ function App() {
           />
         ) : (
           <div className="text-center py-12">
-            <p className="text-slate-600">No cash wallet found. Creating one...</p>
+            <p className="text-slate-600">Initializing wallet...</p>
           </div>
         );
+      
+      case 'dashboard':
       case 'accounts':
-        return (
-           <Accounts 
-             accounts={bankAccounts}
-             onAddAccount={handleAddAccount}
-             onRemoveAccount={handleRemoveAccount}
-           />
-        );
       case 'scan':
-        return (
-          <Scanner 
-            accounts={allAccounts} 
-            onSave={handleSaveTransaction} 
-          />
-        );
       case 'expenses':
         return (
-          <TransactionList 
-            transactions={transactions} 
-            onUpdateTransaction={handleUpdateTransaction}
-          />
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center max-w-md">
+              <div className="text-emerald-500 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Coming Soon</h3>
+              <p className="text-slate-600 mb-2">This feature is under development.</p>
+              <p className="text-sm text-slate-500">For now, use the Cash Wallet to track your physical cash.</p>
+              <button
+                onClick={() => setActiveTab('wallet')}
+                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                Go to Wallet
+              </button>
+            </div>
+          </div>
         );
+      
       default:
         return null;
     }
