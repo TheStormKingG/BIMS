@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { BankAccount } from '../types';
-import { Building2, Plus, Trash2, ArrowDownToLine, X } from 'lucide-react';
+import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft } from 'lucide-react';
+
+interface BankTransaction {
+  id: string; // This is the bank_id (destination)
+  txnId?: string; // Optional transaction ID for unique key
+  amount: number;
+  source: string;
+  datetime: string;
+}
 
 interface AccountsProps {
   accounts: BankAccount[];
+  bankTransactions?: BankTransaction[];
   onAddAccount: (name: string, initialBalance: number) => void;
   onRemoveAccount: (id: string) => void;
   onAddFunds?: (bankId: string, amount: number, source: string) => void;
 }
 
-export const Accounts: React.FC<AccountsProps> = ({ accounts, onAddAccount, onRemoveAccount, onAddFunds }) => {
+export const Accounts: React.FC<AccountsProps> = ({ accounts, bankTransactions = [], onAddAccount, onRemoveAccount, onAddFunds }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newBalance, setNewBalance] = useState('');
@@ -19,6 +28,9 @@ export const Accounts: React.FC<AccountsProps> = ({ accounts, onAddAccount, onRe
   const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null);
   const [fundAmount, setFundAmount] = useState('');
   const [fundSource, setFundSource] = useState('');
+
+  // Detail view state
+  const [viewingBank, setViewingBank] = useState<BankAccount | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +62,89 @@ export const Accounts: React.FC<AccountsProps> = ({ accounts, onAddAccount, onRe
     }
   };
 
+  // Get transactions for specific bank
+  const getBankTransactions = (bankId: string) => {
+    return bankTransactions
+      .filter(txn => txn.id === bankId)
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+  };
+
+  // If viewing a bank's details, show detail view
+  if (viewingBank) {
+    const transactions = getBankTransactions(viewingBank.id);
+
+    return (
+      <div className="space-y-6 animate-fade-in pb-20">
+        {/* Back Button */}
+        <button
+          onClick={() => setViewingBank(null)}
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to All Accounts
+        </button>
+
+        {/* Bank Header Card */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">{viewingBank.name}</h2>
+              <p className="text-3xl font-bold text-emerald-600 mt-2">
+                ${viewingBank.balance.toLocaleString()} <span className="text-lg text-slate-500">GYD</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => handleOpenAddFunds(viewingBank)}
+            className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <ArrowDownToLine className="w-4 h-4" />
+            Add Funds
+          </button>
+        </div>
+
+        {/* Transaction History */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50">
+            <h3 className="font-semibold text-slate-700">Transaction History</h3>
+          </div>
+          
+          {transactions.length === 0 ? (
+            <div className="p-12 text-center text-slate-400">
+              <p>No transactions yet</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {transactions.map((txn, index) => (
+                <div key={txn.txnId || `${txn.id}-${index}`} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900">Deposit</p>
+                      <p className="text-sm text-slate-500">From: {txn.source}</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {new Date(txn.datetime).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-emerald-600">
+                        +${txn.amount.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Main accounts list view
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       <div className="flex justify-between items-center">
@@ -109,21 +204,28 @@ export const Accounts: React.FC<AccountsProps> = ({ accounts, onAddAccount, onRe
 
       <div className="grid gap-4">
         {accounts.map(acc => (
-          <div key={acc.id} className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 group">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center gap-4">
+          <div key={acc.id} className="bg-white rounded-xl shadow-sm border border-slate-100 group overflow-hidden">
+             <div 
+               className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+               onClick={() => setViewingBank(acc)}
+             >
+               <div className="flex items-center gap-4 flex-1">
                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
                    <Building2 className="w-6 h-6" />
                  </div>
-                 <div>
+                 <div className="flex-1">
                    <h3 className="font-bold text-slate-800 text-lg">{acc.name}</h3>
                    <p className="text-emerald-600 font-semibold">${acc.balance.toLocaleString()} GYD</p>
                  </div>
+                 <ChevronRight className="w-5 h-5 text-slate-400" />
                </div>
                
                <button 
-                  onClick={() => onRemoveAccount(acc.id)}
-                  className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveAccount(acc.id);
+                  }}
+                  className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
                   title="Remove Account"
                >
                  <Trash2 className="w-5 h-5" />

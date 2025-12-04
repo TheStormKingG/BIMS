@@ -83,11 +83,29 @@ function App() {
 
   const handleAddWalletFunds = async (source: string, denominations: CashDenominations) => {
     try {
+      // Calculate total amount
+      const totalAmount = Object.entries(denominations).reduce(
+        (sum, [denom, count]) => sum + Number(denom) * Number(count),
+        0
+      );
+
       // Add funds to the wallet (updates wallet_snapshots)
       await addFundsToWallet(denominations);
       
       // Record the transaction in wallet_in table
       await addWalletInTransaction(source, denominations);
+
+      // If source is a bank account, deduct the amount from it
+      if (source !== 'Cash-In') {
+        const sourceBank = banks.find(bank => bank.bank_name === source);
+        if (sourceBank) {
+          const newBalance = Number(sourceBank.total) - totalAmount;
+          if (newBalance < 0) {
+            alert('Warning: Bank account balance is now negative!');
+          }
+          await updateBank(sourceBank.id, sourceBank.bank_name, newBalance);
+        }
+      }
     } catch (err) {
       alert('Failed to add wallet funds: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
@@ -161,6 +179,13 @@ function App() {
               name: bank.bank_name,
               type: 'BANK' as const,
               balance: Number(bank.total)
+            }))}
+            bankTransactions={bankInTransactions.map(txn => ({
+              id: txn.destination,
+              txnId: txn.id,
+              amount: Number(txn.amount),
+              source: txn.source,
+              datetime: txn.datetime
             }))}
             onAddAccount={handleAddBank}
             onRemoveAccount={handleDeleteBank}
