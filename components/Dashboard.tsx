@@ -33,7 +33,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, transactions, to
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      {/* Total Net Worth Card - Dark Theme */}
+      {/* Total Balance Card */}
       <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
         <div className="flex justify-between items-start">
           <div>
