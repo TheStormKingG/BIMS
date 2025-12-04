@@ -1,140 +1,149 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Account, 
-  BankAccount, 
-  CashWallet as CashWalletType, 
-  CashDenominations, 
-  Transaction, 
-  ReceiptScanResult 
+  ReceiptScanResult,
+  Transaction,
+  CashDenominations
 } from './types';
-import { INITIAL_DENOMINATIONS, NAV_ITEMS } from './constants';
+import { NAV_ITEMS } from './constants';
 import { Dashboard } from './components/Dashboard';
 import { CashWallet } from './components/CashWallet';
 import { Scanner } from './components/Scanner';
 import { TransactionList } from './components/TransactionList';
 import { Accounts } from './components/Accounts';
-
-// Mock initial data
-const INITIAL_WALLET: CashWalletType = {
-  id: 'wallet-1',
-  type: 'CASH_WALLET',
-  denominations: { ...INITIAL_DENOMINATIONS, 5000: 2, 1000: 5, 100: 10 } // Start with some cash
-};
-
-const INITIAL_BANKS: BankAccount[] = [
-  { id: 'bank-1', name: 'Republic Bank Checking', type: 'BANK', balance: 150000 },
-  { id: 'bank-2', name: 'GBTI Savings', type: 'BANK', balance: 450000 },
-];
+import { useSupabaseData } from './hooks/useSupabaseData';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [wallet, setWallet] = useState<CashWalletType>(INITIAL_WALLET);
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(INITIAL_BANKS);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  
+  // Use Supabase data hook
+  const {
+    wallet,
+    bankAccounts,
+    transactions,
+    cashBalance,
+    totalBalance,
+    loading,
+    error,
+    addAccount,
+    updateAccount,
+    deleteAccount,
+    updateWallet,
+    addTransaction,
+    updateTransaction,
+  } = useSupabaseData();
 
-  // Calculate total cash
-  const cashBalance = Object.entries(wallet.denominations).reduce(
-    (sum, [denom, count]) => sum + Number(denom) * Number(count),
-    0
-  );
-
-  // Calculate total net worth
-  const totalBalance = cashBalance + bankAccounts.reduce((sum, acc) => sum + acc.balance, 0);
-
-  const handleUpdateWallet = (denoms: CashDenominations) => {
-    setWallet(prev => ({ ...prev, denominations: denoms }));
-  };
-
-  const handleAddAccount = (name: string, balance: number) => {
-    const newAccount: BankAccount = {
-      id: `bank-${Date.now()}`,
-      name,
-      type: 'BANK',
-      balance
-    };
-    setBankAccounts(prev => [...prev, newAccount]);
-  };
-
-  const handleRemoveAccount = (id: string) => {
-    setBankAccounts(prev => prev.filter(a => a.id !== id));
-  };
-
-  const handleSaveTransaction = (data: ReceiptScanResult, accountId: string) => {
-    // 1. Create Transaction Record
-    const newTx: Transaction = {
-      id: `tx-${Date.now()}`,
-      merchant: data.merchant,
-      date: data.date,
-      totalAmount: data.total,
-      items: data.items,
-      accountId: accountId,
-      source: 'SCAN_RECEIPT'
-    };
-
-    setTransactions(prev => [newTx, ...prev]);
-
-    // 2. Deduct from Account
-    if (accountId === wallet.id) {
-       // For cash wallet, we can't easily "deduct" specific notes automatically
-       // without complex logic (Making change algorithm).
-       // In this app, we act as a ledger. 
-       // We will NOT auto-update cash denominations because the user needs to physically check their wallet.
-       // However, for Bank accounts, we SHOULD update the balance.
-       alert("Transaction saved! Please manually update your Cash Wallet denominations to match your physical cash.");
-    } else {
-       setBankAccounts(prev => prev.map(acc => {
-         if (acc.id === accountId) {
-           return { ...acc, balance: acc.balance - data.total };
-         }
-         return acc;
-       }));
-    }
-    
-    // Move to dashboard or ledger after save
-    setActiveTab('expenses');
-  };
-
-  const handleUpdateTransaction = (updatedTx: Transaction) => {
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === updatedTx.id) {
-        // Calculate diff for balance update (only for bank accounts)
-        // If the total amount changed, we need to adjust the bank balance
-        const oldTotal = tx.totalAmount;
-        const newTotal = updatedTx.totalAmount;
-        const diff = newTotal - oldTotal;
-
-        if (tx.accountId !== wallet.id && diff !== 0) {
-           // If diff is positive (spent more), balance decreases. 
-           // If diff is negative (spent less), balance increases.
-           setBankAccounts(banks => banks.map(b => {
-             if (b.id === tx.accountId) {
-               return { ...b, balance: b.balance - diff };
-             }
-             return b;
-           }));
-        }
-        return updatedTx;
+  const handleUpdateWallet = async (denoms: CashDenominations) => {
+    if (wallet) {
+      try {
+        await updateWallet(wallet.id, denoms);
+      } catch (err) {
+        alert('Failed to update wallet: ' + (err instanceof Error ? err.message : 'Unknown error'));
       }
-      return tx;
-    }));
+    }
+  };
+
+  const handleAddAccount = async (name: string, balance: number) => {
+    try {
+      await addAccount(name, balance);
+    } catch (err) {
+      alert('Failed to add account: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleRemoveAccount = async (id: string) => {
+    if (confirm('Are you sure you want to delete this account?')) {
+      try {
+        await deleteAccount(id);
+      } catch (err) {
+        alert('Failed to delete account: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      }
+    }
+  };
+
+  const handleSaveTransaction = async (data: ReceiptScanResult, accountId: string) => {
+    try {
+      await addTransaction({
+        merchant: data.merchant,
+        date: data.date,
+        totalAmount: data.total,
+        items: data.items,
+        accountId: accountId,
+        source: 'SCAN_RECEIPT'
+      });
+
+      // Show alert for cash wallet transactions
+      if (wallet && accountId === wallet.id) {
+        alert("Transaction saved! Please manually update your Cash Wallet denominations to match your physical cash.");
+      }
+      
+      // Move to expenses tab after save
+      setActiveTab('expenses');
+    } catch (err) {
+      alert('Failed to save transaction: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
+  const handleUpdateTransaction = async (updatedTx: Transaction) => {
+    try {
+      await updateTransaction(updatedTx.id, updatedTx);
+    } catch (err) {
+      alert('Failed to update transaction: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
   };
 
   const renderContent = () => {
+    // Show loading state
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-600">Loading data from Supabase...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Show error state
+    if (error) {
+      return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center max-w-md">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to connect to Supabase</h3>
+            <p className="text-slate-600 mb-4">{error}</p>
+            <p className="text-sm text-slate-500">Make sure your Supabase credentials are configured correctly. Check the console for details.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Normal content
+    const allAccounts = wallet ? [wallet, ...bankAccounts] : bankAccounts;
+
     switch (activeTab) {
       case 'dashboard':
         return (
           <Dashboard 
-            accounts={[wallet, ...bankAccounts]} 
+            accounts={allAccounts} 
             transactions={transactions} 
             totalBalance={totalBalance} 
           />
         );
       case 'wallet':
-        return (
+        return wallet ? (
           <CashWallet 
             wallet={wallet} 
             onUpdate={handleUpdateWallet} 
           />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-slate-600">No cash wallet found. Creating one...</p>
+          </div>
         );
       case 'accounts':
         return (
@@ -147,7 +156,7 @@ function App() {
       case 'scan':
         return (
           <Scanner 
-            accounts={[wallet, ...bankAccounts]} 
+            accounts={allAccounts} 
             onSave={handleSaveTransaction} 
           />
         );
