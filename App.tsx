@@ -18,6 +18,7 @@ function App() {
     loading: walletLoading,
     error: walletError,
     updateWallet,
+    addFunds: addFundsToWallet,
   } = useWallet();
 
   // Use banks hook
@@ -82,6 +83,10 @@ function App() {
 
   const handleAddWalletFunds = async (source: string, denominations: CashDenominations) => {
     try {
+      // Add funds to the wallet (updates wallet_snapshots)
+      await addFundsToWallet(denominations);
+      
+      // Record the transaction in wallet_in table
       await addWalletInTransaction(source, denominations);
     } catch (err) {
       alert('Failed to add wallet funds: ' + (err instanceof Error ? err.message : 'Unknown error'));

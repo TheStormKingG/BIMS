@@ -51,6 +51,32 @@ export const useWallet = () => {
     }
   };
 
+  // Add funds to wallet (adds to existing denominations)
+  const addFunds = async (incomingDenominations: CashDenominations) => {
+    try {
+      if (!wallet) {
+        throw new Error('Wallet not initialized');
+      }
+
+      // Combine current wallet with incoming funds
+      const newDenominations: CashDenominations = { ...wallet.denominations };
+      
+      Object.entries(incomingDenominations).forEach(([denom, count]) => {
+        const denomKey = Number(denom);
+        newDenominations[denomKey] = (newDenominations[denomKey] || 0) + count;
+      });
+
+      // Create new wallet snapshot with updated denominations
+      const updatedWallet = await dbUpdateWallet(newDenominations);
+      setWallet(updatedWallet);
+      
+      return updatedWallet;
+    } catch (err) {
+      console.error('Failed to add funds to wallet:', err);
+      throw err;
+    }
+  };
+
   // Calculate current cash balance
   const cashBalance = wallet ? calculateTotal(wallet.denominations) : 0;
 
@@ -60,6 +86,7 @@ export const useWallet = () => {
     loading,
     error,
     updateWallet,
+    addFunds,
     refresh: loadWallet,
   };
 };
