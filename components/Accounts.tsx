@@ -404,31 +404,31 @@ export const Accounts: React.FC<AccountsProps> = ({
       <div className="grid gap-4">
         {/* Wallet Card */}
         {wallet && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 group overflow-hidden">
+          <div className="bg-emerald-600 rounded-xl shadow-sm group overflow-hidden">
             <div 
-              className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+              className="p-5 flex items-center justify-between cursor-pointer hover:bg-emerald-700 transition-colors"
               onClick={() => setViewingWallet(true)}
             >
               <div className="flex items-center gap-4 flex-1">
-                <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white">
                   <Wallet className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-slate-800 text-lg">Cash Wallet</h3>
-                  <p className="text-emerald-600 font-semibold">${calculateWalletTotal().toLocaleString()} GYD</p>
+                  <h3 className="font-bold text-white text-lg">Cash Wallet</h3>
+                  <p className="text-white/90 font-semibold">${calculateWalletTotal().toLocaleString()} GYD</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-400" />
+                <ChevronRight className="w-5 h-5 text-white/80" />
               </div>
             </div>
             
             {/* Add Funds Button */}
-            <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="px-5 pb-5">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenWalletAddFunds();
                 }}
-                className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-white/20 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2"
               >
                 <ArrowDownToLine className="w-4 h-4" />
                 Add Funds
@@ -439,20 +439,20 @@ export const Accounts: React.FC<AccountsProps> = ({
 
         {/* Bank Account Cards */}
         {accounts.map(acc => (
-          <div key={acc.id} className="bg-white rounded-xl shadow-sm border border-slate-100 group overflow-hidden">
+          <div key={acc.id} className="bg-emerald-600 rounded-xl shadow-sm group overflow-hidden">
              <div 
-               className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+               className="p-5 flex items-center justify-between cursor-pointer hover:bg-emerald-700 transition-colors"
                onClick={() => setViewingBank(acc)}
              >
                <div className="flex items-center gap-4 flex-1">
-                 <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white">
                    <Building2 className="w-6 h-6" />
                  </div>
                  <div className="flex-1">
-                   <h3 className="font-bold text-slate-800 text-lg">{acc.name}</h3>
-                   <p className="text-emerald-600 font-semibold">${acc.balance.toLocaleString()} GYD</p>
+                   <h3 className="font-bold text-white text-lg">{acc.name}</h3>
+                   <p className="text-white/90 font-semibold">${acc.balance.toLocaleString()} GYD</p>
                  </div>
-                 <ChevronRight className="w-5 h-5 text-slate-400" />
+                 <ChevronRight className="w-5 h-5 text-white/80" />
                </div>
                
                <button 
@@ -460,7 +460,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                     e.stopPropagation();
                     onRemoveAccount(acc.id);
                   }}
-                  className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                  className="p-2 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
                   title="Remove Account"
                >
                  <Trash2 className="w-5 h-5" />
@@ -468,10 +468,10 @@ export const Accounts: React.FC<AccountsProps> = ({
              </div>
              
              {/* Add Funds Button */}
-             <div className="mt-4 pt-4 border-t border-slate-100">
+             <div className="px-5 pb-5">
                <button
                  onClick={() => handleOpenAddFunds(acc)}
-                 className="w-full bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
+                 className="w-full bg-white/20 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2"
                >
                  <ArrowDownToLine className="w-4 h-4" />
                  Add Funds
