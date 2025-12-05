@@ -315,46 +315,29 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Payment Method
-                  </label>
-                  <select
-                    value={formData.paymentMethod}
-                    onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
-                  >
-                    <option value="">Select payment method...</option>
-                    {wallet && (
-                      <option value="Cash Wallet">Cash Wallet</option>
-                    )}
-                    {banks.length > 0 && (
-                      <>
-                        {banks.map(bank => (
-                          <option key={bank.id} value={bank.name}>
-                            {bank.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Source <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={formData.source}
-                    className="w-full p-3 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
-                    disabled
-                    required
-                  >
-                    <option value="MANUAL">Manual Entry</option>
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">Auto-filled for manual entries</p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Payment Method
+                </label>
+                <select
+                  value={formData.paymentMethod}
+                  onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                >
+                  <option value="">Select payment method...</option>
+                  {wallet && (
+                    <option value="Cash Wallet">Cash Wallet</option>
+                  )}
+                  {banks.length > 0 && (
+                    <>
+                      {banks.map(bank => (
+                        <option key={bank.id} value={bank.name}>
+                          {bank.name}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
               </div>
 
               <div className="flex gap-3 pt-4">
