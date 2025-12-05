@@ -428,7 +428,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                   e.stopPropagation();
                   handleOpenWalletAddFunds();
                 }}
-                className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
               >
                 <ArrowDownToLine className="w-4 h-4" />
                 Add Funds
@@ -471,7 +471,7 @@ export const Accounts: React.FC<AccountsProps> = ({
              <div className="px-6 pb-6">
                <button
                  onClick={() => handleOpenAddFunds(acc)}
-                 className="w-full bg-slate-700 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
+                 className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
                >
                  <ArrowDownToLine className="w-4 h-4" />
                  Add Funds
