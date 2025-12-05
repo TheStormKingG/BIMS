@@ -231,10 +231,7 @@ function App() {
             wallet={wallet}
             onAddSpend={async (item) => {
               try {
-                const addedItems = await addSpentItems([item]);
-                await loadCurrentMonth();
-                
-                // Deduct from payment method and record in funds_out
+                // Check funds BEFORE saving spent items
                 if (item.paymentMethod) {
                   // Find the account
                   const isWallet = item.paymentMethod === 'Cash Wallet';
@@ -253,7 +250,28 @@ function App() {
                       alert(`Error: Insufficient funds in wallet. Wallet has ${walletTotal.toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
                       return; // Don't proceed with the transaction
                     }
-                    
+                  } else if (account && !isWallet) {
+                    // Check if bank has enough funds
+                    if (Number(account.total) < item.itemTotal) {
+                      alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
+                      return; // Don't proceed with the transaction
+                    }
+                  }
+                }
+                
+                // Save spent items
+                const addedItems = await addSpentItems([item]);
+                await loadCurrentMonth();
+                
+                // Deduct from payment method and record in funds_out
+                if (item.paymentMethod) {
+                  // Find the account
+                  const isWallet = item.paymentMethod === 'Cash Wallet';
+                  const account = isWallet 
+                    ? wallet 
+                    : banks.find(bank => bank.bank_name === item.paymentMethod);
+                  
+                  if (isWallet && wallet) {
                     // Deduct from wallet
                     const totalToDeduct = item.itemTotal;
                     const currentDenoms = { ...wallet.denominations };
@@ -285,6 +303,11 @@ function App() {
                       );
                       
                       if (!proceed) {
+                        // Rollback: delete the spent item
+                        if (addedItems.length > 0) {
+                          // Note: We'd need a delete function, but for now just show error
+                          alert('Transaction cancelled. Please delete the spending entry manually.');
+                        }
                         return; // Cancel the transaction
                       }
                       
@@ -314,7 +337,7 @@ function App() {
                       spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
                       source: item.source,
                     });
-                  } else if (account) {
+                  } else if (account && !isWallet) {
                     // Deduct from bank account
                     const newBalance = Number(account.total) - item.itemTotal;
                     if (newBalance < 0) {
