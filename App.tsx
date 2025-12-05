@@ -5,8 +5,10 @@ import {
 import { NAV_ITEMS } from './constants';
 import { CashWallet } from './components/CashWallet';
 import { Accounts } from './components/Accounts';
+import { Spending } from './components/Spending';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
+import { useTransactions } from './hooks/useTransactions';
 
 function App() {
   const [activeTab, setActiveTab] = useState('wallet');
@@ -36,8 +38,15 @@ function App() {
     addWalletInTransaction,
   } = useBanks();
 
-  const loading = walletLoading || banksLoading;
-  const error = walletError || banksError;
+  // Use transactions hook
+  const {
+    transactions,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useTransactions();
+
+  const loading = walletLoading || banksLoading || transactionsLoading;
+  const error = walletError || banksError || transactionsError;
 
   const handleUpdateWallet = async (denoms: CashDenominations) => {
     try {
@@ -213,9 +222,13 @@ function App() {
           />
         );
       
+      case 'expenses':
+        return (
+          <Spending transactions={transactions} />
+        );
+      
       case 'dashboard':
       case 'scan':
-      case 'expenses':
         return (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center max-w-md">
@@ -229,7 +242,6 @@ function App() {
               <p className="text-sm text-slate-500">
                 {activeTab === 'dashboard' && 'Dashboard with analytics and charts'}
                 {activeTab === 'scan' && 'Receipt scanning with AI'}
-                {activeTab === 'expenses' && 'Full transaction ledger'}
               </p>
               <div className="flex gap-2 justify-center mt-4">
                 <button

@@ -72,6 +72,26 @@ COMMENT ON TABLE wallet_in IS 'Records of cash received with denomination breakd
 
 
 -- ==============================================
+-- 5. TRANSACTIONS - Track spending transactions
+-- ==============================================
+CREATE TABLE IF NOT EXISTS transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date TIMESTAMP WITH TIME ZONE NOT NULL,
+  merchant TEXT NOT NULL,
+  total_amount NUMERIC NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]',
+  account_id UUID, -- Can reference banks(id) or NULL for wallet
+  source TEXT NOT NULL CHECK (source IN ('MANUAL', 'SCAN_RECEIPT', 'IMPORT_EMAIL', 'IMPORT_SMS')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id);
+COMMENT ON TABLE transactions IS 'Records of spending transactions with itemized details';
+
+
+-- ==============================================
 -- SUMMARY
 -- ==============================================
 -- Tables created:
@@ -79,5 +99,6 @@ COMMENT ON TABLE wallet_in IS 'Records of cash received with denomination breakd
 -- ✓ banks - Bank account names and balances
 -- ✓ bank_in - Deposits/transfers into bank accounts
 -- ✓ wallet_in - Cash received with denomination breakdown
+-- ✓ transactions - Spending transactions with itemized details
 
 

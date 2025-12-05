@@ -29,5 +29,5 @@ export const NAV_ITEMS = [
   { id: 'wallet', label: 'Cash Wallet', icon: Wallet },
   { id: 'accounts', label: 'Banks', icon: Landmark },
   { id: 'scan', label: 'Scan', icon: ScanLine },
-  { id: 'expenses', label: 'Ledger', icon: Calculator },
+  { id: 'expenses', label: 'Spending', icon: Calculator },
 ];
