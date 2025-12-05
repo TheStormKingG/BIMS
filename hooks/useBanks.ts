@@ -12,11 +12,13 @@ import {
   DBBankIn,
   DBWalletIn,
 } from '../services/banksDatabase';
+import { fetchFundsOut, DBFundsOut } from '../services/fundsOutDatabase';
 
 export const useBanks = () => {
   const [banks, setBanks] = useState<DBBank[]>([]);
   const [bankInTransactions, setBankInTransactions] = useState<DBBankIn[]>([]);
   const [walletInTransactions, setWalletInTransactions] = useState<DBWalletIn[]>([]);
+  const [fundsOutTransactions, setFundsOutTransactions] = useState<DBFundsOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,15 +31,17 @@ export const useBanks = () => {
       setLoading(true);
       setError(null);
       
-      const [banksData, bankInsData, walletInsData] = await Promise.all([
+      const [banksData, bankInsData, walletInsData, fundsOutData] = await Promise.all([
         fetchBanks(),
         fetchBankInTransactions(),
         fetchWalletInTransactions(),
+        fetchFundsOut(),
       ]);
       
       setBanks(banksData);
       setBankInTransactions(bankInsData);
       setWalletInTransactions(walletInsData);
+      setFundsOutTransactions(fundsOutData);
     } catch (err: any) {
       console.error('Failed to load banks data:', err);
       // If tables don't exist, just set empty arrays - don't show error
@@ -45,6 +49,7 @@ export const useBanks = () => {
         setBanks([]);
         setBankInTransactions([]);
         setWalletInTransactions([]);
+        setFundsOutTransactions([]);
         setError(null);
       } else {
         setError(err instanceof Error ? err.message : 'Failed to load banks data');
@@ -151,6 +156,7 @@ export const useBanks = () => {
     banks,
     bankInTransactions,
     walletInTransactions,
+    fundsOutTransactions,
     totalInBanks,
     totalBankInflows,
     totalWalletInflows,

@@ -26,9 +26,17 @@ interface WalletTransaction {
   datetime: string;
 }
 
+interface WalletFundsOut {
+  id: string;
+  amount: number;
+  transaction_datetime: string;
+  source: string;
+}
+
 interface AccountsProps {
   wallet: CashWallet | null;
   walletTransactions?: WalletTransaction[];
+  walletFundsOut?: WalletFundsOut[];
   accounts: BankAccount[];
   bankTransactions?: BankTransaction[];
   walletTransactionsForBanks?: Array<{ id: string; source: string; total: number; datetime: string }>;
@@ -40,7 +48,8 @@ interface AccountsProps {
 
 export const Accounts: React.FC<AccountsProps> = ({ 
   wallet, 
-  walletTransactions = [], 
+  walletTransactions = [],
+  walletFundsOut = [],
   accounts, 
   bankTransactions = [], 
   walletTransactionsForBanks = [],
@@ -168,7 +177,34 @@ export const Accounts: React.FC<AccountsProps> = ({
 
   // If viewing wallet details, show detail view
   if (viewingWallet && wallet) {
-    const sortedTransactions = [...walletTransactions].sort(
+    // Combine wallet_in (funds added) and funds_out (cash spent) transactions
+    const fundsAdded = walletTransactions.map(txn => ({
+      id: txn.id,
+      type: 'funds_added' as const,
+      amount: txn.total,
+      source: txn.source,
+      datetime: txn.datetime,
+      denominationBreakdown: [
+        txn.note_5000 > 0 && `${txn.note_5000}× $5000`,
+        txn.note_2000 > 0 && `${txn.note_2000}× $2000`,
+        txn.note_1000 > 0 && `${txn.note_1000}× $1000`,
+        txn.note_500 > 0 && `${txn.note_500}× $500`,
+        txn.note_100 > 0 && `${txn.note_100}× $100`,
+        txn.note_50 > 0 && `${txn.note_50}× $50`,
+        txn.note_20 > 0 && `${txn.note_20}× $20`,
+      ].filter(Boolean).join(', '),
+    }));
+
+    const cashSpent = walletFundsOut.map(txn => ({
+      id: txn.id,
+      type: 'cash_spent' as const,
+      amount: txn.amount,
+      source: txn.source,
+      datetime: txn.transaction_datetime,
+      denominationBreakdown: null,
+    }));
+
+    const sortedTransactions = [...fundsAdded, ...cashSpent].sort(
       (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
     );
 
@@ -219,25 +255,19 @@ export const Accounts: React.FC<AccountsProps> = ({
           ) : (
             <div className="divide-y divide-slate-100">
               {sortedTransactions.map((txn) => {
-                const denominationBreakdown = [
-                  txn.note_5000 > 0 && `${txn.note_5000}× $5000`,
-                  txn.note_2000 > 0 && `${txn.note_2000}× $2000`,
-                  txn.note_1000 > 0 && `${txn.note_1000}× $1000`,
-                  txn.note_500 > 0 && `${txn.note_500}× $500`,
-                  txn.note_100 > 0 && `${txn.note_100}× $100`,
-                  txn.note_50 > 0 && `${txn.note_50}× $50`,
-                  txn.note_20 > 0 && `${txn.note_20}× $20`,
-                ].filter(Boolean).join(', ');
-
                 return (
                   <div key={txn.id} className="p-4 hover:bg-slate-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-slate-900">Funds Added</p>
-                        <p className="text-sm text-slate-500">From: {txn.source}</p>
-                        {denominationBreakdown && (
+                        <p className="font-medium text-slate-900">
+                          {txn.type === 'funds_added' ? 'Funds Added' : 'Cash Spent'}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {txn.type === 'funds_added' ? `From: ${txn.source}` : `Source: ${txn.source}`}
+                        </p>
+                        {txn.denominationBreakdown && (
                           <p className="text-xs text-slate-400 mt-1">
-                            {denominationBreakdown}
+                            {txn.denominationBreakdown}
                           </p>
                         )}
                         <p className="text-xs text-slate-400 mt-1">
@@ -245,8 +275,10 @@ export const Accounts: React.FC<AccountsProps> = ({
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-600">
-                          +${txn.total.toLocaleString()}
+                        <p className={`text-lg font-bold ${
+                          txn.type === 'funds_added' ? 'text-emerald-600' : 'text-red-600'
+                        }`}>
+                          {txn.type === 'funds_added' ? '+' : '-'}${txn.amount.toLocaleString()}
                         </p>
                       </div>
                     </div>

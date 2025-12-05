@@ -29,6 +29,7 @@ function App() {
     banks,
     bankInTransactions,
     walletInTransactions,
+    fundsOutTransactions,
     totalInBanks,
     loading: banksLoading,
     error: banksError,
@@ -181,6 +182,14 @@ function App() {
               note_20: txn.note_20,
               datetime: txn.datetime
             }))}
+            walletFundsOut={fundsOutTransactions
+              .filter(txn => txn.source_account_type === 'CASH_WALLET')
+              .map(txn => ({
+                id: txn.id,
+                amount: Number(txn.amount),
+                transaction_datetime: txn.transaction_datetime,
+                source: txn.source,
+              }))}
             accounts={banks.map(bank => ({
               id: bank.id,
               name: bank.bank_name,
