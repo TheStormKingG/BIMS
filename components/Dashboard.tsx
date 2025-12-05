@@ -137,39 +137,75 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         </div>
       </div>
 
+      {/* Spending Totals */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-slate-600">Spent Today</h3>
+            <Calendar className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-3xl font-bold text-slate-900">
+            ${spendingMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">Total spent today</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h3>
+            <Calendar className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-3xl font-bold text-slate-900">
+            ${spendingMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h3>
+            <DollarSign className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-3xl font-bold text-slate-900">
+            ${spendingMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">Total spent this month</p>
+        </div>
+      </div>
+
       {/* Spending Averages */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spend Per Day</h3>
-            <Calendar className="w-5 h-5 text-emerald-600" />
+            <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
+            <Calendar className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
-            ${spendingAverages.perDay.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${spendingMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Today's spending</p>
+          <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spend Per Week</h3>
-            <Calendar className="w-5 h-5 text-emerald-600" />
+            <h3 className="text-sm font-medium text-slate-600">Average Weekly</h3>
+            <Calendar className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
-            ${spendingAverages.perWeek.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${spendingMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Average daily (last 7 days)</p>
+          <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spend Per Month</h3>
-            <DollarSign className="w-5 h-5 text-emerald-600" />
+            <h3 className="text-sm font-medium text-slate-600">Average Monthly</h3>
+            <DollarSign className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
-            ${spendingAverages.perMonth.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${spendingMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Average daily (last 30 days)</p>
+          <p className="text-xs text-slate-500 mt-1">Per month (last 30 days)</p>
         </div>
       </div>
 
