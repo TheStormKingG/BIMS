@@ -22,13 +22,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
     setMessage(null);
 
+    // Get the correct redirect URL (production or development)
+    const redirectUrl = window.location.origin + window.location.pathname;
+
     try {
       if (isSignUp) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: redirectUrl,
           },
         });
 
@@ -62,11 +65,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     setError(null);
 
+    // Get the correct redirect URL (production or development)
+    const redirectUrl = window.location.origin + window.location.pathname;
+
     try {
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}${window.location.pathname}`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

@@ -38,7 +38,7 @@ export const getSupabase = () => {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          redirectTo: window.location.origin,
+          redirectTo: window.location.origin + window.location.pathname,
         },
       });
     } catch (error) {
@@ -55,7 +55,7 @@ export const getSupabase = () => {
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
-            redirectTo: window.location.origin,
+            redirectTo: window.location.origin + window.location.pathname,
           },
         });
       } else {
