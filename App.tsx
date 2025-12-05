@@ -3,6 +3,7 @@ import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
 import { Scanner } from './components/Scanner';
+import { Dashboard } from './components/Dashboard';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -422,29 +423,16 @@ function App() {
       
       case 'dashboard':
         return (
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center max-w-md">
-              <div className="text-emerald-500 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Coming Soon</h3>
-              <p className="text-slate-600 mb-2">This feature is under development.</p>
-              <p className="text-sm text-slate-500">
-                {activeTab === 'dashboard' && 'Dashboard with analytics and charts'}
-                {activeTab === 'scan' && 'Receipt scanning with AI'}
-              </p>
-              <div className="flex gap-2 justify-center mt-4">
-                <button
-                  onClick={() => setActiveTab('accounts')}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                  Funds
-                </button>
-              </div>
-            </div>
-          </div>
+          <Dashboard 
+            accounts={banks.map(bank => ({
+              id: bank.id,
+              name: bank.bank_name,
+              type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
+              balance: Number(bank.total)
+            }))}
+            spentItems={spentItems}
+            totalBalance={totalInBanks}
+          />
         );
       
       default:
