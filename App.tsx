@@ -9,6 +9,7 @@ import { Scanner } from './components/Scanner';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
+import { addFundsOut } from './services/fundsOutDatabase';
 
 function App() {
   const [activeTab, setActiveTab] = useState('accounts');
@@ -214,8 +215,75 @@ function App() {
             loading={spentItemsLoading}
             onAddSpend={async (item) => {
               try {
-                await addSpentItems([item]);
+                const addedItems = await addSpentItems([item]);
                 await loadCurrentMonth();
+                
+                // Deduct from payment method and record in funds_out
+                if (item.paymentMethod) {
+                  // Find the account
+                  const isWallet = item.paymentMethod === 'Cash Wallet';
+                  const account = isWallet 
+                    ? wallet 
+                    : banks.find(bank => bank.bank_name === item.paymentMethod);
+                  
+                  if (isWallet && wallet) {
+                    // Deduct from wallet
+                    const totalToDeduct = item.itemTotal;
+                    const currentDenoms = { ...wallet.denominations };
+                    const newDenoms: CashDenominations = { ...currentDenoms };
+                    
+                    let remaining = totalToDeduct;
+                    const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
+                    
+                    for (const denom of denominations) {
+                      if (remaining <= 0) break;
+                      
+                      const currentCount = newDenoms[denom] || 0;
+                      const needed = Math.floor(remaining / denom);
+                      const toDeduct = Math.min(needed, currentCount);
+                      
+                      if (toDeduct > 0) {
+                        newDenoms[denom] = currentCount - toDeduct;
+                        remaining -= toDeduct * denom;
+                      }
+                    }
+                    
+                    if (remaining > 0) {
+                      alert(`Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet. Please manually adjust your cash.`);
+                    }
+                    
+                    await updateWallet(newDenoms);
+                    
+                    // Record in funds_out
+                    await addFundsOut({
+                      source_account_id: wallet.id,
+                      source_account_type: 'CASH_WALLET',
+                      source_account_name: 'Cash Wallet',
+                      amount: item.itemTotal,
+                      transaction_datetime: item.transactionDateTime,
+                      spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
+                      source: item.source,
+                    });
+                  } else if (account) {
+                    // Deduct from bank account
+                    const newBalance = Number(account.total) - item.itemTotal;
+                    if (newBalance < 0) {
+                      alert('Warning: Bank account balance will be negative!');
+                    }
+                    await updateBank(account.id, account.bank_name, newBalance);
+                    
+                    // Record in funds_out
+                    await addFundsOut({
+                      source_account_id: account.id,
+                      source_account_type: 'BANK',
+                      source_account_name: account.bank_name,
+                      amount: item.itemTotal,
+                      transaction_datetime: item.transactionDateTime,
+                      spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
+                      source: item.source,
+                    });
+                  }
+                }
               } catch (err) {
                 alert('Failed to add spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
               }
@@ -273,7 +341,7 @@ function App() {
                   source: 'SCAN_RECEIPT' as const,
                 }));
                 
-                await addSpentItems(spentItemsToAdd);
+                const addedSpentItems = await addSpentItems(spentItemsToAdd);
                 
                 // Refresh current month items
                 await loadCurrentMonth();
@@ -286,6 +354,17 @@ function App() {
                     alert('Warning: Bank account balance will be negative!');
                   }
                   await updateBank(account.id, account.name, newBalance);
+                  
+                  // Record in funds_out
+                  await addFundsOut({
+                    source_account_id: account.id,
+                    source_account_type: 'BANK',
+                    source_account_name: account.name,
+                    amount: receiptData.total,
+                    transaction_datetime: transactionDate,
+                    spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
+                    source: 'SCAN_RECEIPT',
+                  });
                 } else if (account?.type === 'CASH_WALLET' && wallet) {
                   // Deduct from cash wallet
                   // Calculate which denominations to deduct (simple algorithm: deduct from highest first)
@@ -316,6 +395,17 @@ function App() {
                   
                   // Update wallet with new denominations
                   await updateWallet(newDenoms);
+                  
+                  // Record in funds_out
+                  await addFundsOut({
+                    source_account_id: wallet.id,
+                    source_account_type: 'CASH_WALLET',
+                    source_account_name: 'Cash Wallet',
+                    amount: receiptData.total,
+                    transaction_datetime: transactionDate,
+                    spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
+                    source: 'SCAN_RECEIPT',
+                  });
                 }
                 
                 // Show success and navigate

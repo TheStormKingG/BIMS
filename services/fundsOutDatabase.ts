@@ -1,0 +1,112 @@
+import { getSupabase } from './supabaseClient';
+
+const supabase = getSupabase();
+
+// Database Types
+export interface DBFundsOut {
+  id: string;
+  source_account_id: string;
+  source_account_type: 'BANK' | 'CASH_WALLET';
+  source_account_name: string;
+  amount: number;
+  transaction_datetime: string;
+  spent_table_id: string | null;
+  source: 'SCAN_RECEIPT' | 'MANUAL' | 'IMPORT_EMAIL' | 'IMPORT_SMS';
+  created_at: string;
+}
+
+export interface FundsOutInput {
+  source_account_id: string;
+  source_account_type: 'BANK' | 'CASH_WALLET';
+  source_account_name: string;
+  amount: number;
+  transaction_datetime: string;
+  spent_table_id?: string | null;
+  source: 'SCAN_RECEIPT' | 'MANUAL' | 'IMPORT_EMAIL' | 'IMPORT_SMS';
+}
+
+// FUNDS_OUT TABLE OPERATIONS
+
+export const addFundsOut = async (fundsOut: FundsOutInput): Promise<DBFundsOut> => {
+  try {
+    const { data, error } = await supabase
+      .from('funds_out')
+      .insert([{
+        source_account_id: fundsOut.source_account_id,
+        source_account_type: fundsOut.source_account_type,
+        source_account_name: fundsOut.source_account_name,
+        amount: fundsOut.amount,
+        transaction_datetime: fundsOut.transaction_datetime,
+        spent_table_id: fundsOut.spent_table_id || null,
+        source: fundsOut.source,
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      // If table doesn't exist, return gracefully
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        console.warn('funds_out table does not exist yet. Please create it in Supabase.');
+        // Return a mock object so the app doesn't break
+        return {
+          id: '',
+          ...fundsOut,
+          spent_table_id: fundsOut.spent_table_id || null,
+          created_at: new Date().toISOString(),
+        } as DBFundsOut;
+      }
+      throw error;
+    }
+    
+    return data as DBFundsOut;
+  } catch (err) {
+    console.error('Error adding funds_out:', err);
+    throw err;
+  }
+};
+
+export const fetchFundsOut = async (): Promise<DBFundsOut[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('funds_out')
+      .select('*')
+      .order('transaction_datetime', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBFundsOut[];
+  } catch (err) {
+    console.error('Error fetching funds_out:', err);
+    return [];
+  }
+};
+
+export const fetchFundsOutByAccount = async (
+  accountId: string,
+  accountType: 'BANK' | 'CASH_WALLET'
+): Promise<DBFundsOut[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('funds_out')
+      .select('*')
+      .eq('source_account_id', accountId)
+      .eq('source_account_type', accountType)
+      .order('transaction_datetime', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBFundsOut[];
+  } catch (err) {
+    console.error('Error fetching funds_out by account:', err);
+    return [];
+  }
+};
+
