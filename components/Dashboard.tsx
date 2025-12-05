@@ -14,6 +14,7 @@ const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857'
 
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, totalBalance }) => {
   const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '3months' | '6months' | '1year'>('1month');
+  const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
   
   // Calculate category spend
   const categoryData = React.useMemo(() => {
@@ -25,6 +26,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     return Object.entries(categories)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
+  }, [spentItems]);
+
+  // Get unique categories for dropdown
+  const categories = React.useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    spentItems.forEach(item => {
+      if (item.category) {
+        uniqueCategories.add(item.category);
+      }
+    });
+    return Array.from(uniqueCategories).sort();
   }, [spentItems]);
 
   // Calculate spending totals and averages
@@ -100,9 +112,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - daysBack);
 
-    const filtered = spentItems.filter(
-      item => new Date(item.transactionDateTime) >= startDate
-    );
+    // Filter by date and category
+    const filtered = spentItems.filter(item => {
+      const isInDateRange = new Date(item.transactionDateTime) >= startDate;
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      return isInDateRange && matchesCategory;
+    });
 
     // Group by date/week/month based on period
     const byPeriod: Record<string, number> = {};
@@ -194,7 +209,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     }
 
     return result;
-  }, [spentItems, timePeriod]);
+  }, [spentItems, timePeriod, selectedCategory]);
 
   const recentTransactions = [...spentItems]
     .sort((a, b) => new Date(b.transactionDateTime).getTime() - new Date(a.transactionDateTime).getTime())
