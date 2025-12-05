@@ -4,13 +4,58 @@ import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
 import { Scanner } from './components/Scanner';
 import { Dashboard } from './components/Dashboard';
+import { Login } from './components/Login';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
+import { getSupabase } from './services/supabaseClient';
 
 function App() {
   const [activeTab, setActiveTab] = useState('accounts');
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const supabase = getSupabase();
+
+  // Check auth state on mount and listen for changes
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Show login page if not authenticated
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login onLoginSuccess={() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+      });
+    }} />;
+  }
   
   // Use wallet hook
   const {
