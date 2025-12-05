@@ -15,7 +15,7 @@ export const useSpentItems = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSpentItems();
+    loadCurrentMonth();
   }, []);
 
   const loadSpentItems = async () => {
@@ -24,9 +24,15 @@ export const useSpentItems = () => {
       setError(null);
       const data = await fetchSpentItems();
       setSpentItems(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load spent items:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load spent items');
+      // If table doesn't exist, don't show error - just return empty array
+      if (err?.code === 'PGRST202' || err?.message?.includes('does not exist') || err?.message?.includes('relation')) {
+        setSpentItems([]);
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load spent items');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,9 +44,15 @@ export const useSpentItems = () => {
       setError(null);
       const data = await fetchCurrentMonthSpentItems();
       setSpentItems(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load current month spent items:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load current month spent items');
+      // If table doesn't exist, don't show error - just return empty array
+      if (err?.code === 'PGRST202' || err?.message?.includes('does not exist') || err?.message?.includes('relation')) {
+        setSpentItems([]);
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load current month spent items');
+      }
     } finally {
       setLoading(false);
     }

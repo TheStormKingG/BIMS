@@ -64,32 +64,58 @@ const spentItemToDb = (item: Omit<SpentItem, 'id' | 'entryDate'>): Partial<DBSpe
 
 // Fetch all spent items
 export const fetchSpentItems = async (): Promise<SpentItem[]> => {
-  const { data, error } = await supabase
-    .from('spent_table')
-    .select('*')
-    .order('transaction_datetime', { ascending: false });
-  
-  if (error) throw error;
-  
-  return (data || []).map(dbToSpentItem);
+  try {
+    const { data, error } = await supabase
+      .from('spent_table')
+      .select('*')
+      .order('transaction_datetime', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        // Table doesn't exist - return empty array
+        return [];
+      }
+      throw error;
+    }
+    
+    return (data || []).map(dbToSpentItem);
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
+  }
 };
 
 // Fetch spent items for current month
 export const fetchCurrentMonthSpentItems = async (): Promise<SpentItem[]> => {
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  
-  const { data, error } = await supabase
-    .from('spent_table')
-    .select('*')
-    .gte('transaction_datetime', firstDay.toISOString())
-    .lte('transaction_datetime', lastDay.toISOString())
-    .order('transaction_datetime', { ascending: false });
-  
-  if (error) throw error;
-  
-  return (data || []).map(dbToSpentItem);
+  try {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    const { data, error } = await supabase
+      .from('spent_table')
+      .select('*')
+      .gte('transaction_datetime', firstDay.toISOString())
+      .lte('transaction_datetime', lastDay.toISOString())
+      .order('transaction_datetime', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        // Table doesn't exist - return empty array
+        return [];
+      }
+      throw error;
+    }
+    
+    return (data || []).map(dbToSpentItem);
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
+  }
 };
 
 // Create a new spent item

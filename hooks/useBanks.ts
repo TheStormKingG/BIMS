@@ -38,9 +38,17 @@ export const useBanks = () => {
       setBanks(banksData);
       setBankInTransactions(bankInsData);
       setWalletInTransactions(walletInsData);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load banks data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load banks data');
+      // If tables don't exist, just set empty arrays - don't show error
+      if (err?.code === 'PGRST202' || err?.message?.includes('does not exist') || err?.message?.includes('relation')) {
+        setBanks([]);
+        setBankInTransactions([]);
+        setWalletInTransactions([]);
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load banks data');
+      }
     } finally {
       setLoading(false);
     }

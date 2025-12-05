@@ -35,13 +35,25 @@ export interface DBWalletIn {
 // BANKS TABLE OPERATIONS
 
 export const fetchBanks = async (): Promise<DBBank[]> => {
-  const { data, error } = await supabase
-    .from('banks')
-    .select('*')
-    .order('updated', { ascending: false });
-  
-  if (error) throw error;
-  return (data || []) as DBBank[];
+  try {
+    const { data, error } = await supabase
+      .from('banks')
+      .select('*')
+      .order('updated', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBBank[];
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
+  }
 };
 
 export const createBank = async (bankName: string, initialTotal: number = 0): Promise<DBBank> => {
@@ -80,19 +92,31 @@ export const deleteBank = async (id: string): Promise<void> => {
 // BANK_IN TABLE OPERATIONS
 
 export const fetchBankInTransactions = async (bankId?: string): Promise<DBBankIn[]> => {
-  let query = supabase
-    .from('bank_in')
-    .select('*')
-    .order('datetime', { ascending: false });
-  
-  if (bankId) {
-    query = query.eq('destination', bankId);
+  try {
+    let query = supabase
+      .from('bank_in')
+      .select('*')
+      .order('datetime', { ascending: false });
+    
+    if (bankId) {
+      query = query.eq('destination', bankId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBBankIn[];
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
   }
-  
-  const { data, error } = await query;
-  
-  if (error) throw error;
-  return (data || []) as DBBankIn[];
 };
 
 export const createBankInTransaction = async (
@@ -135,13 +159,25 @@ export const createBankInTransaction = async (
 // WALLET_IN TABLE OPERATIONS
 
 export const fetchWalletInTransactions = async (): Promise<DBWalletIn[]> => {
-  const { data, error } = await supabase
-    .from('wallet_in')
-    .select('*')
-    .order('datetime', { ascending: false });
-  
-  if (error) throw error;
-  return (data || []) as DBWalletIn[];
+  try {
+    const { data, error } = await supabase
+      .from('wallet_in')
+      .select('*')
+      .order('datetime', { ascending: false });
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBWalletIn[];
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
+  }
 };
 
 export const createWalletInTransaction = async (

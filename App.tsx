@@ -43,13 +43,7 @@ function App() {
     spentItems,
     loading: spentItemsLoading,
     error: spentItemsError,
-    loadCurrentMonth,
   } = useSpentItems();
-
-  // Load current month items on mount
-  useEffect(() => {
-    loadCurrentMonth();
-  }, [loadCurrentMonth]);
 
   const loading = walletLoading || banksLoading || spentItemsLoading;
   const error = walletError || banksError || spentItemsError;
