@@ -296,9 +296,44 @@ function App() {
                 // Refresh current month items
                 await loadCurrentMonth();
                 
-                // If paid from bank, deduct from balance
+                // Deduct total from selected payment method
                 if (account?.type === 'BANK') {
-                  await updateBank(account.id, account.name, account.balance - receiptData.total);
+                  // Deduct from bank account
+                  const newBalance = account.balance - receiptData.total;
+                  if (newBalance < 0) {
+                    alert('Warning: Bank account balance will be negative!');
+                  }
+                  await updateBank(account.id, account.name, newBalance);
+                } else if (account?.type === 'CASH_WALLET' && wallet) {
+                  // Deduct from cash wallet
+                  // Calculate which denominations to deduct (simple algorithm: deduct from highest first)
+                  const totalToDeduct = receiptData.total;
+                  const currentDenoms = { ...wallet.denominations };
+                  const newDenoms: CashDenominations = { ...currentDenoms };
+                  
+                  let remaining = totalToDeduct;
+                  const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
+                  
+                  // Deduct from highest denominations first
+                  for (const denom of denominations) {
+                    if (remaining <= 0) break;
+                    
+                    const currentCount = newDenoms[denom] || 0;
+                    const needed = Math.floor(remaining / denom);
+                    const toDeduct = Math.min(needed, currentCount);
+                    
+                    if (toDeduct > 0) {
+                      newDenoms[denom] = currentCount - toDeduct;
+                      remaining -= toDeduct * denom;
+                    }
+                  }
+                  
+                  if (remaining > 0) {
+                    alert(`Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet. Please manually adjust your cash.`);
+                  }
+                  
+                  // Update wallet with new denominations
+                  await updateWallet(newDenoms);
                 }
                 
                 // Show success and navigate
