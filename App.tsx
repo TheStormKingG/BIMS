@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CashDenominations
 } from './types';
@@ -8,7 +8,7 @@ import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
-import { useTransactions } from './hooks/useTransactions';
+import { useSpentItems } from './hooks/useSpentItems';
 
 function App() {
   const [activeTab, setActiveTab] = useState('wallet');
@@ -38,15 +38,21 @@ function App() {
     addWalletInTransaction,
   } = useBanks();
 
-  // Use transactions hook
+  // Use spent items hook
   const {
-    transactions,
-    loading: transactionsLoading,
-    error: transactionsError,
-  } = useTransactions();
+    spentItems,
+    loading: spentItemsLoading,
+    error: spentItemsError,
+    loadCurrentMonth,
+  } = useSpentItems();
 
-  const loading = walletLoading || banksLoading || transactionsLoading;
-  const error = walletError || banksError || transactionsError;
+  // Load current month items on mount
+  useEffect(() => {
+    loadCurrentMonth();
+  }, [loadCurrentMonth]);
+
+  const loading = walletLoading || banksLoading || spentItemsLoading;
+  const error = walletError || banksError || spentItemsError;
 
   const handleUpdateWallet = async (denoms: CashDenominations) => {
     try {
@@ -224,7 +230,7 @@ function App() {
       
       case 'expenses':
         return (
-          <Spending transactions={transactions} />
+          <Spending spentItems={spentItems} loading={spentItemsLoading} />
         );
       
       case 'dashboard':

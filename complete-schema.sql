@@ -72,23 +72,27 @@ COMMENT ON TABLE wallet_in IS 'Records of cash received with denomination breakd
 
 
 -- ==============================================
--- 5. TRANSACTIONS - Track spending transactions
+-- 5. SPENT_TABLE - Track spending line items
 -- ==============================================
-CREATE TABLE IF NOT EXISTS transactions (
+CREATE TABLE IF NOT EXISTS spent_table (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  date TIMESTAMP WITH TIME ZONE NOT NULL,
-  merchant TEXT NOT NULL,
-  total_amount NUMERIC NOT NULL,
-  items JSONB NOT NULL DEFAULT '[]',
-  account_id UUID, -- Can reference banks(id) or NULL for wallet
+  transaction_datetime TIMESTAMP WITH TIME ZONE NOT NULL,
+  category TEXT NOT NULL,
+  item TEXT NOT NULL,
+  item_cost NUMERIC NOT NULL,
+  item_qty NUMERIC NOT NULL,
+  item_total NUMERIC NOT NULL,
+  payment_method TEXT, -- Bank account name or 'Cash Wallet'
   source TEXT NOT NULL CHECK (source IN ('MANUAL', 'SCAN_RECEIPT', 'IMPORT_EMAIL', 'IMPORT_SMS')),
+  entry_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
-CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id);
-COMMENT ON TABLE transactions IS 'Records of spending transactions with itemized details';
+CREATE INDEX IF NOT EXISTS idx_spent_table_transaction_datetime ON spent_table(transaction_datetime DESC);
+CREATE INDEX IF NOT EXISTS idx_spent_table_category ON spent_table(category);
+CREATE INDEX IF NOT EXISTS idx_spent_table_entry_date ON spent_table(entry_date DESC);
+COMMENT ON TABLE spent_table IS 'Records of spending line items with all transaction details';
 
 
 -- ==============================================
@@ -99,6 +103,6 @@ COMMENT ON TABLE transactions IS 'Records of spending transactions with itemized
 -- ✓ banks - Bank account names and balances
 -- ✓ bank_in - Deposits/transfers into bank accounts
 -- ✓ wallet_in - Cash received with denomination breakdown
--- ✓ transactions - Spending transactions with itemized details
+-- ✓ spent_table - Spending line items with transaction details
 
 

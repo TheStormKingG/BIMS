@@ -1,53 +1,13 @@
-import React, { useMemo } from 'react';
-import { Transaction } from '../types';
+import React from 'react';
+import { SpentItem } from '../services/spentTableDatabase';
 import { ShoppingBag } from 'lucide-react';
 
 interface SpendingProps {
-  transactions: Transaction[];
+  spentItems: SpentItem[];
+  loading?: boolean;
 }
 
-export const Spending: React.FC<SpendingProps> = ({ transactions }) => {
-  // Get current month start and end dates
-  const getCurrentMonthRange = () => {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    return {
-      start: firstDay.toISOString().split('T')[0],
-      end: lastDay.toISOString().split('T')[0]
-    };
-  };
-
-  // Filter transactions for current month and flatten to line items
-  const currentMonthItems = useMemo(() => {
-    const { start, end } = getCurrentMonthRange();
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    endDate.setHours(23, 59, 59, 999); // End of day
-    
-    return transactions
-      .filter(tx => {
-        const txDate = new Date(tx.date);
-        return txDate >= startDate && txDate <= endDate;
-      })
-      .flatMap(tx =>
-        tx.items.map((item, index) => ({
-          ...item,
-          date: tx.date,
-          merchant: tx.merchant,
-          txId: tx.id,
-          itemIndex: index
-        }))
-      )
-      .sort((a, b) => {
-        // Sort by date/time descending (newest first)
-        const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
-        if (dateCompare !== 0) return dateCompare;
-        // If same date, sort by merchant then item
-        return a.merchant.localeCompare(b.merchant) || a.description.localeCompare(b.description);
-      });
-  }, [transactions]);
-
+export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false }) => {
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString(undefined, {
@@ -59,7 +19,29 @@ export const Spending: React.FC<SpendingProps> = ({ transactions }) => {
     });
   };
 
+  const formatEntryDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const currentMonthName = new Date().toLocaleString(undefined, { month: 'long', year: 'numeric' });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-600">Loading spending data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
@@ -75,20 +57,23 @@ export const Spending: React.FC<SpendingProps> = ({ transactions }) => {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-500 uppercase font-medium text-xs border-b border-slate-100">
               <tr>
-                <th className="px-4 py-3 text-left">Date/Time</th>
+                <th className="px-4 py-3 text-left">Transaction Date/Time</th>
                 <th className="px-4 py-3 text-left">Category</th>
                 <th className="px-4 py-3 text-left">Item</th>
                 <th className="px-4 py-3 text-right">Item Cost</th>
                 <th className="px-4 py-3 text-right">Item Qty</th>
                 <th className="px-4 py-3 text-right">Item Total</th>
+                <th className="px-4 py-3 text-left">Payment Method</th>
+                <th className="px-4 py-3 text-left">Source</th>
+                <th className="px-4 py-3 text-left">Entry Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {currentMonthItems.length > 0 ? (
-                currentMonthItems.map((item, idx) => (
-                  <tr key={`${item.txId}-${item.itemIndex}-${idx}`} className="hover:bg-slate-50 transition-colors">
+              {spentItems.length > 0 ? (
+                spentItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                      {formatDateTime(item.date)}
+                      {formatDateTime(item.transactionDateTime)}
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-800">
@@ -96,23 +81,33 @@ export const Spending: React.FC<SpendingProps> = ({ transactions }) => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">{item.description}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{item.merchant}</div>
+                      <div className="font-medium text-slate-900">{item.item}</div>
                     </td>
                     <td className="px-4 py-3 text-right text-slate-700 font-medium">
-                      ${item.unitPrice.toLocaleString()}
+                      ${item.itemCost.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right text-slate-600">
-                      {item.quantity}
+                      {item.itemQty}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-slate-900">
-                      ${item.total.toLocaleString()}
+                      ${item.itemTotal.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {item.paymentMethod || 'N/A'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                        {item.source}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                      {formatEntryDate(item.entryDate)}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-slate-400">
+                  <td colSpan={9} className="px-4 py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center gap-2">
                       <ShoppingBag className="w-8 h-8 opacity-20" />
                       <p>No spending transactions for {currentMonthName}</p>
