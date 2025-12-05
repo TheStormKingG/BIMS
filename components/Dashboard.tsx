@@ -215,6 +215,87 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     .sort((a, b) => new Date(b.transactionDateTime).getTime() - new Date(a.transactionDateTime).getTime())
     .slice(0, 3);
 
+  // Find the item with most money spent
+  const topItem = React.useMemo(() => {
+    const itemTotals: Record<string, number> = {};
+    spentItems.forEach(item => {
+      const key = item.item.toLowerCase();
+      itemTotals[key] = (itemTotals[key] || 0) + item.itemTotal;
+    });
+    
+    const sortedItems = Object.entries(itemTotals)
+      .sort((a, b) => b[1] - a[1]);
+    
+    if (sortedItems.length === 0) return null;
+    
+    const [itemName, totalSpent] = sortedItems[0];
+    // Find the original item to get proper capitalization
+    const originalItem = spentItems.find(item => item.item.toLowerCase() === itemName);
+    
+    return {
+      name: originalItem?.item || itemName,
+      totalSpent,
+    };
+  }, [spentItems]);
+
+  // Calculate spending metrics for the top item
+  const topItemMetrics = React.useMemo(() => {
+    if (!topItem) {
+      return {
+        spentToday: 0,
+        spentLast7Days: 0,
+        spentLast30Days: 0,
+        avgDaily: 0,
+        avgWeekly: 0,
+        avgMonthly: 0,
+      };
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+    // Filter items by name (case-insensitive)
+    const itemNameLower = topItem.name.toLowerCase();
+    const itemTransactions = spentItems.filter(
+      item => item.item.toLowerCase() === itemNameLower
+    );
+
+    // Total amounts spent
+    const spentToday = itemTransactions
+      .filter(item => new Date(item.transactionDateTime) >= today)
+      .reduce((sum, item) => sum + item.itemTotal, 0);
+
+    const spentLast7Days = itemTransactions
+      .filter(item => new Date(item.transactionDateTime) >= weekAgo)
+      .reduce((sum, item) => sum + item.itemTotal, 0);
+
+    const spentLast30Days = itemTransactions
+      .filter(item => new Date(item.transactionDateTime) >= monthAgo)
+      .reduce((sum, item) => sum + item.itemTotal, 0);
+
+    // Calculate days in period for averages
+    const daysInWeek = Math.max(1, Math.ceil((now.getTime() - weekAgo.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysInMonth = Math.max(1, Math.ceil((now.getTime() - monthAgo.getTime()) / (1000 * 60 * 60 * 24)));
+
+    // Averages
+    const avgDaily = spentLast30Days / daysInMonth;
+    const avgWeekly = spentLast30Days / (daysInMonth / 7);
+    const avgMonthly = spentLast30Days;
+
+    return {
+      spentToday,
+      spentLast7Days,
+      spentLast30Days,
+      avgDaily,
+      avgWeekly,
+      avgMonthly,
+    };
+  }, [spentItems, topItem]);
+
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       {/* Total Balance Card */}
