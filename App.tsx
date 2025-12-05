@@ -3,7 +3,6 @@ import {
   CashDenominations
 } from './types';
 import { NAV_ITEMS } from './constants';
-import { CashWallet } from './components/CashWallet';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
 import { Scanner } from './components/Scanner';
@@ -12,7 +11,7 @@ import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('wallet');
+  const [activeTab, setActiveTab] = useState('accounts');
   
   // Use wallet hook
   const {
@@ -108,7 +107,7 @@ function App() {
       await addWalletInTransaction(source, denominations);
 
       // If source is a bank account, deduct the amount from it
-      if (source !== 'Cash-In') {
+      if (source !== 'Cash-In' && !source.startsWith('Cash-In')) {
         const sourceBank = banks.find(bank => bank.bank_name === source);
         if (sourceBank) {
           const newBalance = Number(sourceBank.total) - totalAmount;
@@ -164,16 +163,10 @@ function App() {
 
     // Render content based on active tab
     switch (activeTab) {
-      case 'wallet':
-        return wallet ? (
-          <CashWallet 
+      case 'accounts':
+        return (
+          <Accounts 
             wallet={wallet}
-            banks={banks.map(bank => ({
-              id: bank.id,
-              name: bank.bank_name,
-              type: 'BANK' as const,
-              balance: Number(bank.total)
-            }))}
             walletTransactions={walletInTransactions.map(txn => ({
               id: txn.id,
               source: txn.source,
@@ -187,18 +180,6 @@ function App() {
               note_20: txn.note_20,
               datetime: txn.datetime
             }))}
-            onUpdate={handleUpdateWallet}
-            onAddFunds={handleAddWalletFunds}
-          />
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-slate-600">Initializing wallet...</p>
-          </div>
-        );
-      
-      case 'accounts':
-        return (
-          <Accounts 
             accounts={banks.map(bank => ({
               id: bank.id,
               name: bank.bank_name,
@@ -213,7 +194,7 @@ function App() {
               datetime: txn.datetime,
               type: 'deposit' as const
             }))}
-            walletTransactions={walletInTransactions.map(txn => ({
+            walletTransactionsForBanks={walletInTransactions.map(txn => ({
               id: txn.id,
               source: txn.source,
               total: Number(txn.total),
@@ -222,6 +203,7 @@ function App() {
             onAddAccount={handleAddBank}
             onRemoveAccount={handleDeleteBank}
             onAddFunds={handleAddBankFunds}
+            onAddWalletFunds={handleAddWalletFunds}
           />
         );
       
@@ -363,16 +345,10 @@ function App() {
               </p>
               <div className="flex gap-2 justify-center mt-4">
                 <button
-                  onClick={() => setActiveTab('wallet')}
+                  onClick={() => setActiveTab('accounts')}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                 >
-                  Cash Wallet
-                </button>
-                <button
-                  onClick={() => setActiveTab('accounts')}
-                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
-                >
-                  Banks
+                  Funds
                 </button>
               </div>
             </div>
