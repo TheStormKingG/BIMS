@@ -146,7 +146,10 @@ export const Accounts: React.FC<AccountsProps> = ({
   };
 
   // If viewing wallet details, show detail view
-  if (viewingWallet && wallet) {
+  // Get Cash Wallet from accounts list
+  const cashWalletAccount = accounts.find(acc => acc.name === 'Cash Wallet' && acc.type === 'CASH_WALLET');
+  
+  if (viewingWallet && (wallet || cashWalletAccount)) {
     // Combine bank_in (funds added) and funds_out (cash spent) transactions
     // Get wallet bank entry to find its transactions
     const walletBank = accounts.find(acc => acc.name === 'Cash Wallet');
@@ -196,7 +199,7 @@ export const Accounts: React.FC<AccountsProps> = ({
             <div>
               <h2 className="text-2xl font-bold text-slate-900">Cash Wallet</h2>
               <p className="text-3xl font-bold text-emerald-600 mt-2">
-                ${walletBalance.toLocaleString()} <span className="text-lg text-slate-500">GYD</span>
+                ${(cashWalletAccount?.balance || walletBalance || 0).toLocaleString()} <span className="text-lg text-slate-500">GYD</span>
               </p>
             </div>
           </div>
@@ -397,9 +400,9 @@ export const Accounts: React.FC<AccountsProps> = ({
       )}
 
       <div className="grid gap-4">
-        {/* Wallet Card - Only show if Cash Wallet is not in accounts list */}
-        {wallet && !accounts.some(acc => acc.name === 'Cash Wallet') && (
-          <div className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
+        {/* Wallet Card - Show Cash Wallet from accounts list first */}
+        {accounts.filter(acc => acc.name === 'Cash Wallet' && acc.type === 'CASH_WALLET').map(walletAcc => (
+          <div key={walletAcc.id} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
             <div 
               className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
               onClick={() => setViewingWallet(true)}
@@ -410,7 +413,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-white text-lg">Cash Wallet</h3>
-                  <p className="text-slate-300 font-semibold text-base">${walletBalance.toLocaleString()} GYD</p>
+                  <p className="text-slate-300 font-semibold text-base">${walletAcc.balance.toLocaleString()} GYD</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400" />
               </div>
@@ -430,9 +433,9 @@ export const Accounts: React.FC<AccountsProps> = ({
               </button>
             </div>
           </div>
-        )}
+        ))}
 
-        {/* Bank Account Cards */}
+        {/* Bank Account Cards - Exclude Cash Wallet */}
         {accounts.filter(acc => acc.name !== 'Cash Wallet').map(acc => (
           <div key={acc.id} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
              <div 

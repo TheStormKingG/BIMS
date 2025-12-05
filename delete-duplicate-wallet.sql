@@ -2,7 +2,7 @@
 -- This keeps the one with the highest balance (or most recent if balances are equal)
 
 -- First, let's see what we have
-SELECT id, bank_name, total, updated, created_at
+SELECT id, bank_name, total, updated
 FROM banks
 WHERE bank_name = 'Cash Wallet'
 ORDER BY total DESC, updated DESC;
