@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SpentItem } from '../services/spentTableDatabase';
-import { ShoppingBag, Plus, X, Edit2 } from 'lucide-react';
+import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
 
@@ -17,6 +17,8 @@ interface SpendingProps {
 export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, walletBalance = 0, onAddSpend, onUpdateSpend }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<SpentItem | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -50,7 +52,42 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
     });
   };
 
-  const currentMonthName = new Date().toLocaleString(undefined, { month: 'long', year: 'numeric' });
+  const currentMonthName = selectedMonth.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+
+  // Filter items by selected month and search term
+  const filteredItems = useMemo(() => {
+    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    return spentItems.filter(item => {
+      const itemDate = new Date(item.transactionDateTime);
+      const isInMonth = itemDate >= monthStart && itemDate <= monthEnd;
+      
+      if (!isInMonth) return false;
+      
+      if (searchTerm.trim() === '') return true;
+      
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        item.item.toLowerCase().includes(searchLower) ||
+        item.category.toLowerCase().includes(searchLower) ||
+        (item.paymentMethod && item.paymentMethod.toLowerCase().includes(searchLower)) ||
+        item.source.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [spentItems, selectedMonth, searchTerm]);
+
+  const handlePreviousMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1));
+  };
+
+  const handleToday = () => {
+    setSelectedMonth(new Date());
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => {
@@ -171,20 +208,56 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Spending</h2>
-          <p className="text-sm text-slate-500 mt-1">{currentMonthName}</p>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Spending</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <button
+                onClick={handlePreviousMonth}
+                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Previous month"
+              >
+                <ChevronLeft className="w-5 h-5 text-slate-600" />
+              </button>
+              <button
+                onClick={handleToday}
+                className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium"
+                title="Go to current month"
+              >
+                {currentMonthName}
+              </button>
+              <button
+                onClick={handleNextMonth}
+                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Next month"
+              >
+                <ChevronRight className="w-5 h-5 text-slate-600" />
+              </button>
+            </div>
+          </div>
         </div>
-        {onAddSpend && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Spend
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search items, categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black w-64"
+            />
+          </div>
+          {onAddSpend && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Spend
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -205,8 +278,8 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {spentItems.length > 0 ? (
-                spentItems.map((item) => (
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                       {formatDateTime(item.transactionDateTime)}
@@ -257,7 +330,12 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   <td colSpan={10} className="px-4 py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center gap-2">
                       <ShoppingBag className="w-8 h-8 opacity-20" />
-                      <p>No spending transactions for {currentMonthName}</p>
+                      <p>
+                        {searchTerm.trim() !== '' 
+                          ? `No spending transactions found matching "${searchTerm}" in ${currentMonthName}`
+                          : `No spending transactions for ${currentMonthName}`
+                        }
+                      </p>
                     </div>
                   </td>
                 </tr>
