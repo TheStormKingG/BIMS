@@ -23,18 +23,34 @@ export const useWallet = () => {
       setLoading(true);
       setError(null);
       
-      let walletData = await fetchLatestWallet();
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout - check if wallet_snapshots table exists in Supabase')), 10000)
+      );
+      
+      const walletPromise = fetchLatestWallet();
+      let walletData = await Promise.race([walletPromise, timeoutPromise]) as CashWallet | null;
       
       // If no wallet exists, create an initial one with zero denominations
       if (!walletData) {
         console.log('No wallet found, creating initial wallet...');
-        walletData = await createWalletSnapshot(INITIAL_DENOMINATIONS);
+        try {
+          walletData = await createWalletSnapshot(INITIAL_DENOMINATIONS);
+        } catch (createErr: any) {
+          // If table doesn't exist, show helpful error
+          if (createErr.message?.includes('does not exist')) {
+            throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase SQL Editor.');
+          }
+          throw createErr;
+        }
       }
       
       setWallet(walletData);
     } catch (err) {
       console.error('Failed to load wallet:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load wallet');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load wallet';
+      setError(errorMessage);
+      // Still set loading to false so user can see the error
     } finally {
       setLoading(false);
     }

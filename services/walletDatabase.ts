@@ -48,24 +48,40 @@ const walletToDb = (denominations: CashDenominations): Partial<DBWalletSnapshot>
 
 // Fetch the latest wallet snapshot
 export const fetchLatestWallet = async (): Promise<CashWallet | null> => {
-  const { data, error } = await supabase
-    .from('wallet_snapshots')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-  
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows found - return null
+  try {
+    const { data, error } = await supabase
+      .from('wallet_snapshots')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (error) {
+      // PGRST116 = No rows found
+      // PGRST202 = Table not found
+      if (error.code === 'PGRST116') {
+        // No rows found - return null
+        return null;
+      }
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        // Table doesn't exist - return null so we can create it
+        console.warn('wallet_snapshots table does not exist yet');
+        return null;
+      }
+      throw error;
+    }
+    
+    if (!data) return null;
+    
+    return dbToWallet(data as DBWalletSnapshot);
+  } catch (err: any) {
+    // Handle any other errors
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      console.warn('wallet_snapshots table does not exist yet');
       return null;
     }
-    throw error;
+    throw err;
   }
-  
-  if (!data) return null;
-  
-  return dbToWallet(data as DBWalletSnapshot);
 };
 
 // Fetch wallet history (for analytics/tracking over time)
@@ -85,15 +101,27 @@ export const fetchWalletHistory = async (limit: number = 30): Promise<DBWalletSn
 export const createWalletSnapshot = async (denominations: CashDenominations): Promise<CashWallet> => {
   const dbData = walletToDb(denominations);
   
-  const { data, error } = await supabase
-    .from('wallet_snapshots')
-    .insert([dbData])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  
-  return dbToWallet(data as DBWalletSnapshot);
+  try {
+    const { data, error } = await supabase
+      .from('wallet_snapshots')
+      .insert([dbData])
+      .select()
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase.');
+      }
+      throw error;
+    }
+    
+    return dbToWallet(data as DBWalletSnapshot);
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase.');
+    }
+    throw err;
+  }
 };
 
 // Update wallet (creates a new snapshot with current timestamp)
