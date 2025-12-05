@@ -639,6 +639,32 @@ function App() {
         </div>
         
         <div className="mt-auto pt-6 border-t border-white/10">
+          {/* User Info */}
+          <div className="mb-4 p-3 bg-slate-800/50 rounded-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {user?.email?.split('@')[0] || 'User'}
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  {user?.email || ''}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                setUser(null);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </div>
           <p className="text-xs text-slate-500 text-center">
             &copy; 2025 Stashway
           </p>
@@ -648,9 +674,36 @@ function App() {
       {/* Main Content Area */}
       <main className="p-4 md:p-8 max-w-6xl mx-auto w-full">
          {/* Mobile Header */}
-         <div className="md:hidden flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
-            <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
+         <div className="md:hidden mb-6">
+           <div className="flex items-center justify-between mb-4">
+             <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
+             <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
+           </div>
+           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+             <div className="flex items-center gap-3">
+               <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                 <User className="w-5 h-5 text-white" />
+               </div>
+               <div className="flex-1 min-w-0">
+                 <p className="text-sm font-semibold text-slate-900 truncate">
+                   {user?.email?.split('@')[0] || 'User'}
+                 </p>
+                 <p className="text-xs text-slate-500 truncate">
+                   {user?.email || ''}
+                 </p>
+               </div>
+             </div>
+             <button
+               onClick={async () => {
+                 await supabase.auth.signOut();
+                 setUser(null);
+               }}
+               className="p-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+               title="Sign Out"
+             >
+               <LogOut className="w-5 h-5" />
+             </button>
+           </div>
          </div>
 
          {renderContent()}
