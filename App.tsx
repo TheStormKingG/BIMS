@@ -221,11 +221,12 @@ function App() {
   };
 
   const activeTab = getActiveTab();
-  const loading = walletLoading || banksLoading || spentItemsLoading;
-  const error = walletError || banksError || spentItemsError;
 
   // Protected route wrapper component
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const loading = walletLoading || banksLoading || spentItemsLoading;
+    const error = walletError || banksError || spentItemsError;
+    
     if (loading) {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -267,367 +268,114 @@ function App() {
 
   // Handler functions
   const handleSaveTransaction = async (receiptData: any, accountId: string) => {
-        return (
-          <Accounts 
-            wallet={wallet}
-            walletBalance={cashBalance}
-            walletTransactions={[]} // No longer using wallet_in table - transactions come from bank_in
-            walletFundsOut={fundsOutTransactions
-              .filter(txn => txn.source_account_type === 'CASH_WALLET')
-              .map(txn => ({
-                id: txn.id,
-                amount: Number(txn.amount),
-                transaction_datetime: txn.transaction_datetime,
-                source: txn.source,
-              }))}
-            fundsOutTransactions={fundsOutTransactions}
-            accounts={banks.map(bank => ({
-              id: bank.id,
-              name: bank.bank_name,
-              type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
-              balance: Number(bank.total)
-            }))}
-            bankTransactions={bankInTransactions.map(txn => ({
-              id: txn.destination,
-              txnId: txn.id,
-              amount: Number(txn.amount),
-              source: txn.source,
-              datetime: txn.datetime,
-              type: 'deposit' as const
-            }))}
-            walletTransactionsForBanks={[]} // No longer using wallet_in table
-            onAddAccount={handleAddBank}
-            onRemoveAccount={handleDeleteBank}
-            onAddFunds={handleAddBankFunds}
-            onAddWalletFunds={handleAddWalletFunds}
-          />
-        );
-      
-      case 'expenses':
-        return (
-          <Spending 
-            spentItems={spentItems} 
-            loading={spentItemsLoading}
-            banks={banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+    try {
+      // Get wallet from banks table (it's now stored as "Cash Wallet" bank entry)
+      const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
+      const allAccounts = walletBank 
+        ? [
+            {
+              id: walletBank.id,
+              name: 'Cash Wallet',
+              type: 'CASH_WALLET' as const,
+              balance: Number(walletBank.total)
+            },
+            ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
               id: bank.id,
               name: bank.bank_name,
               type: 'BANK' as const,
               balance: Number(bank.total)
-            }))}
-            wallet={wallet}
-            walletBalance={cashBalance}
-            onUpdateSpend={async (id, updates) => {
-              try {
-                // Find the original item to get the payment method
-                const originalItem = spentItems.find(item => item.id === id);
-                if (!originalItem) {
-                  throw new Error('Item not found');
-                }
-
-                // Check funds if payment method is being changed or amount is being increased
-                const newAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
-                const paymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
-                
-                if (paymentMethod) {
-                  const isWallet = paymentMethod === 'Cash Wallet';
-                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                  const account = isWallet 
-                    ? walletBankEntry 
-                    : banks.find(bank => bank.bank_name === paymentMethod);
-                  
-                  if (isWallet && walletBankEntry) {
-                    // Calculate the difference in amount
-                    const amountDifference = newAmount - originalItem.itemTotal;
-                    if (amountDifference > 0 && Number(walletBankEntry.total) < amountDifference) {
-                      alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
-                      return;
-                    }
-                  } else if (account && !isWallet) {
-                    const amountDifference = newAmount - originalItem.itemTotal;
-                    if (amountDifference > 0 && Number(account.total) < amountDifference) {
-                      alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
-                      return;
-                    }
-                  }
-                }
-
-                // Update the spent item
-                await updateSpentItem(id, updates);
-
-                // Update funds_out and account balances
-                const fundsOutEntry = fundsOutTransactions.find(
-                  txn => txn.spent_table_id === id
-                );
-
-                if (fundsOutEntry) {
-                  const finalPaymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
-                  const finalAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
-                  const finalDateTime = updates.transactionDateTime !== undefined ? updates.transactionDateTime : originalItem.transactionDateTime;
-                  const finalSource = updates.source !== undefined ? updates.source : originalItem.source;
-                  
-                  if (finalPaymentMethod) {
-                    const isWallet = finalPaymentMethod === 'Cash Wallet';
-                    const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                    const account = isWallet 
-                      ? walletBankEntry 
-                      : banks.find(bank => bank.bank_name === finalPaymentMethod);
-                    
-                    if (account) {
-                      // Calculate the difference in amount
-                      const oldAmount = originalItem.itemTotal;
-                      const newAmount = finalAmount;
-                      const difference = newAmount - oldAmount;
-                      
-                      // Update account balance
-                      if (difference !== 0) {
-                        const newBalance = Number(account.total) - difference;
-                        await updateBank(account.id, account.bank_name, newBalance);
-                      }
-
-                      // Update funds_out entry
-                      await updateFundsOutBySpentTableId(id, {
-                        source_account_id: account.id,
-                        source_account_type: isWallet ? 'CASH_WALLET' : 'BANK',
-                        source_account_name: isWallet ? 'Cash Wallet' : account.bank_name,
-                        amount: finalAmount,
-                        transaction_datetime: finalDateTime,
-                        source: finalSource,
-                      });
-                    }
-                  }
-                }
-              } catch (err) {
-                alert('Failed to update spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
-              }
-            }}
-            onAddSpend={async (item) => {
-              try {
-                // Check funds BEFORE saving spent items
-                if (item.paymentMethod) {
-                  // Find the account
-                  const isWallet = item.paymentMethod === 'Cash Wallet';
-                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                  const account = isWallet 
-                    ? walletBankEntry 
-                    : banks.find(bank => bank.bank_name === item.paymentMethod);
-                  
-                  if (isWallet && walletBankEntry) {
-                    // Check if wallet has enough balance
-                    if (Number(walletBankEntry.total) < item.itemTotal) {
-                      alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
-                      return; // Don't proceed with the transaction
-                    }
-                  } else if (account && !isWallet) {
-                    // Check if bank has enough funds
-                    if (Number(account.total) < item.itemTotal) {
-                      alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
-                      return; // Don't proceed with the transaction
-                    }
-                  }
-                }
-                
-                // Save spent items
-                const addedItems = await addSpentItems([item]);
-                await loadCurrentMonth();
-                
-                // Deduct from payment method and record in funds_out
-                if (item.paymentMethod) {
-                  // Find the account
-                  const isWallet = item.paymentMethod === 'Cash Wallet';
-                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                  const account = isWallet 
-                    ? walletBankEntry 
-                    : banks.find(bank => bank.bank_name === item.paymentMethod);
-                  
-                  if (isWallet && walletBankEntry) {
-                    // Deduct from wallet balance
-                    const newBalance = Number(walletBankEntry.total) - item.itemTotal;
-                    if (newBalance < 0) {
-                      alert('Warning: Wallet balance will be negative!');
-                    }
-                    await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
-                    
-                    // Record in funds_out
-                    await addFundsOut({
-                      source_account_id: walletBankEntry.id,
-                      source_account_type: 'CASH_WALLET',
-                      source_account_name: 'Cash Wallet',
-                      amount: item.itemTotal,
-                      transaction_datetime: item.transactionDateTime,
-                      spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
-                      source: item.source,
-                    });
-                  } else if (account && !isWallet) {
-                    // Deduct from bank account
-                    const newBalance = Number(account.total) - item.itemTotal;
-                    if (newBalance < 0) {
-                      alert('Warning: Bank account balance will be negative!');
-                    }
-                    await updateBank(account.id, account.bank_name, newBalance);
-                    
-                    // Record in funds_out
-                    await addFundsOut({
-                      source_account_id: account.id,
-                      source_account_type: 'BANK',
-                      source_account_name: account.bank_name,
-                      amount: item.itemTotal,
-                      transaction_datetime: item.transactionDateTime,
-                      spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
-                      source: item.source,
-                    });
-                  }
-                }
-              } catch (err) {
-                alert('Failed to add spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
-              }
-            }}
-          />
-        );
+            }))
+          ]
+        : banks.map(bank => ({
+            id: bank.id,
+            name: bank.bank_name,
+            type: 'BANK' as const,
+            balance: Number(bank.total)
+          }));
       
-      case 'scan':
-        // Get wallet from banks table (it's now stored as "Cash Wallet" bank entry)
-        const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
-        const allAccounts = walletBank 
-          ? [
-              {
-                id: walletBank.id,
-                name: 'Cash Wallet',
-                type: 'CASH_WALLET' as const,
-                balance: Number(walletBank.total)
-              },
-              ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
-                id: bank.id,
-                name: bank.bank_name,
-                type: 'BANK' as const,
-                balance: Number(bank.total)
-              }))
-            ]
-          : banks.map(bank => ({
-              id: bank.id,
-              name: bank.bank_name,
-              type: 'BANK' as const,
-              balance: Number(bank.total)
-            }));
+      // Find the account to get payment method name
+      const account = allAccounts.find(acc => acc.id === accountId);
+      const paymentMethod = account?.type === 'CASH_WALLET' ? 'Cash Wallet' : account?.name || 'Unknown';
+      
+      // Convert receipt items to spent_table format
+      let transactionDate: string;
+      try {
+        const receiptDate = new Date(receiptData.date);
+        if (isNaN(receiptDate.getTime())) {
+          transactionDate = new Date().toISOString();
+        } else {
+          const now = new Date();
+          receiptDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+          transactionDate = receiptDate.toISOString();
+        }
+      } catch {
+        transactionDate = new Date().toISOString();
+      }
+      
+      const spentItemsToAdd = receiptData.items.map((item: any) => ({
+        transactionDateTime: transactionDate,
+        category: item.category,
+        item: item.description,
+        itemCost: item.unitPrice,
+        itemQty: item.quantity,
+        itemTotal: item.total,
+        paymentMethod: paymentMethod,
+        source: 'SCAN_RECEIPT' as const,
+      }));
+      
+      const addedSpentItems = await addSpentItems(spentItemsToAdd);
+      await loadCurrentMonth();
+      
+      // Deduct total from selected payment method
+      if (account?.type === 'BANK') {
+        const newBalance = account.balance - receiptData.total;
+        if (newBalance < 0) {
+          alert('Warning: Bank account balance will be negative!');
+        }
+        await updateBank(account.id, account.name, newBalance);
         
-        return (
-          <Scanner 
-            accounts={allAccounts}
-            onSave={async (receiptData, accountId) => {
-              try {
-                // Find the account to get payment method name
-                const account = allAccounts.find(acc => acc.id === accountId);
-                const paymentMethod = account?.type === 'CASH_WALLET' ? 'Cash Wallet' : account?.name || 'Unknown';
-                
-                // Convert receipt items to spent_table format
-                // Use the receipt date with current time, or just current time if date parsing fails
-                let transactionDate: string;
-                try {
-                  const receiptDate = new Date(receiptData.date);
-                  if (isNaN(receiptDate.getTime())) {
-                    transactionDate = new Date().toISOString();
-                  } else {
-                    // Use receipt date but with current time
-                    const now = new Date();
-                    receiptDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
-                    transactionDate = receiptDate.toISOString();
-                  }
-                } catch {
-                  transactionDate = new Date().toISOString();
-                }
-                
-                const spentItemsToAdd = receiptData.items.map(item => ({
-                  transactionDateTime: transactionDate,
-                  category: item.category,
-                  item: item.description,
-                  itemCost: item.unitPrice,
-                  itemQty: item.quantity,
-                  itemTotal: item.total,
-                  paymentMethod: paymentMethod,
-                  source: 'SCAN_RECEIPT' as const,
-                }));
-                
-                const addedSpentItems = await addSpentItems(spentItemsToAdd);
-                
-                // Refresh current month items
-                await loadCurrentMonth();
-                
-                // Deduct total from selected payment method
-                if (account?.type === 'BANK') {
-                  // Deduct from bank account
-                  const newBalance = account.balance - receiptData.total;
-                  if (newBalance < 0) {
-                    alert('Warning: Bank account balance will be negative!');
-                  }
-                  await updateBank(account.id, account.name, newBalance);
-                  
-                  // Record in funds_out
-                  await addFundsOut({
-                    source_account_id: account.id,
-                    source_account_type: 'BANK',
-                    source_account_name: account.name,
-                    amount: receiptData.total,
-                    transaction_datetime: transactionDate,
-                    spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
-                    source: 'SCAN_RECEIPT',
-                  });
-                } else if (account?.type === 'CASH_WALLET') {
-                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                  if (!walletBankEntry) {
-                    alert('Error: Cash Wallet not found in banks table.');
-                    return;
-                  }
-                  
-                  // Check if wallet has enough balance
-                  if (Number(walletBankEntry.total) < receiptData.total) {
-                    alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${receiptData.total.toLocaleString()} GYD is needed.`);
-                    return; // Don't proceed with the transaction
-                  }
-                  
-                  // Deduct from wallet balance
-                  const newBalance = Number(walletBankEntry.total) - receiptData.total;
-                  if (newBalance < 0) {
-                    alert('Warning: Wallet balance will be negative!');
-                  }
-                  await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
-                  
-                  // Record in funds_out
-                  await addFundsOut({
-                    source_account_id: walletBankEntry.id,
-                    source_account_type: 'CASH_WALLET',
-                    source_account_name: 'Cash Wallet',
-                    amount: receiptData.total,
-                    transaction_datetime: transactionDate,
-                    spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
-                    source: 'SCAN_RECEIPT',
-                  });
-                }
-                
-                // Show success and navigate
-                alert('Receipt scanned and saved successfully!');
-                setActiveTab('expenses');
-              } catch (err) {
-                alert('Failed to save receipt: ' + (err instanceof Error ? err.message : 'Unknown error'));
-              }
-            }}
-          />
-        );
+        await addFundsOut({
+          source_account_id: account.id,
+          source_account_type: 'BANK',
+          source_account_name: account.name,
+          amount: receiptData.total,
+          transaction_datetime: transactionDate,
+          spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
+          source: 'SCAN_RECEIPT',
+        });
+      } else if (account?.type === 'CASH_WALLET') {
+        const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+        if (!walletBankEntry) {
+          alert('Error: Cash Wallet not found in banks table.');
+          return;
+        }
+        
+        if (Number(walletBankEntry.total) < receiptData.total) {
+          alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${receiptData.total.toLocaleString()} GYD is needed.`);
+          return;
+        }
+        
+        const newBalance = Number(walletBankEntry.total) - receiptData.total;
+        if (newBalance < 0) {
+          alert('Warning: Wallet balance will be negative!');
+        }
+        await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
+        
+        await addFundsOut({
+          source_account_id: walletBankEntry.id,
+          source_account_type: 'CASH_WALLET',
+          source_account_name: 'Cash Wallet',
+          amount: receiptData.total,
+          transaction_datetime: transactionDate,
+          spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
+          source: 'SCAN_RECEIPT',
+        });
+      }
       
-      case 'dashboard':
-        return (
-          <Dashboard 
-            accounts={banks.map(bank => ({
-              id: bank.id,
-              name: bank.bank_name,
-              type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
-              balance: Number(bank.total)
-            }))}
-            spentItems={spentItems}
-            totalBalance={totalInBanks}
-          />
-        );
-      
-      default:
-        return null;
+      alert('Receipt scanned and saved successfully!');
+      navigate('/spending');
+    } catch (err) {
+      alert('Failed to save receipt: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
@@ -697,7 +445,7 @@ function App() {
          <div className="md:hidden mb-6">
            <div className="flex items-center justify-between mb-4">
              <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
-             <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
+            <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
            </div>
            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
              <div className="flex items-center gap-3">
