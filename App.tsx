@@ -272,13 +272,41 @@ function App() {
                     : banks.find(bank => bank.bank_name === item.paymentMethod);
                   
                   if (isWallet && wallet) {
-                    // Deduct from wallet
+                    // Check if we can make the exact amount with available denominations
                     const totalToDeduct = item.itemTotal;
                     const currentDenoms = { ...wallet.denominations };
-                    const newDenoms: CashDenominations = { ...currentDenoms };
-                    
-                    let remaining = totalToDeduct;
                     const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
+                    
+                    // Try to see if we can make the exact amount
+                    let testRemaining = totalToDeduct;
+                    let canMakeExact = true;
+                    
+                    for (const denom of denominations) {
+                      if (testRemaining <= 0) break;
+                      const available = currentDenoms[denom] || 0;
+                      const needed = Math.floor(testRemaining / denom);
+                      const canUse = Math.min(needed, available);
+                      testRemaining -= canUse * denom;
+                    }
+                    
+                    if (testRemaining > 0) {
+                      // Can't make exact amount - show what denominations are available
+                      const availableDenoms = denominations
+                        .filter(d => (currentDenoms[d] || 0) > 0)
+                        .map(d => `${currentDenoms[d]}× $${d}`)
+                        .join(', ');
+                      
+                      alert(
+                        `Cannot deduct ${totalToDeduct.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
+                        `Available denominations: ${availableDenoms || 'None'}\n\n` +
+                        `Please add smaller denominations to your wallet or use a different payment method.`
+                      );
+                      return; // Cancel the transaction
+                    }
+                    
+                    // Deduct from wallet (we know we can make the exact amount)
+                    const newDenoms: CashDenominations = { ...currentDenoms };
+                    let remaining = totalToDeduct;
                     
                     for (const denom of denominations) {
                       if (remaining <= 0) break;
@@ -291,38 +319,6 @@ function App() {
                         newDenoms[denom] = currentCount - toDeduct;
                         remaining -= toDeduct * denom;
                       }
-                    }
-                    
-                    if (remaining > 0) {
-                      // This shouldn't happen if walletTotal >= itemTotal, but handle it anyway
-                      const actualDeducted = totalToDeduct - remaining;
-                      const proceed = confirm(
-                        `Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
-                        `Only ${actualDeducted.toLocaleString()} GYD can be deducted with available denominations.\n\n` +
-                        `Do you want to proceed with partial deduction of ${actualDeducted.toLocaleString()} GYD?`
-                      );
-                      
-                      if (!proceed) {
-                        // Rollback: delete the spent item
-                        if (addedItems.length > 0) {
-                          // Note: We'd need a delete function, but for now just show error
-                          alert('Transaction cancelled. Please delete the spending entry manually.');
-                        }
-                        return; // Cancel the transaction
-                      }
-                      
-                      // Record only what was actually deducted
-                      await updateWallet(newDenoms);
-                      await addFundsOut({
-                        source_account_id: wallet.id,
-                        source_account_type: 'CASH_WALLET',
-                        source_account_name: 'Cash Wallet',
-                        amount: actualDeducted,
-                        transaction_datetime: item.transactionDateTime,
-                        spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
-                        source: item.source,
-                      });
-                      return;
                     }
                     
                     await updateWallet(newDenoms);
@@ -450,14 +446,40 @@ function App() {
                     return; // Don't proceed with the transaction
                   }
                   
-                  // Deduct from cash wallet
-                  // Calculate which denominations to deduct (simple algorithm: deduct from highest first)
+                  // Check if we can make the exact amount with available denominations
                   const totalToDeduct = receiptData.total;
                   const currentDenoms = { ...wallet.denominations };
-                  const newDenoms: CashDenominations = { ...currentDenoms };
-                  
-                  let remaining = totalToDeduct;
                   const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
+                  
+                  // Try to see if we can make the exact amount
+                  let testRemaining = totalToDeduct;
+                  
+                  for (const denom of denominations) {
+                    if (testRemaining <= 0) break;
+                    const available = currentDenoms[denom] || 0;
+                    const needed = Math.floor(testRemaining / denom);
+                    const canUse = Math.min(needed, available);
+                    testRemaining -= canUse * denom;
+                  }
+                  
+                  if (testRemaining > 0) {
+                    // Can't make exact amount - show what denominations are available
+                    const availableDenoms = denominations
+                      .filter(d => (currentDenoms[d] || 0) > 0)
+                      .map(d => `${currentDenoms[d]}× $${d}`)
+                      .join(', ');
+                    
+                    alert(
+                      `Cannot deduct ${totalToDeduct.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
+                      `Available denominations: ${availableDenoms || 'None'}\n\n` +
+                      `Please add smaller denominations to your wallet or use a different payment method.`
+                    );
+                    return; // Cancel the transaction
+                  }
+                  
+                  // Deduct from cash wallet (we know we can make the exact amount)
+                  const newDenoms: CashDenominations = { ...currentDenoms };
+                  let remaining = totalToDeduct;
                   
                   // Deduct from highest denominations first
                   for (const denom of denominations) {
@@ -471,35 +493,6 @@ function App() {
                       newDenoms[denom] = currentCount - toDeduct;
                       remaining -= toDeduct * denom;
                     }
-                  }
-                  
-                  if (remaining > 0) {
-                    // This shouldn't happen if walletTotal >= receiptData.total, but handle it anyway
-                    const actualDeducted = totalToDeduct - remaining;
-                    const proceed = confirm(
-                      `Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
-                      `Only ${actualDeducted.toLocaleString()} GYD can be deducted with available denominations.\n\n` +
-                      `Do you want to proceed with partial deduction of ${actualDeducted.toLocaleString()} GYD?`
-                    );
-                    
-                    if (!proceed) {
-                      return; // Cancel the transaction
-                    }
-                    
-                    // Update wallet with partial deduction
-                    await updateWallet(newDenoms);
-                    
-                    // Record only what was actually deducted
-                    await addFundsOut({
-                      source_account_id: wallet.id,
-                      source_account_type: 'CASH_WALLET',
-                      source_account_name: 'Cash Wallet',
-                      amount: actualDeducted,
-                      transaction_datetime: transactionDate,
-                      spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
-                      source: 'SCAN_RECEIPT',
-                    });
-                    return;
                   }
                   
                   // Update wallet with new denominations
