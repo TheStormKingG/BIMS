@@ -397,8 +397,8 @@ export const Accounts: React.FC<AccountsProps> = ({
       )}
 
       <div className="grid gap-4">
-        {/* Wallet Card */}
-        {wallet && (
+        {/* Wallet Card - Only show if Cash Wallet is not in accounts list */}
+        {wallet && !accounts.some(acc => acc.name === 'Cash Wallet') && (
           <div className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
             <div 
               className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
@@ -433,7 +433,7 @@ export const Accounts: React.FC<AccountsProps> = ({
         )}
 
         {/* Bank Account Cards */}
-        {accounts.map(acc => (
+        {accounts.filter(acc => acc.name !== 'Cash Wallet').map(acc => (
           <div key={acc.id} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
              <div 
                className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
