@@ -1,7 +1,7 @@
 import React from 'react';
 import { Account } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, DollarSign } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, DollarSign, Clock } from 'lucide-react';
 import { SpentItem } from '../services/spentTableDatabase';
 
 interface DashboardProps {
