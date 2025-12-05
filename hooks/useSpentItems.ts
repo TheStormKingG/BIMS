@@ -15,7 +15,7 @@ export const useSpentItems = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadCurrentMonth();
+    loadSpentItems(); // Load all transactions, not just current month
   }, []);
 
   const loadSpentItems = async () => {
