@@ -331,7 +331,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Today</h3>
-            <Calendar className="w-5 h-5 text-emerald-600" />
+            <Clock className="w-5 h-5 text-emerald-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
             ${spendingMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -367,7 +367,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
-            <Calendar className="w-5 h-5 text-blue-600" />
+            <Clock className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
             ${spendingMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
