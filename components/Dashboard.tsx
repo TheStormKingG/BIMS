@@ -304,7 +304,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Spending Over Time Graph */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h3 className="font-bold text-slate-800 mb-4">Money Spent Over Time</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-slate-800">Money Spent Over Time</h3>
+          <select
+            value={timePeriod}
+            onChange={(e) => setTimePeriod(e.target.value as '7days' | '1month' | '3months' | '6months' | '1year')}
+            className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option value="7days">7 Days</option>
+            <option value="1month">1 Month</option>
+            <option value="3months">3 Months</option>
+            <option value="6months">6 Months</option>
+            <option value="1year">1 Year</option>
+          </select>
+        </div>
         <div className="h-80">
           {spendingOverTime.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
