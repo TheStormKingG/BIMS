@@ -647,10 +647,10 @@ function App() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">
-                  {user?.email?.split('@')[0] || 'User'}
+                  {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
                 </p>
                 <p className="text-xs text-slate-400 truncate">
-                  {user?.email || ''}
+                  {user?.email || 'Not signed in'}
                 </p>
               </div>
             </div>
@@ -686,10 +686,10 @@ function App() {
                </div>
                <div className="flex-1 min-w-0">
                  <p className="text-sm font-semibold text-slate-900 truncate">
-                   {user?.email?.split('@')[0] || 'User'}
+                   {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
                  </p>
                  <p className="text-xs text-slate-500 truncate">
-                   {user?.email || ''}
+                   {user?.email || 'Not signed in'}
                  </p>
                </div>
              </div>
