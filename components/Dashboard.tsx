@@ -13,6 +13,7 @@ interface DashboardProps {
 const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b'];
 
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, totalBalance }) => {
+  const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '3months' | '6months' | '1year'>('1month');
   
   // Calculate category spend
   const categoryData = React.useMemo(() => {
@@ -67,41 +68,133 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     };
   }, [spentItems]);
 
-  // Calculate spending over time (last 30 days)
+  // Calculate spending over time based on selected period
   const spendingOverTime = React.useMemo(() => {
     const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    let daysBack = 30; // Default to 1 month
+    let dateFormat: 'day' | 'week' | 'month' = 'day';
+    
+    switch (timePeriod) {
+      case '7days':
+        daysBack = 7;
+        dateFormat = 'day';
+        break;
+      case '1month':
+        daysBack = 30;
+        dateFormat = 'day';
+        break;
+      case '3months':
+        daysBack = 90;
+        dateFormat = 'week';
+        break;
+      case '6months':
+        daysBack = 180;
+        dateFormat = 'week';
+        break;
+      case '1year':
+        daysBack = 365;
+        dateFormat = 'month';
+        break;
+    }
+
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - daysBack);
 
     const filtered = spentItems.filter(
-      item => new Date(item.transactionDateTime) >= thirtyDaysAgo
+      item => new Date(item.transactionDateTime) >= startDate
     );
 
-    // Group by date
-    const byDate: Record<string, number> = {};
+    // Group by date/week/month based on period
+    const byPeriod: Record<string, number> = {};
     filtered.forEach(item => {
       const date = new Date(item.transactionDateTime);
-      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-      byDate[dateKey] = (byDate[dateKey] || 0) + item.itemTotal;
+      let periodKey: string;
+      
+      if (dateFormat === 'day') {
+        periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      } else if (dateFormat === 'week') {
+        // Get week start (Monday)
+        const weekStart = new Date(date);
+        const day = weekStart.getDay();
+        const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+        weekStart.setDate(diff);
+        periodKey = weekStart.toISOString().split('T')[0];
+      } else {
+        // Month
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+      
+      byPeriod[periodKey] = (byPeriod[periodKey] || 0) + item.itemTotal;
     });
 
-    // Create array for last 30 days
+    // Create array for the selected period
     const result = [];
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().split('T')[0];
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      result.push({
-        date: `${month}/${day}`,
-        fullDate: dateKey,
-        amount: byDate[dateKey] || 0,
+    const totalDays = daysBack;
+    
+    if (dateFormat === 'day') {
+      for (let i = totalDays - 1; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        result.push({
+          date: `${month}/${day}`,
+          fullDate: dateKey,
+          amount: byPeriod[dateKey] || 0,
+        });
+      }
+    } else if (dateFormat === 'week') {
+      // Get all weeks in the period
+      const weeks: string[] = [];
+      for (let i = totalDays - 1; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        const weekStart = new Date(date);
+        weekStart.setDate(diff);
+        const weekKey = weekStart.toISOString().split('T')[0];
+        if (!weeks.includes(weekKey)) {
+          weeks.push(weekKey);
+        }
+      }
+      
+      weeks.forEach(weekKey => {
+        const weekStart = new Date(weekKey);
+        const month = weekStart.getMonth() + 1;
+        const day = weekStart.getDate();
+        result.push({
+          date: `${month}/${day}`,
+          fullDate: weekKey,
+          amount: byPeriod[weekKey] || 0,
+        });
+      });
+    } else {
+      // Month format
+      const months: string[] = [];
+      for (let i = totalDays - 1; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!months.includes(monthKey)) {
+          months.push(monthKey);
+        }
+      }
+      
+      months.forEach(monthKey => {
+        const [year, month] = monthKey.split('-');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        result.push({
+          date: `${monthNames[parseInt(month) - 1]} ${year.slice(2)}`,
+          fullDate: monthKey,
+          amount: byPeriod[monthKey] || 0,
+        });
       });
     }
 
     return result;
-  }, [spentItems]);
+  }, [spentItems, timePeriod]);
 
   const recentTransactions = [...spentItems]
     .sort((a, b) => new Date(b.transactionDateTime).getTime() - new Date(a.transactionDateTime).getTime())
