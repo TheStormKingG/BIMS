@@ -25,8 +25,8 @@ export const DEFAULT_CATEGORIES = [
 ];
 
 export const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Overview', icon: ChartPie },
-  { id: 'accounts', label: 'Funds', icon: Landmark },
-  { id: 'scan', label: 'Scan', icon: ScanLine },
-  { id: 'expenses', label: 'Spending', icon: Calculator },
+  { id: 'dashboard', label: 'Overview', icon: ChartPie, path: '/overview' },
+  { id: 'accounts', label: 'Funds', icon: Landmark, path: '/funds' },
+  { id: 'scan', label: 'Scan', icon: ScanLine, path: '/scan' },
+  { id: 'expenses', label: 'Spending', icon: Calculator, path: '/spending' },
 ];

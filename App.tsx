@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
@@ -13,9 +14,10 @@ import { getSupabase } from './services/supabaseClient';
 import { LogOut, User } from 'lucide-react';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('accounts');
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const supabase = getSupabase();
 
@@ -83,13 +85,13 @@ function App() {
         if (window.location.hash) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
+        // Redirect to overview if on login page
+        if (location.pathname === '/' || location.pathname === '/BIMS' || location.pathname === '/BIMS/') {
+          navigate('/overview', { replace: true });
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
-      } else if (event === 'SIGNED_IN') {
-        // Handle OAuth callback
-        if (session) {
-          setUser(session.user);
-        }
+        navigate('/', { replace: true });
       }
       setAuthLoading(false);
     });
@@ -109,6 +111,17 @@ function App() {
     );
   }
 
+  // If not authenticated and not on login page, show login
+  if (!user && location.pathname !== '/' && location.pathname !== '/BIMS' && location.pathname !== '/BIMS/') {
+    return <Navigate to="/" replace />;
+  }
+
+  // If authenticated and on login page, redirect to overview
+  if (user && (location.pathname === '/' || location.pathname === '/BIMS' || location.pathname === '/BIMS/')) {
+    return <Navigate to="/overview" replace />;
+  }
+
+  // Show login page if not authenticated
   if (!user) {
     return <Login onLoginSuccess={async () => {
       try {
@@ -117,6 +130,7 @@ function App() {
           console.error('Error getting session after login:', error);
         } else {
           setUser(session?.user ?? null);
+          navigate('/overview', { replace: true });
         }
       } catch (err) {
         console.error('Failed to get session after login:', err);
@@ -196,8 +210,22 @@ function App() {
     }
   };
 
-  const renderContent = () => {
-    // Show loading state
+  // Get current route to determine active tab
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path === '/overview' || path === '/dashboard') return 'dashboard';
+    if (path === '/funds' || path === '/accounts') return 'accounts';
+    if (path === '/scan') return 'scan';
+    if (path === '/spending' || path === '/expenses') return 'expenses';
+    return 'dashboard'; // default
+  };
+
+  const activeTab = getActiveTab();
+  const loading = walletLoading || banksLoading || spentItemsLoading;
+  const error = walletError || banksError || spentItemsError;
+
+  // Protected route wrapper component
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (loading) {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -209,7 +237,6 @@ function App() {
       );
     }
 
-    // Show error state
     if (error) {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -235,9 +262,11 @@ function App() {
       );
     }
 
-    // Render content based on active tab
-    switch (activeTab) {
-      case 'accounts':
+    return <>{children}</>;
+  };
+
+  // Handler functions
+  const handleSaveTransaction = async (receiptData: any, accountId: string) => {
         return (
           <Accounts 
             wallet={wallet}
@@ -615,7 +644,7 @@ function App() {
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === item.id 
                 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
@@ -648,6 +677,7 @@ function App() {
               onClick={async () => {
                 await supabase.auth.signOut();
                 setUser(null);
+                navigate('/', { replace: true });
               }}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 rounded-lg transition-colors"
             >
@@ -687,6 +717,7 @@ function App() {
                onClick={async () => {
                  await supabase.auth.signOut();
                  setUser(null);
+                 navigate('/', { replace: true });
                }}
                className="p-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
                title="Sign Out"
@@ -696,7 +727,255 @@ function App() {
            </div>
          </div>
 
-         {renderContent()}
+         <ProtectedRoute>
+           <Routes>
+             <Route path="/overview" element={
+               <Dashboard 
+                 accounts={banks.map(bank => ({
+                   id: bank.id,
+                   name: bank.bank_name,
+                   type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
+                   balance: Number(bank.total)
+                 }))}
+                 spentItems={spentItems}
+                 totalBalance={totalInBanks}
+               />
+             } />
+             
+             <Route path="/funds" element={
+               <Accounts 
+                 wallet={wallet}
+                 walletBalance={cashBalance}
+                 walletTransactions={[]}
+                 walletFundsOut={fundsOutTransactions
+                   .filter(txn => txn.source_account_type === 'CASH_WALLET')
+                   .map(txn => ({
+                     id: txn.id,
+                     amount: Number(txn.amount),
+                     transaction_datetime: txn.transaction_datetime,
+                     source: txn.source,
+                   }))}
+                 fundsOutTransactions={fundsOutTransactions}
+                 accounts={banks.map(bank => ({
+                   id: bank.id,
+                   name: bank.bank_name,
+                   type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
+                   balance: Number(bank.total)
+                 }))}
+                 bankTransactions={bankInTransactions.map(txn => ({
+                   id: txn.destination,
+                   txnId: txn.id,
+                   amount: Number(txn.amount),
+                   source: txn.source,
+                   datetime: txn.datetime,
+                   type: 'deposit' as const
+                 }))}
+                 walletTransactionsForBanks={[]}
+                 onAddAccount={handleAddBank}
+                 onRemoveAccount={handleDeleteBank}
+                 onAddFunds={handleAddBankFunds}
+                 onAddWalletFunds={handleAddWalletFunds}
+               />
+             } />
+             
+             <Route path="/scan" element={
+               (() => {
+                 const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                 const allAccounts = walletBank 
+                   ? [
+                       {
+                         id: walletBank.id,
+                         name: 'Cash Wallet',
+                         type: 'CASH_WALLET' as const,
+                         balance: Number(walletBank.total)
+                       },
+                       ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+                         id: bank.id,
+                         name: bank.bank_name,
+                         type: 'BANK' as const,
+                         balance: Number(bank.total)
+                       }))
+                     ]
+                   : banks.map(bank => ({
+                       id: bank.id,
+                       name: bank.bank_name,
+                       type: 'BANK' as const,
+                       balance: Number(bank.total)
+                     }));
+                 
+                 return (
+                   <Scanner 
+                     accounts={allAccounts}
+                     onSave={handleSaveTransaction}
+                   />
+                 );
+               })()
+             } />
+             
+             <Route path="/spending" element={
+               <Spending 
+                 spentItems={spentItems} 
+                 loading={spentItemsLoading}
+                 banks={banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+                   id: bank.id,
+                   name: bank.bank_name,
+                   type: 'BANK' as const,
+                   balance: Number(bank.total)
+                 }))}
+                 wallet={wallet}
+                 walletBalance={cashBalance}
+                 onUpdateSpend={async (id, updates) => {
+                   try {
+                     const originalItem = spentItems.find(item => item.id === id);
+                     if (!originalItem) {
+                       throw new Error('Item not found');
+                     }
+
+                     const newAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
+                     const paymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
+                     
+                     if (paymentMethod) {
+                       const isWallet = paymentMethod === 'Cash Wallet';
+                       const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                       const account = isWallet 
+                         ? walletBankEntry 
+                         : banks.find(bank => bank.bank_name === paymentMethod);
+                       
+                       if (isWallet && walletBankEntry) {
+                         const amountDifference = newAmount - originalItem.itemTotal;
+                         if (amountDifference > 0 && Number(walletBankEntry.total) < amountDifference) {
+                           alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
+                           return;
+                         }
+                       } else if (account && !isWallet) {
+                         const amountDifference = newAmount - originalItem.itemTotal;
+                         if (amountDifference > 0 && Number(account.total) < amountDifference) {
+                           alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
+                           return;
+                         }
+                       }
+                     }
+
+                     await updateSpentItem(id, updates);
+
+                     const fundsOutEntry = fundsOutTransactions.find(
+                       txn => txn.spent_table_id === id
+                     );
+
+                     if (fundsOutEntry) {
+                       const finalPaymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
+                       const finalAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
+                       const finalDateTime = updates.transactionDateTime !== undefined ? updates.transactionDateTime : originalItem.transactionDateTime;
+                       const finalSource = updates.source !== undefined ? updates.source : originalItem.source;
+                       
+                       if (finalPaymentMethod) {
+                         const isWallet = finalPaymentMethod === 'Cash Wallet';
+                         const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                         const account = isWallet 
+                           ? walletBankEntry 
+                           : banks.find(bank => bank.bank_name === finalPaymentMethod);
+                         
+                         if (account) {
+                           const oldAmount = originalItem.itemTotal;
+                           const newAmount = finalAmount;
+                           const difference = newAmount - oldAmount;
+                           
+                           if (difference !== 0) {
+                             const newBalance = Number(account.total) - difference;
+                             await updateBank(account.id, account.bank_name, newBalance);
+                           }
+
+                           await updateFundsOutBySpentTableId(id, {
+                             source_account_id: account.id,
+                             source_account_type: isWallet ? 'CASH_WALLET' : 'BANK',
+                             source_account_name: isWallet ? 'Cash Wallet' : account.bank_name,
+                             amount: finalAmount,
+                             transaction_datetime: finalDateTime,
+                             source: finalSource,
+                           });
+                         }
+                       }
+                     }
+                   } catch (err) {
+                     alert('Failed to update spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                   }
+                 }}
+                 onAddSpend={async (item) => {
+                   try {
+                     if (item.paymentMethod) {
+                       const isWallet = item.paymentMethod === 'Cash Wallet';
+                       const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                       const account = isWallet 
+                         ? walletBankEntry 
+                         : banks.find(bank => bank.bank_name === item.paymentMethod);
+                       
+                       if (isWallet && walletBankEntry) {
+                         if (Number(walletBankEntry.total) < item.itemTotal) {
+                           alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
+                           return;
+                         }
+                       } else if (account && !isWallet) {
+                         if (Number(account.total) < item.itemTotal) {
+                           alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
+                           return;
+                         }
+                       }
+                     }
+                     
+                     const addedItems = await addSpentItems([item]);
+                     await loadCurrentMonth();
+                     
+                     if (item.paymentMethod) {
+                       const isWallet = item.paymentMethod === 'Cash Wallet';
+                       const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                       const account = isWallet 
+                         ? walletBankEntry 
+                         : banks.find(bank => bank.bank_name === item.paymentMethod);
+                       
+                       if (isWallet && walletBankEntry) {
+                         const newBalance = Number(walletBankEntry.total) - item.itemTotal;
+                         if (newBalance < 0) {
+                           alert('Warning: Wallet balance will be negative!');
+                         }
+                         await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
+                         
+                         await addFundsOut({
+                           source_account_id: walletBankEntry.id,
+                           source_account_type: 'CASH_WALLET',
+                           source_account_name: 'Cash Wallet',
+                           amount: item.itemTotal,
+                           transaction_datetime: item.transactionDateTime,
+                           spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
+                           source: item.source,
+                         });
+                       } else if (account && !isWallet) {
+                         const newBalance = Number(account.total) - item.itemTotal;
+                         if (newBalance < 0) {
+                           alert('Warning: Bank account balance will be negative!');
+                         }
+                         await updateBank(account.id, account.bank_name, newBalance);
+                         
+                         await addFundsOut({
+                           source_account_id: account.id,
+                           source_account_type: 'BANK',
+                           source_account_name: account.bank_name,
+                           amount: item.itemTotal,
+                           transaction_datetime: item.transactionDateTime,
+                           spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
+                           source: item.source,
+                         });
+                       }
+                     }
+                   } catch (err) {
+                     alert('Failed to add spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                   }
+                 }}
+               />
+             } />
+             
+             <Route path="*" element={<Navigate to="/overview" replace />} />
+           </Routes>
+         </ProtectedRoute>
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -704,7 +983,7 @@ function App() {
         {NAV_ITEMS.map(item => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id)}
+            onClick={() => navigate(item.path)}
             className={`flex flex-col items-center justify-center w-full py-2 gap-1 transition-colors ${
               activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
             }`}
