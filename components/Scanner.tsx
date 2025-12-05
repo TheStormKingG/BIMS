@@ -12,10 +12,38 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate available balance for each account
+  const accountsWithBalance = useMemo(() => {
+    return accounts.map(acc => {
+      const available = acc.type === 'CASH_WALLET' 
+        ? ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((s:number, [d, c]: any) => s + (Number(d) * c), 0)) || acc.balance || 0
+        : acc.balance || 0;
+      return { ...acc, available };
+    });
+  }, [accounts]);
+
+  // Filter accounts with sufficient funds based on receipt total
+  const accountsWithFunds = useMemo(() => {
+    if (!scanResult) return accountsWithBalance;
+    return accountsWithBalance.filter(acc => acc.available >= scanResult.total);
+  }, [accountsWithBalance, scanResult]);
+
+  // Auto-select first account with sufficient funds when scan result changes
+  useEffect(() => {
+    if (scanResult && accountsWithFunds.length > 0) {
+      const currentAccount = accountsWithFunds.find(acc => acc.id === selectedAccountId);
+      if (!currentAccount) {
+        setSelectedAccountId(accountsWithFunds[0].id);
+      }
+    } else if (scanResult && accountsWithFunds.length === 0) {
+      setSelectedAccountId('');
+    }
+  }, [scanResult, accountsWithFunds, selectedAccountId]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
