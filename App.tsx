@@ -6,6 +6,7 @@ import { NAV_ITEMS } from './constants';
 import { CashWallet } from './components/CashWallet';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
+import { Scanner } from './components/Scanner';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -43,6 +44,8 @@ function App() {
     spentItems,
     loading: spentItemsLoading,
     error: spentItemsError,
+    addSpentItems,
+    loadCurrentMonth,
   } = useSpentItems();
 
   const loading = walletLoading || banksLoading || spentItemsLoading;
@@ -224,11 +227,91 @@ function App() {
       
       case 'expenses':
         return (
-          <Spending spentItems={spentItems} loading={spentItemsLoading} />
+          <Spending 
+            spentItems={spentItems} 
+            loading={spentItemsLoading}
+            onAddSpend={async (item) => {
+              try {
+                await addSpentItems([item]);
+                await loadCurrentMonth();
+              } catch (err) {
+                alert('Failed to add spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+              }
+            }}
+          />
+        );
+      
+      case 'scan':
+        const allAccounts = wallet ? [wallet, ...banks.map(bank => ({
+          id: bank.id,
+          name: bank.bank_name,
+          type: 'BANK' as const,
+          balance: Number(bank.total)
+        }))] : banks.map(bank => ({
+          id: bank.id,
+          name: bank.bank_name,
+          type: 'BANK' as const,
+          balance: Number(bank.total)
+        }));
+        
+        return (
+          <Scanner 
+            accounts={allAccounts}
+            onSave={async (receiptData, accountId) => {
+              try {
+                // Find the account to get payment method name
+                const account = allAccounts.find(acc => acc.id === accountId);
+                const paymentMethod = account?.type === 'CASH_WALLET' ? 'Cash Wallet' : account?.name || 'Unknown';
+                
+                // Convert receipt items to spent_table format
+                // Use the receipt date with current time, or just current time if date parsing fails
+                let transactionDate: string;
+                try {
+                  const receiptDate = new Date(receiptData.date);
+                  if (isNaN(receiptDate.getTime())) {
+                    transactionDate = new Date().toISOString();
+                  } else {
+                    // Use receipt date but with current time
+                    const now = new Date();
+                    receiptDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+                    transactionDate = receiptDate.toISOString();
+                  }
+                } catch {
+                  transactionDate = new Date().toISOString();
+                }
+                
+                const spentItemsToAdd = receiptData.items.map(item => ({
+                  transactionDateTime: transactionDate,
+                  category: item.category,
+                  item: item.description,
+                  itemCost: item.unitPrice,
+                  itemQty: item.quantity,
+                  itemTotal: item.total,
+                  paymentMethod: paymentMethod,
+                  source: 'SCAN_RECEIPT' as const,
+                }));
+                
+                await addSpentItems(spentItemsToAdd);
+                
+                // Refresh current month items
+                await loadCurrentMonth();
+                
+                // If paid from bank, deduct from balance
+                if (account?.type === 'BANK') {
+                  await updateBank(account.id, account.name, account.balance - receiptData.total);
+                }
+                
+                // Show success and navigate
+                alert('Receipt scanned and saved successfully!');
+                setActiveTab('expenses');
+              } catch (err) {
+                alert('Failed to save receipt: ' + (err instanceof Error ? err.message : 'Unknown error'));
+              }
+            }}
+          />
         );
       
       case 'dashboard':
-      case 'scan':
         return (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center max-w-md">
