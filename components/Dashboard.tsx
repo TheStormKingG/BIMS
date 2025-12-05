@@ -567,7 +567,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h4>
-                <Clock className="w-4 h-4 text-emerald-600" />
+                <Calendar className="w-4 h-4 text-emerald-600" />
               </div>
               <p className="text-2xl font-bold text-slate-900">
                 ${topItemMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -578,7 +578,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h4>
-                <Clock className="w-4 h-4 text-emerald-600" />
+                <DollarSign className="w-4 h-4 text-emerald-600" />
               </div>
               <p className="text-2xl font-bold text-slate-900">
                 ${topItemMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -603,7 +603,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-slate-600">Average Weekly</h4>
-                <Clock className="w-4 h-4 text-blue-600" />
+                <Calendar className="w-4 h-4 text-blue-600" />
               </div>
               <p className="text-2xl font-bold text-slate-900">
                 ${topItemMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -614,7 +614,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-slate-600">Average Monthly</h4>
-                <Clock className="w-4 h-4 text-blue-600" />
+                <DollarSign className="w-4 h-4 text-blue-600" />
               </div>
               <p className="text-2xl font-bold text-slate-900">
                 ${topItemMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
