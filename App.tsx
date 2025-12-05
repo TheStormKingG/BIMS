@@ -243,6 +243,17 @@ function App() {
                     : banks.find(bank => bank.bank_name === item.paymentMethod);
                   
                   if (isWallet && wallet) {
+                    // Check if wallet has enough total cash
+                    const walletTotal = Object.entries(wallet.denominations).reduce(
+                      (sum, [denom, count]) => sum + Number(denom) * Number(count),
+                      0
+                    );
+                    
+                    if (walletTotal < item.itemTotal) {
+                      alert(`Error: Insufficient funds in wallet. Wallet has ${walletTotal.toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
+                      return; // Don't proceed with the transaction
+                    }
+                    
                     // Deduct from wallet
                     const totalToDeduct = item.itemTotal;
                     const currentDenoms = { ...wallet.denominations };
@@ -265,7 +276,30 @@ function App() {
                     }
                     
                     if (remaining > 0) {
-                      alert(`Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet. Please manually adjust your cash.`);
+                      // This shouldn't happen if walletTotal >= itemTotal, but handle it anyway
+                      const actualDeducted = totalToDeduct - remaining;
+                      const proceed = confirm(
+                        `Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
+                        `Only ${actualDeducted.toLocaleString()} GYD can be deducted with available denominations.\n\n` +
+                        `Do you want to proceed with partial deduction of ${actualDeducted.toLocaleString()} GYD?`
+                      );
+                      
+                      if (!proceed) {
+                        return; // Cancel the transaction
+                      }
+                      
+                      // Record only what was actually deducted
+                      await updateWallet(newDenoms);
+                      await addFundsOut({
+                        source_account_id: wallet.id,
+                        source_account_type: 'CASH_WALLET',
+                        source_account_name: 'Cash Wallet',
+                        amount: actualDeducted,
+                        transaction_datetime: item.transactionDateTime,
+                        spent_table_id: addedItems.length > 0 ? addedItems[0].id : null,
+                        source: item.source,
+                      });
+                      return;
                     }
                     
                     await updateWallet(newDenoms);
@@ -382,6 +416,17 @@ function App() {
                     source: 'SCAN_RECEIPT',
                   });
                 } else if (account?.type === 'CASH_WALLET' && wallet) {
+                  // Check if wallet has enough total cash
+                  const walletTotal = Object.entries(wallet.denominations).reduce(
+                    (sum, [denom, count]) => sum + Number(denom) * Number(count),
+                    0
+                  );
+                  
+                  if (walletTotal < receiptData.total) {
+                    alert(`Error: Insufficient funds in wallet. Wallet has ${walletTotal.toLocaleString()} GYD, but ${receiptData.total.toLocaleString()} GYD is needed.`);
+                    return; // Don't proceed with the transaction
+                  }
+                  
                   // Deduct from cash wallet
                   // Calculate which denominations to deduct (simple algorithm: deduct from highest first)
                   const totalToDeduct = receiptData.total;
@@ -406,7 +451,32 @@ function App() {
                   }
                   
                   if (remaining > 0) {
-                    alert(`Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet. Please manually adjust your cash.`);
+                    // This shouldn't happen if walletTotal >= receiptData.total, but handle it anyway
+                    const actualDeducted = totalToDeduct - remaining;
+                    const proceed = confirm(
+                      `Warning: Could not fully deduct ${remaining.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
+                      `Only ${actualDeducted.toLocaleString()} GYD can be deducted with available denominations.\n\n` +
+                      `Do you want to proceed with partial deduction of ${actualDeducted.toLocaleString()} GYD?`
+                    );
+                    
+                    if (!proceed) {
+                      return; // Cancel the transaction
+                    }
+                    
+                    // Update wallet with partial deduction
+                    await updateWallet(newDenoms);
+                    
+                    // Record only what was actually deducted
+                    await addFundsOut({
+                      source_account_id: wallet.id,
+                      source_account_type: 'CASH_WALLET',
+                      source_account_name: 'Cash Wallet',
+                      amount: actualDeducted,
+                      transaction_datetime: transactionDate,
+                      spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
+                      source: 'SCAN_RECEIPT',
+                    });
+                    return;
                   }
                   
                   // Update wallet with new denominations
