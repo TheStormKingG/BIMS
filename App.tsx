@@ -57,10 +57,17 @@ function App() {
   }
 
   if (!user) {
-    return <Login onLoginSuccess={() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setUser(session?.user ?? null);
-      });
+    return <Login onLoginSuccess={async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session after login:', error);
+        } else {
+          setUser(session?.user ?? null);
+        }
+      } catch (err) {
+        console.error('Failed to get session after login:', err);
+      }
     }} />;
   }
   
