@@ -26,8 +26,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       .sort((a, b) => b.value - a.value);
   }, [spentItems]);
 
-  // Calculate spending averages
-  const spendingAverages = React.useMemo(() => {
+  // Calculate spending totals and averages
+  const spendingMetrics = React.useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekAgo = new Date(today);
@@ -35,26 +35,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     const monthAgo = new Date(today);
     monthAgo.setMonth(monthAgo.getMonth() - 1);
 
-    const daySpend = spentItems
+    // Total amounts spent
+    const spentToday = spentItems
       .filter(item => new Date(item.transactionDateTime) >= today)
       .reduce((sum, item) => sum + item.itemTotal, 0);
 
-    const weekSpend = spentItems
+    const spentLast7Days = spentItems
       .filter(item => new Date(item.transactionDateTime) >= weekAgo)
       .reduce((sum, item) => sum + item.itemTotal, 0);
 
-    const monthSpend = spentItems
+    const spentLast30Days = spentItems
       .filter(item => new Date(item.transactionDateTime) >= monthAgo)
       .reduce((sum, item) => sum + item.itemTotal, 0);
 
-    // Calculate days in period
+    // Calculate days in period for averages
     const daysInWeek = Math.max(1, Math.ceil((now.getTime() - weekAgo.getTime()) / (1000 * 60 * 60 * 24)));
     const daysInMonth = Math.max(1, Math.ceil((now.getTime() - monthAgo.getTime()) / (1000 * 60 * 60 * 24)));
 
+    // Averages
+    const avgDaily = spentLast30Days / daysInMonth;
+    const avgWeekly = spentLast30Days / (daysInMonth / 7);
+    const avgMonthly = spentLast30Days;
+
     return {
-      perDay: daySpend,
-      perWeek: weekSpend / daysInWeek,
-      perMonth: monthSpend / daysInMonth,
+      spentToday,
+      spentLast7Days,
+      spentLast30Days,
+      avgDaily,
+      avgWeekly,
+      avgMonthly,
     };
   }, [spentItems]);
 
