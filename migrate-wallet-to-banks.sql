@@ -2,12 +2,12 @@
 -- Run this in your Supabase SQL Editor
 
 -- Step 1: Add wallet entry to banks table if it doesn't exist
--- Calculate total from wallet_snapshots if it exists, otherwise use 0
+-- Calculate total from latest wallet_snapshots entry if it exists, otherwise use 0
 INSERT INTO banks (bank_name, total, updated)
 SELECT 
   'Cash Wallet' as bank_name,
   COALESCE((
-    SELECT SUM(
+    SELECT 
       (note_5000 * 5000) + 
       (note_2000 * 2000) + 
       (note_1000 * 1000) + 
@@ -15,7 +15,6 @@ SELECT
       (note_100 * 100) + 
       (note_50 * 50) + 
       (note_20 * 20)
-    )
     FROM wallet_snapshots
     ORDER BY created_at DESC
     LIMIT 1
