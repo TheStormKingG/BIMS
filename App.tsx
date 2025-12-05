@@ -162,6 +162,19 @@ function App() {
               type: 'BANK' as const,
               balance: Number(bank.total)
             }))}
+            walletTransactions={walletInTransactions.map(txn => ({
+              id: txn.id,
+              source: txn.source,
+              total: Number(txn.total),
+              note_5000: txn.note_5000,
+              note_2000: txn.note_2000,
+              note_1000: txn.note_1000,
+              note_500: txn.note_500,
+              note_100: txn.note_100,
+              note_50: txn.note_50,
+              note_20: txn.note_20,
+              datetime: txn.datetime
+            }))}
             onUpdate={handleUpdateWallet}
             onAddFunds={handleAddWalletFunds}
           />

@@ -1,21 +1,37 @@
 import React, { useState } from 'react';
 import { GYD_DENOMINATIONS } from '../constants';
 import { CashWallet as CashWalletType, CashDenominations, BankAccount } from '../types';
-import { Wallet, ArrowDownToLine, X } from 'lucide-react';
+import { Wallet, ArrowDownToLine, X, ChevronRight, ArrowLeft } from 'lucide-react';
+
+interface WalletTransaction {
+  id: string;
+  source: string;
+  total: number;
+  note_5000: number;
+  note_2000: number;
+  note_1000: number;
+  note_500: number;
+  note_100: number;
+  note_50: number;
+  note_20: number;
+  datetime: string;
+}
 
 interface CashWalletProps {
   wallet: CashWalletType;
   banks: BankAccount[];
+  walletTransactions?: WalletTransaction[];
   onUpdate: (denominations: CashDenominations) => void;
   onAddFunds?: (source: string, denominations: CashDenominations) => void;
 }
 
-export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, onUpdate, onAddFunds }) => {
+export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTransactions = [], onUpdate, onAddFunds }) => {
   const [showAddFundsModal, setShowAddFundsModal] = useState(false);
   const [fundSource, setFundSource] = useState('');
   const [fundDenominations, setFundDenominations] = useState<CashDenominations>({
     5000: 0, 2000: 0, 1000: 0, 500: 0, 100: 0, 50: 0, 20: 0
   });
+  const [viewingDetails, setViewingDetails] = useState(false);
 
   const totalValue = Object.entries(wallet.denominations).reduce(
     (sum, [denom, count]) => sum + Number(denom) * Number(count),
@@ -57,42 +73,61 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, onUpdate,
     }));
   };
 
-  return (
-    <div className="space-y-6 animate-fade-in pb-20">
-      <div className="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg">
-        <div className="flex items-center gap-3 mb-2 opacity-80">
-          <Wallet className="w-5 h-5" />
-          <span className="text-sm font-medium uppercase tracking-wider">Physical Wallet</span>
-        </div>
-        <div className="text-4xl font-bold">
-          ${totalValue.toLocaleString()} <span className="text-lg font-normal opacity-75">GYD</span>
-        </div>
-        <p className="text-emerald-100 text-sm mt-2">
-          Current cash in your physical wallet.
-        </p>
-      </div>
+  // If viewing details, show detail view
+  if (viewingDetails) {
+    const sortedTransactions = [...walletTransactions].sort(
+      (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+    );
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-6">
-        <h3 className="font-semibold text-slate-700 mb-4">Cash Balance Breakdown</h3>
-        
-        <div className="space-y-3 mb-6">
-          {GYD_DENOMINATIONS.map((denom) => {
-            const count = wallet.denominations[denom] || 0;
-            const subtotal = count * denom;
-            
-            return (
-              <div key={denom} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-bold text-slate-800">${denom}</span>
-                  <span className="text-xs text-slate-400">×</span>
-                  <span className="text-sm text-slate-600 font-mono">{count}</span>
+    return (
+      <div className="space-y-6 animate-fade-in pb-20">
+        {/* Back Button */}
+        <button
+          onClick={() => setViewingDetails(false)}
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Wallet
+        </button>
+
+        {/* Wallet Header Card */}
+        <div className="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-3 mb-2 opacity-80">
+            <Wallet className="w-5 h-5" />
+            <span className="text-sm font-medium uppercase tracking-wider">Physical Wallet</span>
+          </div>
+          <div className="text-4xl font-bold">
+            ${totalValue.toLocaleString()} <span className="text-lg font-normal opacity-75">GYD</span>
+          </div>
+          <p className="text-emerald-100 text-sm mt-2">
+            Current cash in your physical wallet.
+          </p>
+        </div>
+
+        {/* Balance Breakdown */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-6">
+          <h3 className="font-semibold text-slate-700 mb-4">Cash Balance Breakdown</h3>
+          
+          <div className="space-y-3">
+            {GYD_DENOMINATIONS.map((denom) => {
+              const count = wallet.denominations[denom] || 0;
+              const subtotal = count * denom;
+              
+              return (
+                <div key={denom} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-bold text-slate-800">${denom}</span>
+                    <span className="text-xs text-slate-400">×</span>
+                    <span className="text-sm text-slate-600 font-mono">{count}</span>
+                  </div>
+                  <span className="text-slate-700 font-semibold">${subtotal.toLocaleString()}</span>
                 </div>
-                <span className="text-slate-700 font-semibold">${subtotal.toLocaleString()}</span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
+        {/* Add Funds Button */}
         <button
           onClick={handleOpenAddFunds}
           className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
@@ -100,6 +135,83 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, onUpdate,
           <ArrowDownToLine className="w-4 h-4" />
           Add Funds to Wallet
         </button>
+
+        {/* Transaction History */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50">
+            <h3 className="font-semibold text-slate-700">Transaction History</h3>
+          </div>
+          
+          {sortedTransactions.length === 0 ? (
+            <div className="p-12 text-center text-slate-400">
+              <p>No transactions yet</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {sortedTransactions.map((txn) => {
+                const denominationBreakdown = [
+                  txn.note_5000 > 0 && `${txn.note_5000}× $5000`,
+                  txn.note_2000 > 0 && `${txn.note_2000}× $2000`,
+                  txn.note_1000 > 0 && `${txn.note_1000}× $1000`,
+                  txn.note_500 > 0 && `${txn.note_500}× $500`,
+                  txn.note_100 > 0 && `${txn.note_100}× $100`,
+                  txn.note_50 > 0 && `${txn.note_50}× $50`,
+                  txn.note_20 > 0 && `${txn.note_20}× $20`,
+                ].filter(Boolean).join(', ');
+
+                return (
+                  <div key={txn.id} className="p-4 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-900">Funds Added</p>
+                        <p className="text-sm text-slate-500">From: {txn.source}</p>
+                        {denominationBreakdown && (
+                          <p className="text-xs text-slate-400 mt-1">
+                            {denominationBreakdown}
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-400 mt-1">
+                          {new Date(txn.datetime).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-emerald-600">
+                          +${txn.total.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Main wallet card view (clickable)
+  return (
+    <div className="space-y-6 animate-fade-in pb-20">
+      <div 
+        className="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg cursor-pointer hover:bg-emerald-800 transition-colors group"
+        onClick={() => setViewingDetails(true)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2 opacity-80">
+              <Wallet className="w-5 h-5" />
+              <span className="text-sm font-medium uppercase tracking-wider">Physical Wallet</span>
+            </div>
+            <div className="text-4xl font-bold">
+              ${totalValue.toLocaleString()} <span className="text-lg font-normal opacity-75">GYD</span>
+            </div>
+            <p className="text-emerald-100 text-sm mt-2">
+              Current cash in your physical wallet.
+            </p>
+          </div>
+          <ChevronRight className="w-6 h-6 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
       </div>
 
       {/* Add Funds Modal */}
