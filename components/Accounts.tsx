@@ -25,6 +25,18 @@ interface WalletFundsOut {
   source: string;
 }
 
+interface FundsOutTransaction {
+  id: string;
+  source_account_id: string;
+  source_account_type: 'BANK' | 'CASH_WALLET';
+  source_account_name: string;
+  amount: number;
+  transaction_datetime: string;
+  spent_table_id: string | null;
+  source: 'SCAN_RECEIPT' | 'MANUAL' | 'IMPORT_EMAIL' | 'IMPORT_SMS';
+  created_at: string;
+}
+
 interface AccountsProps {
   wallet: CashWallet | null;
   walletTransactions?: WalletTransaction[];
@@ -32,6 +44,7 @@ interface AccountsProps {
   accounts: BankAccount[];
   bankTransactions?: BankTransaction[];
   walletTransactionsForBanks?: Array<{ id: string; source: string; total: number; datetime: string }>;
+  fundsOutTransactions?: FundsOutTransaction[];
   onAddAccount: (name: string, initialBalance: number) => void;
   onRemoveAccount: (id: string) => void;
   onAddFunds?: (bankId: string, amount: number, source: string) => void;
@@ -47,6 +60,7 @@ export const Accounts: React.FC<AccountsProps> = ({
   accounts, 
   bankTransactions = [], 
   walletTransactionsForBanks = [],
+  fundsOutTransactions = [],
   onAddAccount, 
   onRemoveAccount, 
   onAddFunds,
@@ -127,8 +141,22 @@ export const Accounts: React.FC<AccountsProps> = ({
       .filter(txn => txn.id === bank.id)
       .map(txn => ({ ...txn, type: 'deposit' as const }));
 
-    // Get withdrawals (wallet_in transactions where source matches bank name)
-    const withdrawals = walletTransactionsForBanks
+    // Get withdrawals from funds_out table (spending transactions)
+    const fundsOutWithdrawals = fundsOutTransactions
+      .filter(txn => txn.source_account_id === bank.id && txn.source_account_type === 'BANK')
+      .map(txn => ({
+        id: bank.id,
+        txnId: txn.id,
+        amount: Number(txn.amount),
+        source: txn.source === 'SCAN_RECEIPT' ? 'Receipt Scan' : 
+                txn.source === 'MANUAL' ? 'Manual Entry' :
+                txn.source === 'IMPORT_EMAIL' ? 'Email Import' : 'SMS Import',
+        datetime: txn.transaction_datetime,
+        type: 'withdrawal' as const
+      }));
+
+    // Get withdrawals (wallet_in transactions where source matches bank name) - legacy
+    const walletWithdrawals = walletTransactionsForBanks
       .filter(txn => txn.source === bank.name)
       .map(txn => ({
         id: bank.id,
@@ -140,7 +168,7 @@ export const Accounts: React.FC<AccountsProps> = ({
       }));
 
     // Combine and sort by datetime (newest first)
-    return [...deposits, ...withdrawals].sort(
+    return [...deposits, ...fundsOutWithdrawals, ...walletWithdrawals].sort(
       (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
     );
   };

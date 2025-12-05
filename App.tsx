@@ -174,6 +174,7 @@ function App() {
                 transaction_datetime: txn.transaction_datetime,
                 source: txn.source,
               }))}
+            fundsOutTransactions={fundsOutTransactions}
             accounts={banks.map(bank => ({
               id: bank.id,
               name: bank.bank_name,
