@@ -20,6 +20,27 @@ function App() {
 
   // Check auth state on mount and listen for changes
   useEffect(() => {
+    // Handle OAuth callback if present in URL
+    const handleAuthCallback = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const error = hashParams.get('error');
+      
+      if (error) {
+        console.error('OAuth error:', error);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
+      
+      if (accessToken) {
+        // Clean up URL hash
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    handleAuthCallback();
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -33,11 +54,15 @@ function App() {
       setAuthLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes (this will catch OAuth callbacks)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
       setAuthLoading(false);
     });
 
