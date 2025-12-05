@@ -185,6 +185,13 @@ function App() {
               txnId: txn.id,
               amount: Number(txn.amount),
               source: txn.source,
+              datetime: txn.datetime,
+              type: 'deposit' as const
+            }))}
+            walletTransactions={walletInTransactions.map(txn => ({
+              id: txn.id,
+              source: txn.source,
+              total: Number(txn.total),
               datetime: txn.datetime
             }))}
             onAddAccount={handleAddBank}

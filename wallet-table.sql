@@ -20,3 +20,4 @@ CREATE INDEX IF NOT EXISTS idx_wallet_created_at ON wallet_snapshots(created_at 
 -- Add a comment to the table
 COMMENT ON TABLE wallet_snapshots IS 'Stores snapshots of cash wallet denomination counts over time';
 
+

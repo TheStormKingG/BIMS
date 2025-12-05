@@ -54,3 +54,4 @@ export const getSupabase = () => {
 
 export default getSupabase;
 
+

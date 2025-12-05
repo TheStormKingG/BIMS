@@ -80,3 +80,4 @@ COMMENT ON TABLE wallet_in IS 'Records of cash received with denomination breakd
 -- ✓ bank_in - Deposits/transfers into bank accounts
 -- ✓ wallet_in - Cash received with denomination breakdown
 
+

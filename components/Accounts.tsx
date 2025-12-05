@@ -8,17 +8,26 @@ interface BankTransaction {
   amount: number;
   source: string;
   datetime: string;
+  type: 'deposit' | 'withdrawal';
+}
+
+interface WalletTransaction {
+  id: string;
+  source: string;
+  total: number;
+  datetime: string;
 }
 
 interface AccountsProps {
   accounts: BankAccount[];
   bankTransactions?: BankTransaction[];
+  walletTransactions?: WalletTransaction[];
   onAddAccount: (name: string, initialBalance: number) => void;
   onRemoveAccount: (id: string) => void;
   onAddFunds?: (bankId: string, amount: number, source: string) => void;
 }
 
-export const Accounts: React.FC<AccountsProps> = ({ accounts, bankTransactions = [], onAddAccount, onRemoveAccount, onAddFunds }) => {
+export const Accounts: React.FC<AccountsProps> = ({ accounts, bankTransactions = [], walletTransactions = [], onAddAccount, onRemoveAccount, onAddFunds }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newBalance, setNewBalance] = useState('');
@@ -62,16 +71,34 @@ export const Accounts: React.FC<AccountsProps> = ({ accounts, bankTransactions =
     }
   };
 
-  // Get transactions for specific bank
-  const getBankTransactions = (bankId: string) => {
-    return bankTransactions
-      .filter(txn => txn.id === bankId)
-      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+  // Get transactions for specific bank (both deposits and withdrawals)
+  const getBankTransactions = (bank: BankAccount) => {
+    // Get deposits (bank_in transactions)
+    const deposits = bankTransactions
+      .filter(txn => txn.id === bank.id)
+      .map(txn => ({ ...txn, type: 'deposit' as const }));
+
+    // Get withdrawals (wallet_in transactions where source matches bank name)
+    const withdrawals = walletTransactions
+      .filter(txn => txn.source === bank.name)
+      .map(txn => ({
+        id: bank.id,
+        txnId: txn.id,
+        amount: txn.total,
+        source: 'Wallet',
+        datetime: txn.datetime,
+        type: 'withdrawal' as const
+      }));
+
+    // Combine and sort by datetime (newest first)
+    return [...deposits, ...withdrawals].sort(
+      (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+    );
   };
 
   // If viewing a bank's details, show detail view
   if (viewingBank) {
-    const transactions = getBankTransactions(viewingBank.id);
+    const transactions = getBankTransactions(viewingBank);
 
     return (
       <div className="space-y-6 animate-fade-in pb-20">
@@ -123,15 +150,23 @@ export const Accounts: React.FC<AccountsProps> = ({ accounts, bankTransactions =
                 <div key={txn.txnId || `${txn.id}-${index}`} className="p-4 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-slate-900">Deposit</p>
-                      <p className="text-sm text-slate-500">From: {txn.source}</p>
+                      <p className="font-medium text-slate-900">
+                        {txn.type === 'deposit' ? 'Deposit' : 'Withdrawal'}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {txn.type === 'deposit' ? `From: ${txn.source}` : `To: ${txn.source}`}
+                      </p>
                       <p className="text-xs text-slate-400 mt-1">
                         {new Date(txn.datetime).toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-emerald-600">
-                        +${txn.amount.toLocaleString()}
+                      <p className={`text-lg font-bold ${
+                        txn.type === 'deposit' 
+                          ? 'text-emerald-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {txn.type === 'deposit' ? '+' : '-'}${txn.amount.toLocaleString()}
                       </p>
                     </div>
                   </div>

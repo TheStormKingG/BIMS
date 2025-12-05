@@ -173,3 +173,4 @@ export const deleteTransaction = async (id: string): Promise<void> => {
   if (error) throw error;
 };
 
+

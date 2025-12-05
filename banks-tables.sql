@@ -54,3 +54,4 @@ CREATE INDEX IF NOT EXISTS idx_wallet_in_datetime ON wallet_in(datetime DESC);
 -- Comment
 COMMENT ON TABLE wallet_in IS 'Records of cash received with denomination breakdown';
 
+
