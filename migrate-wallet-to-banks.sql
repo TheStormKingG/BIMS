@@ -24,8 +24,8 @@ WHERE NOT EXISTS (
   SELECT 1 FROM banks WHERE bank_name = 'Cash Wallet'
 );
 
--- Step 2: Drop wallet_snapshots table (optional - uncomment if you want to delete it)
--- DROP TABLE IF EXISTS wallet_snapshots CASCADE;
+-- Step 2: Drop wallet_snapshots table (no longer needed - wallet is now in banks table)
+DROP TABLE IF EXISTS wallet_snapshots CASCADE;
 
 -- Step 3: Drop wallet_in table (optional - uncomment if you want to delete it)
 -- DROP TABLE IF EXISTS wallet_in CASCADE;
