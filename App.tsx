@@ -7,7 +7,7 @@ import { Dashboard } from './components/Dashboard';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
-import { addFundsOut } from './services/fundsOutDatabase';
+import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 
 function App() {
   const [activeTab, setActiveTab] = useState('accounts');
@@ -44,6 +44,7 @@ function App() {
     loading: spentItemsLoading,
     error: spentItemsError,
     addSpentItems,
+    updateItem: updateSpentItem,
     loadCurrentMonth,
   } = useSpentItems();
 
@@ -210,6 +211,90 @@ function App() {
             }))}
             wallet={wallet}
             walletBalance={cashBalance}
+            onUpdateSpend={async (id, updates) => {
+              try {
+                // Find the original item to get the payment method
+                const originalItem = spentItems.find(item => item.id === id);
+                if (!originalItem) {
+                  throw new Error('Item not found');
+                }
+
+                // Check funds if payment method is being changed or amount is being increased
+                const newAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
+                const paymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
+                
+                if (paymentMethod) {
+                  const isWallet = paymentMethod === 'Cash Wallet';
+                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                  const account = isWallet 
+                    ? walletBankEntry 
+                    : banks.find(bank => bank.bank_name === paymentMethod);
+                  
+                  if (isWallet && walletBankEntry) {
+                    // Calculate the difference in amount
+                    const amountDifference = newAmount - originalItem.itemTotal;
+                    if (amountDifference > 0 && Number(walletBankEntry.total) < amountDifference) {
+                      alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
+                      return;
+                    }
+                  } else if (account && !isWallet) {
+                    const amountDifference = newAmount - originalItem.itemTotal;
+                    if (amountDifference > 0 && Number(account.total) < amountDifference) {
+                      alert(`Error: Insufficient funds in ${account.bank_name}. Account has ${Number(account.total).toLocaleString()} GYD, but ${amountDifference.toLocaleString()} GYD additional is needed.`);
+                      return;
+                    }
+                  }
+                }
+
+                // Update the spent item
+                await updateSpentItem(id, updates);
+
+                // Update funds_out and account balances
+                const fundsOutEntry = fundsOutTransactions.find(
+                  txn => txn.spent_table_id === id
+                );
+
+                if (fundsOutEntry) {
+                  const finalPaymentMethod = updates.paymentMethod !== undefined ? updates.paymentMethod : originalItem.paymentMethod;
+                  const finalAmount = updates.itemTotal !== undefined ? updates.itemTotal : originalItem.itemTotal;
+                  const finalDateTime = updates.transactionDateTime !== undefined ? updates.transactionDateTime : originalItem.transactionDateTime;
+                  const finalSource = updates.source !== undefined ? updates.source : originalItem.source;
+                  
+                  if (finalPaymentMethod) {
+                    const isWallet = finalPaymentMethod === 'Cash Wallet';
+                    const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                    const account = isWallet 
+                      ? walletBankEntry 
+                      : banks.find(bank => bank.bank_name === finalPaymentMethod);
+                    
+                    if (account) {
+                      // Calculate the difference in amount
+                      const oldAmount = originalItem.itemTotal;
+                      const newAmount = finalAmount;
+                      const difference = newAmount - oldAmount;
+                      
+                      // Update account balance
+                      if (difference !== 0) {
+                        const newBalance = Number(account.total) - difference;
+                        await updateBank(account.id, account.bank_name, newBalance);
+                      }
+
+                      // Update funds_out entry
+                      await updateFundsOutBySpentTableId(id, {
+                        source_account_id: account.id,
+                        source_account_type: isWallet ? 'CASH_WALLET' : 'BANK',
+                        source_account_name: isWallet ? 'Cash Wallet' : account.bank_name,
+                        amount: finalAmount,
+                        transaction_datetime: finalDateTime,
+                        source: finalSource,
+                      });
+                    }
+                  }
+                }
+              } catch (err) {
+                alert('Failed to update spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+              }
+            }}
             onAddSpend={async (item) => {
               try {
                 // Check funds BEFORE saving spent items

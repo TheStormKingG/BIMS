@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SpentItem } from '../services/spentTableDatabase';
-import { ShoppingBag, Plus, X } from 'lucide-react';
+import { ShoppingBag, Plus, X, Edit2 } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
 
@@ -11,10 +11,12 @@ interface SpendingProps {
   wallet?: CashWallet | null;
   walletBalance?: number;
   onAddSpend?: (item: Omit<SpentItem, 'id' | 'entryDate'>) => Promise<void>;
+  onUpdateSpend?: (id: string, updates: Partial<SpentItem>) => Promise<void>;
 }
 
-export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, walletBalance = 0, onAddSpend }) => {
+export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, walletBalance = 0, onAddSpend, onUpdateSpend }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<SpentItem | null>(null);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -100,6 +102,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
   const handleCloseModal = () => {
     setShowAddModal(false);
+    setEditingItem(null);
     setFormData({
       transactionDateTime: new Date().toISOString().slice(0, 16),
       category: 'Other',
@@ -110,6 +113,49 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       paymentMethod: '',
       source: 'MANUAL',
     });
+  };
+
+  const handleEditClick = (item: SpentItem) => {
+    setEditingItem(item);
+    // Convert ISO datetime to local datetime format for input
+    const date = new Date(item.transactionDateTime);
+    const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    
+    setFormData({
+      transactionDateTime: localDateTime,
+      category: item.category,
+      item: item.item,
+      itemCost: item.itemCost.toString(),
+      itemQty: item.itemQty.toString(),
+      itemTotal: item.itemTotal.toString(),
+      paymentMethod: item.paymentMethod || '',
+      source: item.source as 'MANUAL' | 'SCAN_RECEIPT' | 'IMPORT_EMAIL' | 'IMPORT_SMS',
+    });
+    setShowAddModal(true);
+  };
+
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onUpdateSpend || !editingItem) return;
+
+    try {
+      await onUpdateSpend(editingItem.id, {
+        transactionDateTime: new Date(formData.transactionDateTime).toISOString(),
+        category: formData.category,
+        item: formData.item,
+        itemCost: Number(formData.itemCost),
+        itemQty: Number(formData.itemQty),
+        itemTotal: Number(formData.itemTotal),
+        paymentMethod: formData.paymentMethod || null,
+        source: formData.source,
+      });
+      
+      handleCloseModal();
+    } catch (err) {
+      // Error handling is done in parent
+    }
   };
 
   if (loading) {
@@ -155,6 +201,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 <th className="px-4 py-3 text-left">Payment Method</th>
                 <th className="px-4 py-3 text-left">Source</th>
                 <th className="px-4 py-3 text-left">Entry Date</th>
+                <th className="px-4 py-3 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -192,11 +239,22 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                     <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                       {formatEntryDate(item.entryDate)}
                     </td>
+                    <td className="px-4 py-3">
+                      {onUpdateSpend && (
+                        <button
+                          onClick={() => handleEditClick(item)}
+                          className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="Edit item"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-slate-400">
+                  <td colSpan={10} className="px-4 py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center gap-2">
                       <ShoppingBag className="w-8 h-8 opacity-20" />
                       <p>No spending transactions for {currentMonthName}</p>
@@ -209,12 +267,14 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
         </div>
       </div>
 
-      {/* Add Spend Modal */}
-      {showAddModal && onAddSpend && (
+      {/* Add/Edit Spend Modal */}
+      {showAddModal && (onAddSpend || onUpdateSpend) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-900">Add Spending</h3>
+              <h3 className="text-xl font-bold text-slate-900">
+                {editingItem ? 'Edit Spending' : 'Add Spending'}
+              </h3>
               <button
                 onClick={handleCloseModal}
                 className="p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -223,7 +283,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={editingItem ? handleUpdateSubmit : handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -353,7 +413,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   type="submit"
                   className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
                 >
-                  Add Spending
+                  {editingItem ? 'Update Spending' : 'Add Spending'}
                 </button>
               </div>
             </form>

@@ -110,3 +110,59 @@ export const fetchFundsOutByAccount = async (
   }
 };
 
+export const updateFundsOut = async (
+  id: string,
+  updates: Partial<FundsOutInput>
+): Promise<DBFundsOut> => {
+  try {
+    const { data, error } = await supabase
+      .from('funds_out')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        throw new Error('funds_out table does not exist');
+      }
+      throw error;
+    }
+    
+    return data as DBFundsOut;
+  } catch (err) {
+    console.error('Error updating funds_out:', err);
+    throw err;
+  }
+};
+
+export const updateFundsOutBySpentTableId = async (
+  spentTableId: string,
+  updates: Partial<FundsOutInput>
+): Promise<DBFundsOut | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('funds_out')
+      .update(updates)
+      .eq('spent_table_id', spentTableId)
+      .select()
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return null;
+      }
+      if (error.code === 'PGRST116') {
+        // No rows found
+        return null;
+      }
+      throw error;
+    }
+    
+    return data as DBFundsOut;
+  } catch (err) {
+    console.error('Error updating funds_out by spent_table_id:', err);
+    return null;
+  }
+};
+
