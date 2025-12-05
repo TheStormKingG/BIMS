@@ -116,8 +116,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="mt-6 flex gap-4">
            {accounts.map(acc => {
               const bal = acc.type === 'CASH_WALLET' 
-                ? Object.entries((acc as any).denominations).reduce((sum:number, [d, c]: any) => sum + Number(d)*c, 0)
-                : acc.balance;
+                ? ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((sum:number, [d, c]: any) => sum + Number(d)*c, 0)) || acc.balance || 0
+                : acc.balance || 0;
               return (
                 <div key={acc.id} className="bg-white/5 rounded-lg p-3 flex-1 min-w-[120px]">
                   <p className="text-xs text-slate-400 mb-1">{acc.type === 'CASH_WALLET' ? 'Wallet' : acc.name}</p>
