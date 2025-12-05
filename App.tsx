@@ -18,6 +18,43 @@ function App() {
 
   const supabase = getSupabase();
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // Use wallet hook
+  const {
+    wallet,
+    cashBalance,
+    loading: walletLoading,
+    error: walletError,
+    updateWallet,
+    addFunds: addFundsToWallet,
+  } = useWallet();
+
+  // Use banks hook
+  const {
+    banks,
+    bankInTransactions,
+    walletInTransactions,
+    fundsOutTransactions,
+    totalInBanks,
+    loading: banksLoading,
+    error: banksError,
+    addBank,
+    updateBank,
+    deleteBank,
+    addBankInTransaction,
+    addWalletInTransaction,
+  } = useBanks();
+
+  // Use spent items hook
+  const {
+    spentItems,
+    loading: spentItemsLoading,
+    error: spentItemsError,
+    addSpentItems,
+    updateItem: updateSpentItem,
+    loadCurrentMonth,
+  } = useSpentItems();
+
   // Check auth state on mount and listen for changes
   useEffect(() => {
     // Handle OAuth callback if present in URL
@@ -95,42 +132,6 @@ function App() {
       }
     }} />;
   }
-  
-  // Use wallet hook
-  const {
-    wallet,
-    cashBalance,
-    loading: walletLoading,
-    error: walletError,
-    updateWallet,
-    addFunds: addFundsToWallet,
-  } = useWallet();
-
-  // Use banks hook
-  const {
-    banks,
-    bankInTransactions,
-    walletInTransactions,
-    fundsOutTransactions,
-    totalInBanks,
-    loading: banksLoading,
-    error: banksError,
-    addBank,
-    updateBank,
-    deleteBank,
-    addBankInTransaction,
-    addWalletInTransaction,
-  } = useBanks();
-
-  // Use spent items hook
-  const {
-    spentItems,
-    loading: spentItemsLoading,
-    error: spentItemsError,
-    addSpentItems,
-    updateItem: updateSpentItem,
-    loadCurrentMonth,
-  } = useSpentItems();
 
   const loading = walletLoading || banksLoading || spentItemsLoading;
   const error = walletError || banksError || spentItemsError;
