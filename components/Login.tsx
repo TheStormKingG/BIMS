@@ -80,11 +80,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         },
       });
 
-      if (oauthError) throw oauthError;
+      if (oauthError) {
+        throw oauthError;
+      }
       
-      // If we get a URL, the redirect will happen automatically
-      // No need to set loading to false as we're redirecting
+      // The redirect will happen automatically via Supabase
+      // Don't set loading to false as we're redirecting
     } catch (err: any) {
+      console.error('Google OAuth error:', err);
       setError(err.message || 'An error occurred during Google authentication');
       setLoading(false);
     }
