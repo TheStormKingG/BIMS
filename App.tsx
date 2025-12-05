@@ -10,6 +10,7 @@ import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
+import { LogOut, User } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('accounts');
