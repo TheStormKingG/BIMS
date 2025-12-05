@@ -161,30 +161,29 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTra
   // Main wallet card view (with bill count and add funds button)
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      <div className="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg">
-        <div className="flex items-center gap-3 mb-2 opacity-80">
-          <Wallet className="w-5 h-5" />
-          <span className="text-sm font-medium uppercase tracking-wider">Physical Wallet</span>
+      <div 
+        className="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg cursor-pointer hover:bg-emerald-800 transition-colors group"
+        onClick={() => setViewingDetails(true)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2 opacity-80">
+              <Wallet className="w-5 h-5" />
+              <span className="text-sm font-medium uppercase tracking-wider">Physical Wallet</span>
+            </div>
+            <div className="text-4xl font-bold">
+              ${totalValue.toLocaleString()} <span className="text-lg font-normal opacity-75">GYD</span>
+            </div>
+            <p className="text-emerald-100 text-sm mt-2">
+              Current cash in your physical wallet.
+            </p>
+          </div>
+          <ChevronRight className="w-6 h-6 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <div className="text-4xl font-bold">
-          ${totalValue.toLocaleString()} <span className="text-lg font-normal opacity-75">GYD</span>
-        </div>
-        <p className="text-emerald-100 text-sm mt-2">
-          Current cash in your physical wallet.
-        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-slate-700">Cash Balance Breakdown</h3>
-          <button
-            onClick={() => setViewingDetails(true)}
-            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
-          >
-            View History
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+        <h3 className="font-semibold text-slate-700 mb-4">Cash Balance Breakdown</h3>
         
         <div className="space-y-3 mb-6">
           {GYD_DENOMINATIONS.map((denom) => {
