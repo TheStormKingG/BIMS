@@ -63,14 +63,21 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}${window.location.pathname}`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (oauthError) throw oauthError;
+      
+      // If we get a URL, the redirect will happen automatically
+      // No need to set loading to false as we're redirecting
     } catch (err: any) {
       setError(err.message || 'An error occurred during Google authentication');
       setLoading(false);

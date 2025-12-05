@@ -21,8 +21,15 @@ function App() {
   // Check auth state on mount and listen for changes
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        // If it's a 403, it might be a configuration issue, but we'll still show login
+      }
       setUser(session?.user ?? null);
+      setAuthLoading(false);
+    }).catch((err) => {
+      console.error('Failed to get session:', err);
       setAuthLoading(false);
     });
 

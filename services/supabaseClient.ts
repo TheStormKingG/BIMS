@@ -33,7 +33,14 @@ export const getSupabase = () => {
     try {
       const supabaseUrl = getSupabaseUrl();
       const supabaseAnonKey = getSupabaseAnonKey();
-      supabase = createClient(supabaseUrl, supabaseAnonKey);
+      supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          redirectTo: window.location.origin,
+        },
+      });
     } catch (error) {
       console.error('Failed to initialize Supabase:', error);
       // Prompt user for credentials if not found
@@ -43,7 +50,14 @@ export const getSupabase = () => {
       if (url && key) {
         localStorage.setItem('SUPABASE_URL', url);
         localStorage.setItem('SUPABASE_ANON_KEY', key);
-        supabase = createClient(url, key);
+        supabase = createClient(url, key, {
+          auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            redirectTo: window.location.origin,
+          },
+        });
       } else {
         throw new Error('Supabase credentials are required');
       }
