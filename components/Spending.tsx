@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { SpentItem } from '../services/spentTableDatabase';
 import { ShoppingBag, Plus, X } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
+import { CashWallet, BankAccount } from '../types';
 
 interface SpendingProps {
   spentItems: SpentItem[];
   loading?: boolean;
+  banks?: BankAccount[];
+  wallet?: CashWallet | null;
   onAddSpend?: (item: Omit<SpentItem, 'id' | 'entryDate'>) => Promise<void>;
 }
 
-export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, onAddSpend }) => {
+export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, onAddSpend }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
@@ -317,13 +320,25 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Payment Method
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.paymentMethod}
                     onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                    placeholder="e.g. Republic Bank, Cash Wallet"
                     className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
-                  />
+                  >
+                    <option value="">Select payment method...</option>
+                    {wallet && (
+                      <option value="Cash Wallet">Cash Wallet</option>
+                    )}
+                    {banks.length > 0 && (
+                      <>
+                        {banks.map(bank => (
+                          <option key={bank.id} value={bank.name}>
+                            {bank.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
                 </div>
 
                 <div>
@@ -332,15 +347,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   </label>
                   <select
                     value={formData.source}
-                    onChange={(e) => handleInputChange('source', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                    className="w-full p-3 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
+                    disabled
                     required
                   >
                     <option value="MANUAL">Manual Entry</option>
-                    <option value="SCAN_RECEIPT">Scan Receipt</option>
-                    <option value="IMPORT_EMAIL">Import Email</option>
-                    <option value="IMPORT_SMS">Import SMS</option>
                   </select>
+                  <p className="text-xs text-slate-500 mt-1">Auto-filled for manual entries</p>
                 </div>
               </div>
 

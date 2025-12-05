@@ -213,6 +213,13 @@ function App() {
           <Spending 
             spentItems={spentItems} 
             loading={spentItemsLoading}
+            banks={banks.map(bank => ({
+              id: bank.id,
+              name: bank.bank_name,
+              type: 'BANK' as const,
+              balance: Number(bank.total)
+            }))}
+            wallet={wallet}
             onAddSpend={async (item) => {
               try {
                 const addedItems = await addSpentItems([item]);
