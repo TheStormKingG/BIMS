@@ -196,16 +196,17 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
                     onChange={(e) => setSelectedAccountId(e.target.value)}
                     className="w-full p-3 border border-slate-200 rounded-lg bg-white text-black"
                   >
-                    {accounts.map(acc => (
-                      <option key={acc.id} value={acc.id} className="text-black">
-                        {acc.type === 'CASH_WALLET' ? 'Physical Wallet' : acc.name} 
-                        {' '}(Available: ${
-                          acc.type === 'CASH_WALLET' 
-                          ? Object.entries((acc as any).denominations).reduce((s:number, [d, c]: any) => s + (Number(d) * c), 0).toLocaleString()
-                          : acc.balance.toLocaleString()
-                        })
-                      </option>
-                    ))}
+                    {accounts.map(acc => {
+                      const available = acc.type === 'CASH_WALLET' 
+                        ? ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((s:number, [d, c]: any) => s + (Number(d) * c), 0)) || acc.balance || 0
+                        : acc.balance || 0;
+                      return (
+                        <option key={acc.id} value={acc.id} className="text-black">
+                          {acc.type === 'CASH_WALLET' ? 'Physical Wallet' : acc.name} 
+                          {' '}(Available: ${available.toLocaleString()})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
