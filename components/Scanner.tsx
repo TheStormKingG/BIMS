@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { parseReceiptImage } from '../services/geminiService';
 import { ReceiptScanResult, Account, LineItem } from '../types';
 import { Camera, Upload, Loader2, Check, AlertCircle, X } from 'lucide-react';
@@ -196,17 +196,18 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
                     onChange={(e) => setSelectedAccountId(e.target.value)}
                     className="w-full p-3 border border-slate-200 rounded-lg bg-white text-black"
                   >
-                    {accounts.map(acc => {
-                      const available = acc.type === 'CASH_WALLET' 
-                        ? ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((s:number, [d, c]: any) => s + (Number(d) * c), 0)) || acc.balance || 0
-                        : acc.balance || 0;
-                      return (
+                    {accountsWithFunds.length > 0 ? (
+                      accountsWithFunds.map(acc => (
                         <option key={acc.id} value={acc.id} className="text-black">
                           {acc.type === 'CASH_WALLET' ? 'Physical Wallet' : acc.name} 
-                          {' '}(Available: ${available.toLocaleString()})
+                          {' '}(Available: ${acc.available.toLocaleString()})
                         </option>
-                      );
-                    })}
+                      ))
+                    ) : (
+                      <option value="" disabled className="text-black">
+                        No payment methods with sufficient funds
+                      </option>
+                    )}
                   </select>
                 </div>
 
@@ -224,7 +225,8 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
                       </button>
                       <button 
                         onClick={handleSave}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md shadow-emerald-200 transition-colors"
+                        disabled={accountsWithFunds.length === 0 || !selectedAccountId}
+                        className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold shadow-md shadow-emerald-200 transition-colors"
                       >
                         Confirm & Save
                       </button>
