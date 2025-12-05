@@ -1,71 +1,44 @@
 import { getSupabase } from './supabaseClient';
-import { CashWallet, CashDenominations } from '../types';
+import { CashWallet } from '../types';
 
 const supabase = getSupabase();
 
-// Database type for wallet snapshots
-export interface DBWalletSnapshot {
+// Wallet is now stored in banks table as "Cash Wallet"
+// This service provides wallet-specific operations using the banks table
+
+export interface DBWallet {
   id: string;
-  note_5000: number;
-  note_2000: number;
-  note_1000: number;
-  note_500: number;
-  note_100: number;
-  note_50: number;
-  note_20: number;
-  created_at: string;
+  bank_name: string;
+  total: number;
+  updated: string;
 }
 
 // Convert database row to app format
-const dbToWallet = (snapshot: DBWalletSnapshot): CashWallet => {
+const dbToWallet = (bank: DBWallet): CashWallet => {
   return {
-    id: snapshot.id,
+    id: bank.id,
     type: 'CASH_WALLET',
-    denominations: {
-      5000: snapshot.note_5000,
-      2000: snapshot.note_2000,
-      1000: snapshot.note_1000,
-      500: snapshot.note_500,
-      100: snapshot.note_100,
-      50: snapshot.note_50,
-      20: snapshot.note_20,
-    }
+    // No longer using denominations - wallet is just a balance
+    denominations: {} as any, // Keep for compatibility but not used
   };
 };
 
-// Convert app format to database row
-const walletToDb = (denominations: CashDenominations): Partial<DBWalletSnapshot> => {
-  return {
-    note_5000: denominations[5000] || 0,
-    note_2000: denominations[2000] || 0,
-    note_1000: denominations[1000] || 0,
-    note_500: denominations[500] || 0,
-    note_100: denominations[100] || 0,
-    note_50: denominations[50] || 0,
-    note_20: denominations[20] || 0,
-  };
-};
-
-// Fetch the latest wallet snapshot
-export const fetchLatestWallet = async (): Promise<CashWallet | null> => {
+// Fetch the wallet from banks table
+export const fetchWallet = async (): Promise<CashWallet | null> => {
   try {
     const { data, error } = await supabase
-      .from('wallet_snapshots')
+      .from('banks')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
+      .eq('bank_name', 'Cash Wallet')
       .single();
     
     if (error) {
       // PGRST116 = No rows found
-      // PGRST202 = Table not found
       if (error.code === 'PGRST116') {
-        // No rows found - return null
         return null;
       }
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        // Table doesn't exist - return null so we can create it
-        console.warn('wallet_snapshots table does not exist yet');
+        console.warn('banks table does not exist yet');
         return null;
       }
       throw error;
@@ -73,83 +46,124 @@ export const fetchLatestWallet = async (): Promise<CashWallet | null> => {
     
     if (!data) return null;
     
-    return dbToWallet(data as DBWalletSnapshot);
+    return dbToWallet(data as DBWallet);
   } catch (err: any) {
-    // Handle any other errors
     if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
-      console.warn('wallet_snapshots table does not exist yet');
+      console.warn('banks table does not exist yet');
       return null;
     }
     throw err;
   }
 };
 
-// Fetch wallet history (for analytics/tracking over time)
-export const fetchWalletHistory = async (limit: number = 30): Promise<DBWalletSnapshot[]> => {
-  const { data, error } = await supabase
-    .from('wallet_snapshots')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  
-  if (error) throw error;
-  
-  return (data || []) as DBWalletSnapshot[];
-};
-
-// Create a new wallet snapshot
-export const createWalletSnapshot = async (denominations: CashDenominations): Promise<CashWallet> => {
-  const dbData = walletToDb(denominations);
-  
+// Get wallet balance
+export const getWalletBalance = async (): Promise<number> => {
   try {
     const { data, error } = await supabase
-      .from('wallet_snapshots')
-      .insert([dbData])
-      .select()
+      .from('banks')
+      .select('total')
+      .eq('bank_name', 'Cash Wallet')
       .single();
     
     if (error) {
+      if (error.code === 'PGRST116') {
+        return 0; // No wallet found, return 0
+      }
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase.');
+        return 0;
       }
       throw error;
     }
     
-    return dbToWallet(data as DBWalletSnapshot);
+    return Number(data?.total || 0);
   } catch (err: any) {
     if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
-      throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase.');
+      return 0;
     }
     throw err;
   }
 };
 
-// Update wallet (creates a new snapshot with current timestamp)
-export const updateWallet = async (denominations: CashDenominations): Promise<CashWallet> => {
-  // Instead of updating, we create a new snapshot (keeps history)
-  return createWalletSnapshot(denominations);
+// Create wallet if it doesn't exist
+export const createWallet = async (initialBalance: number = 0): Promise<CashWallet> => {
+  try {
+    const { data, error } = await supabase
+      .from('banks')
+      .insert([{ bank_name: 'Cash Wallet', total: initialBalance }])
+      .select()
+      .single();
+    
+    if (error) {
+      // If wallet already exists, fetch it
+      if (error.code === '23505') { // Unique constraint violation
+        const existing = await fetchWallet();
+        if (existing) return existing;
+      }
+      throw error;
+    }
+    
+    return dbToWallet(data as DBWallet);
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      throw new Error('banks table does not exist. Please run the SQL schema in Supabase.');
+    }
+    throw err;
+  }
 };
 
-// Calculate total from denominations
-export const calculateTotal = (denominations: CashDenominations): number => {
-  return Object.entries(denominations).reduce(
-    (sum, [denom, count]) => sum + Number(denom) * Number(count),
-    0
-  );
+// Update wallet balance
+export const updateWalletBalance = async (newBalance: number): Promise<CashWallet> => {
+  try {
+    // First, check if wallet exists
+    let wallet = await fetchWallet();
+    
+    if (!wallet) {
+      // Create wallet if it doesn't exist
+      return await createWallet(newBalance);
+    }
+    
+    // Update wallet balance
+    const { data, error } = await supabase
+      .from('banks')
+      .update({ 
+        total: newBalance,
+        updated: new Date().toISOString()
+      })
+      .eq('bank_name', 'Cash Wallet')
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return dbToWallet(data as DBWallet);
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      throw new Error('banks table does not exist. Please run the SQL schema in Supabase.');
+    }
+    throw err;
+  }
 };
 
-// Get wallet summary with total
-export const getWalletWithTotal = async () => {
-  const wallet = await fetchLatestWallet();
-  if (!wallet) return null;
-  
-  const total = calculateTotal(wallet.denominations);
-  
-  return {
-    wallet,
-    total,
-    lastUpdated: wallet.id // The ID contains timestamp info
-  };
+// Add amount to wallet balance
+export const addToWalletBalance = async (amount: number): Promise<CashWallet> => {
+  try {
+    const currentBalance = await getWalletBalance();
+    const newBalance = currentBalance + amount;
+    return await updateWalletBalance(newBalance);
+  } catch (err) {
+    console.error('Failed to add to wallet balance:', err);
+    throw err;
+  }
 };
 
-
+// Subtract amount from wallet balance
+export const subtractFromWalletBalance = async (amount: number): Promise<CashWallet> => {
+  try {
+    const currentBalance = await getWalletBalance();
+    const newBalance = Math.max(0, currentBalance - amount);
+    return await updateWalletBalance(newBalance);
+  } catch (err) {
+    console.error('Failed to subtract from wallet balance:', err);
+    throw err;
+  }
+};

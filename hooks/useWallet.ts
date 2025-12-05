@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import {
-  fetchLatestWallet,
-  createWalletSnapshot,
-  updateWallet as dbUpdateWallet,
-  calculateTotal,
+  fetchWallet,
+  createWallet,
+  getWalletBalance,
+  updateWalletBalance,
+  addToWalletBalance,
 } from '../services/walletDatabase';
-import { CashWallet, CashDenominations } from '../types';
-import { INITIAL_DENOMINATIONS } from '../constants';
+import { CashWallet } from '../types';
 
 export const useWallet = () => {
   const [wallet, setWallet] = useState<CashWallet | null>(null);
+  const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,23 +24,27 @@ export const useWallet = () => {
       setLoading(true);
       setError(null);
       
-      let walletData = await fetchLatestWallet();
+      let walletData = await fetchWallet();
+      let walletBalance = 0;
       
-      // If no wallet exists, create an initial one with zero denominations
+      // If no wallet exists, create one with zero balance
       if (!walletData) {
         console.log('No wallet found, creating initial wallet...');
         try {
-          walletData = await createWalletSnapshot(INITIAL_DENOMINATIONS);
+          walletData = await createWallet(0);
+          walletBalance = 0;
         } catch (createErr: any) {
-          // If table doesn't exist, show helpful error
           if (createErr.message?.includes('does not exist') || createErr.code === 'PGRST202') {
-            throw new Error('wallet_snapshots table does not exist. Please run the SQL schema in Supabase SQL Editor.');
+            throw new Error('banks table does not exist. Please run the SQL schema in Supabase SQL Editor.');
           }
           throw createErr;
         }
+      } else {
+        walletBalance = await getWalletBalance();
       }
       
       setWallet(walletData);
+      setBalance(walletBalance);
     } catch (err) {
       console.error('Failed to load wallet:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load wallet';
@@ -49,35 +54,34 @@ export const useWallet = () => {
     }
   };
 
-  // Update wallet denominations (creates new snapshot)
-  const updateWallet = async (denominations: CashDenominations) => {
+  // Update wallet balance
+  const updateWallet = async (newBalance: number) => {
     try {
-      const updatedWallet = await dbUpdateWallet(denominations);
+      const updatedWallet = await updateWalletBalance(newBalance);
+      const updatedBalance = await getWalletBalance();
       setWallet(updatedWallet);
+      setBalance(updatedBalance);
     } catch (err) {
       console.error('Failed to update wallet:', err);
       throw err;
     }
   };
 
-  // Add funds to wallet (adds to existing denominations)
-  const addFunds = async (incomingDenominations: CashDenominations) => {
+  // Add funds to wallet (simple amount, no denominations)
+  const addFunds = async (amount: number) => {
     try {
       if (!wallet) {
-        throw new Error('Wallet not initialized');
+        // Create wallet if it doesn't exist
+        const newWallet = await createWallet(amount);
+        setWallet(newWallet);
+        setBalance(amount);
+        return newWallet;
       }
 
-      // Combine current wallet with incoming funds
-      const newDenominations: CashDenominations = { ...wallet.denominations };
-      
-      Object.entries(incomingDenominations).forEach(([denom, count]) => {
-        const denomKey = Number(denom);
-        newDenominations[denomKey] = (newDenominations[denomKey] || 0) + count;
-      });
-
-      // Create new wallet snapshot with updated denominations
-      const updatedWallet = await dbUpdateWallet(newDenominations);
+      const updatedWallet = await addToWalletBalance(amount);
+      const updatedBalance = await getWalletBalance();
       setWallet(updatedWallet);
+      setBalance(updatedBalance);
       
       return updatedWallet;
     } catch (err) {
@@ -86,17 +90,19 @@ export const useWallet = () => {
     }
   };
 
-  // Calculate current cash balance
-  const cashBalance = wallet ? calculateTotal(wallet.denominations) : 0;
+  // Refresh wallet data
+  const refresh = async () => {
+    await loadWallet();
+  };
 
   return {
     wallet,
-    cashBalance,
+    balance,
+    cashBalance: balance, // Alias for compatibility
     loading,
     error,
     updateWallet,
     addFunds,
-    refresh: loadWallet,
+    refresh,
   };
 };
-

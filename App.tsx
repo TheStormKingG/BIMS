@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  CashDenominations
-} from './types';
 import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
@@ -52,9 +49,9 @@ function App() {
   const loading = walletLoading || banksLoading || spentItemsLoading;
   const error = walletError || banksError || spentItemsError;
 
-  const handleUpdateWallet = async (denoms: CashDenominations) => {
+  const handleUpdateWallet = async (balance: number) => {
     try {
-      await updateWallet(denoms);
+      await updateWallet(balance);
     } catch (err) {
       alert('Failed to update wallet: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
@@ -94,25 +91,22 @@ function App() {
     }
   };
 
-  const handleAddWalletFunds = async (source: string, denominations: CashDenominations) => {
+  const handleAddWalletFunds = async (source: string, amount: number) => {
     try {
-      // Calculate total amount
-      const totalAmount = Object.entries(denominations).reduce(
-        (sum, [denom, count]) => sum + Number(denom) * Number(count),
-        0
-      );
-
-      // Add funds to the wallet (updates wallet_snapshots)
-      await addFundsToWallet(denominations);
+      // Add funds to the wallet (updates banks table)
+      await addFundsToWallet(amount);
       
-      // Record the transaction in wallet_in table
-      await addWalletInTransaction(source, denominations);
+      // Record the transaction in bank_in table (wallet is now a bank)
+      const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
+      if (walletBank) {
+        await addBankInTransaction(walletBank.id, amount, source);
+      }
 
       // If source is a bank account, deduct the amount from it
-      if (source !== 'Cash-In' && !source.startsWith('Cash-In')) {
+      if (source !== 'Cash-In (Payments, Gifts, Etc.)' && !source.startsWith('Cash-In')) {
         const sourceBank = banks.find(bank => bank.bank_name === source);
         if (sourceBank) {
-          const newBalance = Number(sourceBank.total) - totalAmount;
+          const newBalance = Number(sourceBank.total) - amount;
           if (newBalance < 0) {
             alert('Warning: Bank account balance is now negative!');
           }
@@ -169,19 +163,8 @@ function App() {
         return (
           <Accounts 
             wallet={wallet}
-            walletTransactions={walletInTransactions.map(txn => ({
-              id: txn.id,
-              source: txn.source,
-              total: Number(txn.total),
-              note_5000: txn.note_5000,
-              note_2000: txn.note_2000,
-              note_1000: txn.note_1000,
-              note_500: txn.note_500,
-              note_100: txn.note_100,
-              note_50: txn.note_50,
-              note_20: txn.note_20,
-              datetime: txn.datetime
-            }))}
+            walletBalance={cashBalance}
+            walletTransactions={[]} // No longer using wallet_in table - transactions come from bank_in
             walletFundsOut={fundsOutTransactions
               .filter(txn => txn.source_account_type === 'CASH_WALLET')
               .map(txn => ({
@@ -193,7 +176,7 @@ function App() {
             accounts={banks.map(bank => ({
               id: bank.id,
               name: bank.bank_name,
-              type: 'BANK' as const,
+              type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
               balance: Number(bank.total)
             }))}
             bankTransactions={bankInTransactions.map(txn => ({
@@ -204,12 +187,7 @@ function App() {
               datetime: txn.datetime,
               type: 'deposit' as const
             }))}
-            walletTransactionsForBanks={walletInTransactions.map(txn => ({
-              id: txn.id,
-              source: txn.source,
-              total: Number(txn.total),
-              datetime: txn.datetime
-            }))}
+            walletTransactionsForBanks={[]} // No longer using wallet_in table
             onAddAccount={handleAddBank}
             onRemoveAccount={handleDeleteBank}
             onAddFunds={handleAddBankFunds}
@@ -222,32 +200,29 @@ function App() {
           <Spending 
             spentItems={spentItems} 
             loading={spentItemsLoading}
-            banks={banks.map(bank => ({
+            banks={banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
               id: bank.id,
               name: bank.bank_name,
               type: 'BANK' as const,
               balance: Number(bank.total)
             }))}
             wallet={wallet}
+            walletBalance={cashBalance}
             onAddSpend={async (item) => {
               try {
                 // Check funds BEFORE saving spent items
                 if (item.paymentMethod) {
                   // Find the account
                   const isWallet = item.paymentMethod === 'Cash Wallet';
+                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
                   const account = isWallet 
-                    ? wallet 
+                    ? walletBankEntry 
                     : banks.find(bank => bank.bank_name === item.paymentMethod);
                   
-                  if (isWallet && wallet) {
-                    // Check if wallet has enough total cash
-                    const walletTotal = Object.entries(wallet.denominations).reduce(
-                      (sum, [denom, count]) => sum + Number(denom) * Number(count),
-                      0
-                    );
-                    
-                    if (walletTotal < item.itemTotal) {
-                      alert(`Error: Insufficient funds in wallet. Wallet has ${walletTotal.toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
+                  if (isWallet && walletBankEntry) {
+                    // Check if wallet has enough balance
+                    if (Number(walletBankEntry.total) < item.itemTotal) {
+                      alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${item.itemTotal.toLocaleString()} GYD is needed.`);
                       return; // Don't proceed with the transaction
                     }
                   } else if (account && !isWallet) {
@@ -267,65 +242,22 @@ function App() {
                 if (item.paymentMethod) {
                   // Find the account
                   const isWallet = item.paymentMethod === 'Cash Wallet';
+                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
                   const account = isWallet 
-                    ? wallet 
+                    ? walletBankEntry 
                     : banks.find(bank => bank.bank_name === item.paymentMethod);
                   
-                  if (isWallet && wallet) {
-                    // Check if we can make the exact amount with available denominations
-                    const totalToDeduct = item.itemTotal;
-                    const currentDenoms = { ...wallet.denominations };
-                    const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
-                    
-                    // Try to see if we can make the exact amount
-                    let testRemaining = totalToDeduct;
-                    let canMakeExact = true;
-                    
-                    for (const denom of denominations) {
-                      if (testRemaining <= 0) break;
-                      const available = currentDenoms[denom] || 0;
-                      const needed = Math.floor(testRemaining / denom);
-                      const canUse = Math.min(needed, available);
-                      testRemaining -= canUse * denom;
+                  if (isWallet && walletBankEntry) {
+                    // Deduct from wallet balance
+                    const newBalance = Number(walletBankEntry.total) - item.itemTotal;
+                    if (newBalance < 0) {
+                      alert('Warning: Wallet balance will be negative!');
                     }
-                    
-                    if (testRemaining > 0) {
-                      // Can't make exact amount - show what denominations are available
-                      const availableDenoms = denominations
-                        .filter(d => (currentDenoms[d] || 0) > 0)
-                        .map(d => `${currentDenoms[d]}× $${d}`)
-                        .join(', ');
-                      
-                      alert(
-                        `Cannot deduct ${totalToDeduct.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
-                        `Available denominations: ${availableDenoms || 'None'}\n\n` +
-                        `Please add smaller denominations to your wallet or use a different payment method.`
-                      );
-                      return; // Cancel the transaction
-                    }
-                    
-                    // Deduct from wallet (we know we can make the exact amount)
-                    const newDenoms: CashDenominations = { ...currentDenoms };
-                    let remaining = totalToDeduct;
-                    
-                    for (const denom of denominations) {
-                      if (remaining <= 0) break;
-                      
-                      const currentCount = newDenoms[denom] || 0;
-                      const needed = Math.floor(remaining / denom);
-                      const toDeduct = Math.min(needed, currentCount);
-                      
-                      if (toDeduct > 0) {
-                        newDenoms[denom] = currentCount - toDeduct;
-                        remaining -= toDeduct * denom;
-                      }
-                    }
-                    
-                    await updateWallet(newDenoms);
+                    await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
                     
                     // Record in funds_out
                     await addFundsOut({
-                      source_account_id: wallet.id,
+                      source_account_id: walletBankEntry.id,
                       source_account_type: 'CASH_WALLET',
                       source_account_name: 'Cash Wallet',
                       amount: item.itemTotal,
@@ -361,17 +293,29 @@ function App() {
         );
       
       case 'scan':
-        const allAccounts = wallet ? [wallet, ...banks.map(bank => ({
-          id: bank.id,
-          name: bank.bank_name,
-          type: 'BANK' as const,
-          balance: Number(bank.total)
-        }))] : banks.map(bank => ({
-          id: bank.id,
-          name: bank.bank_name,
-          type: 'BANK' as const,
-          balance: Number(bank.total)
-        }));
+        // Get wallet from banks table (it's now stored as "Cash Wallet" bank entry)
+        const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
+        const allAccounts = walletBank 
+          ? [
+              {
+                id: walletBank.id,
+                name: 'Cash Wallet',
+                type: 'CASH_WALLET' as const,
+                balance: Number(walletBank.total)
+              },
+              ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+                id: bank.id,
+                name: bank.bank_name,
+                type: 'BANK' as const,
+                balance: Number(bank.total)
+              }))
+            ]
+          : banks.map(bank => ({
+              id: bank.id,
+              name: bank.bank_name,
+              type: 'BANK' as const,
+              balance: Number(bank.total)
+            }));
         
         return (
           <Scanner 
@@ -434,73 +378,29 @@ function App() {
                     spent_table_id: addedSpentItems.length > 0 ? addedSpentItems[0].id : null,
                     source: 'SCAN_RECEIPT',
                   });
-                } else if (account?.type === 'CASH_WALLET' && wallet) {
-                  // Check if wallet has enough total cash
-                  const walletTotal = Object.entries(wallet.denominations).reduce(
-                    (sum, [denom, count]) => sum + Number(denom) * Number(count),
-                    0
-                  );
+                } else if (account?.type === 'CASH_WALLET') {
+                  const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                  if (!walletBankEntry) {
+                    alert('Error: Cash Wallet not found in banks table.');
+                    return;
+                  }
                   
-                  if (walletTotal < receiptData.total) {
-                    alert(`Error: Insufficient funds in wallet. Wallet has ${walletTotal.toLocaleString()} GYD, but ${receiptData.total.toLocaleString()} GYD is needed.`);
+                  // Check if wallet has enough balance
+                  if (Number(walletBankEntry.total) < receiptData.total) {
+                    alert(`Error: Insufficient funds in wallet. Wallet has ${Number(walletBankEntry.total).toLocaleString()} GYD, but ${receiptData.total.toLocaleString()} GYD is needed.`);
                     return; // Don't proceed with the transaction
                   }
                   
-                  // Check if we can make the exact amount with available denominations
-                  const totalToDeduct = receiptData.total;
-                  const currentDenoms = { ...wallet.denominations };
-                  const denominations = [5000, 2000, 1000, 500, 100, 50, 20];
-                  
-                  // Try to see if we can make the exact amount
-                  let testRemaining = totalToDeduct;
-                  
-                  for (const denom of denominations) {
-                    if (testRemaining <= 0) break;
-                    const available = currentDenoms[denom] || 0;
-                    const needed = Math.floor(testRemaining / denom);
-                    const canUse = Math.min(needed, available);
-                    testRemaining -= canUse * denom;
+                  // Deduct from wallet balance
+                  const newBalance = Number(walletBankEntry.total) - receiptData.total;
+                  if (newBalance < 0) {
+                    alert('Warning: Wallet balance will be negative!');
                   }
-                  
-                  if (testRemaining > 0) {
-                    // Can't make exact amount - show what denominations are available
-                    const availableDenoms = denominations
-                      .filter(d => (currentDenoms[d] || 0) > 0)
-                      .map(d => `${currentDenoms[d]}× $${d}`)
-                      .join(', ');
-                    
-                    alert(
-                      `Cannot deduct ${totalToDeduct.toLocaleString()} GYD from wallet due to denomination limitations.\n\n` +
-                      `Available denominations: ${availableDenoms || 'None'}\n\n` +
-                      `Please add smaller denominations to your wallet or use a different payment method.`
-                    );
-                    return; // Cancel the transaction
-                  }
-                  
-                  // Deduct from cash wallet (we know we can make the exact amount)
-                  const newDenoms: CashDenominations = { ...currentDenoms };
-                  let remaining = totalToDeduct;
-                  
-                  // Deduct from highest denominations first
-                  for (const denom of denominations) {
-                    if (remaining <= 0) break;
-                    
-                    const currentCount = newDenoms[denom] || 0;
-                    const needed = Math.floor(remaining / denom);
-                    const toDeduct = Math.min(needed, currentCount);
-                    
-                    if (toDeduct > 0) {
-                      newDenoms[denom] = currentCount - toDeduct;
-                      remaining -= toDeduct * denom;
-                    }
-                  }
-                  
-                  // Update wallet with new denominations
-                  await updateWallet(newDenoms);
+                  await updateBank(walletBankEntry.id, walletBankEntry.bank_name, newBalance);
                   
                   // Record in funds_out
                   await addFundsOut({
-                    source_account_id: wallet.id,
+                    source_account_id: walletBankEntry.id,
                     source_account_type: 'CASH_WALLET',
                     source_account_name: 'Cash Wallet',
                     amount: receiptData.total,

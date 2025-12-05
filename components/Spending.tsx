@@ -9,10 +9,11 @@ interface SpendingProps {
   loading?: boolean;
   banks?: BankAccount[];
   wallet?: CashWallet | null;
+  walletBalance?: number;
   onAddSpend?: (item: Omit<SpentItem, 'id' | 'entryDate'>) => Promise<void>;
 }
 
-export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, onAddSpend }) => {
+export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, walletBalance = 0, onAddSpend }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
@@ -325,7 +326,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
                 >
                   <option value="">Select payment method...</option>
-                  {wallet && (
+                  {(wallet || walletBalance > 0) && (
                     <option value="Cash Wallet">Cash Wallet</option>
                   )}
                   {banks.length > 0 && (

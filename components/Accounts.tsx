@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { BankAccount, CashWallet, CashDenominations } from '../types';
+import { BankAccount, CashWallet } from '../types';
 import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet } from 'lucide-react';
-import { GYD_DENOMINATIONS } from '../constants';
 
 interface BankTransaction {
   id: string; // This is the bank_id (destination)
@@ -16,13 +15,6 @@ interface WalletTransaction {
   id: string;
   source: string;
   total: number;
-  note_5000: number;
-  note_2000: number;
-  note_1000: number;
-  note_500: number;
-  note_100: number;
-  note_50: number;
-  note_20: number;
   datetime: string;
 }
 
@@ -43,13 +35,15 @@ interface AccountsProps {
   onAddAccount: (name: string, initialBalance: number) => void;
   onRemoveAccount: (id: string) => void;
   onAddFunds?: (bankId: string, amount: number, source: string) => void;
-  onAddWalletFunds?: (source: string, denominations: CashDenominations) => void;
+  onAddWalletFunds?: (source: string, amount: number) => void;
+  walletBalance?: number;
 }
 
 export const Accounts: React.FC<AccountsProps> = ({ 
   wallet, 
   walletTransactions = [],
   walletFundsOut = [],
+  walletBalance = 0,
   accounts, 
   bankTransactions = [], 
   walletTransactionsForBanks = [],
@@ -71,9 +65,7 @@ export const Accounts: React.FC<AccountsProps> = ({
   // Wallet Add Funds modal state
   const [showWalletAddFundsModal, setShowWalletAddFundsModal] = useState(false);
   const [walletFundSource, setWalletFundSource] = useState('');
-  const [walletFundDenominations, setWalletFundDenominations] = useState<CashDenominations>({
-    5000: 0, 2000: 0, 1000: 0, 500: 0, 100: 0, 50: 0, 20: 0
-  });
+  const [walletFundAmount, setWalletFundAmount] = useState('');
 
   // Detail view state
   const [viewingBank, setViewingBank] = useState<BankAccount | null>(null);
@@ -117,37 +109,15 @@ export const Accounts: React.FC<AccountsProps> = ({
   const handleCloseWalletAddFunds = () => {
     setShowWalletAddFundsModal(false);
     setWalletFundSource('');
-    setWalletFundDenominations({
-      5000: 0, 2000: 0, 1000: 0, 500: 0, 100: 0, 50: 0, 20: 0
-    });
+    setWalletFundAmount('');
   };
 
   const handleSubmitWalletFunds = (e: React.FormEvent) => {
     e.preventDefault();
-    const total = Object.entries(walletFundDenominations).reduce(
-      (sum, [denom, count]) => sum + Number(denom) * Number(count),
-      0
-    );
-    if (walletFundSource && total > 0 && onAddWalletFunds) {
-      onAddWalletFunds(walletFundSource, walletFundDenominations);
+    if (walletFundSource && walletFundAmount && Number(walletFundAmount) > 0 && onAddWalletFunds) {
+      onAddWalletFunds(walletFundSource, Number(walletFundAmount));
       handleCloseWalletAddFunds();
     }
-  };
-
-  const updateWalletFundDenomination = (denom: number, value: string) => {
-    const numValue = parseInt(value) || 0;
-    setWalletFundDenominations(prev => ({
-      ...prev,
-      [denom]: Math.max(0, numValue)
-    }));
-  };
-
-  const calculateWalletTotal = () => {
-    if (!wallet) return 0;
-    return Object.entries(wallet.denominations).reduce(
-      (sum, [denom, count]) => sum + Number(denom) * Number(count),
-      0
-    );
   };
 
   // Get transactions for specific bank (both deposits and withdrawals)
@@ -177,23 +147,21 @@ export const Accounts: React.FC<AccountsProps> = ({
 
   // If viewing wallet details, show detail view
   if (viewingWallet && wallet) {
-    // Combine wallet_in (funds added) and funds_out (cash spent) transactions
-    const fundsAdded = walletTransactions.map(txn => ({
-      id: txn.id,
-      type: 'funds_added' as const,
-      amount: txn.total,
-      source: txn.source,
-      datetime: txn.datetime,
-      denominationBreakdown: [
-        txn.note_5000 > 0 && `${txn.note_5000}× $5000`,
-        txn.note_2000 > 0 && `${txn.note_2000}× $2000`,
-        txn.note_1000 > 0 && `${txn.note_1000}× $1000`,
-        txn.note_500 > 0 && `${txn.note_500}× $500`,
-        txn.note_100 > 0 && `${txn.note_100}× $100`,
-        txn.note_50 > 0 && `${txn.note_50}× $50`,
-        txn.note_20 > 0 && `${txn.note_20}× $20`,
-      ].filter(Boolean).join(', '),
-    }));
+    // Combine bank_in (funds added) and funds_out (cash spent) transactions
+    // Get wallet bank entry to find its transactions
+    const walletBank = accounts.find(acc => acc.name === 'Cash Wallet');
+    const fundsAdded = walletBank 
+      ? bankTransactions
+          .filter(txn => txn.id === walletBank.id)
+          .map(txn => ({
+            id: txn.txnId || txn.id,
+            type: 'funds_added' as const,
+            amount: txn.amount,
+            source: txn.source,
+            datetime: txn.datetime,
+            denominationBreakdown: null,
+          }))
+      : [];
 
     const cashSpent = walletFundsOut.map(txn => ({
       id: txn.id,
@@ -228,7 +196,7 @@ export const Accounts: React.FC<AccountsProps> = ({
             <div>
               <h2 className="text-2xl font-bold text-slate-900">Cash Wallet</h2>
               <p className="text-3xl font-bold text-emerald-600 mt-2">
-                ${calculateWalletTotal().toLocaleString()} <span className="text-lg text-slate-500">GYD</span>
+                ${walletBalance.toLocaleString()} <span className="text-lg text-slate-500">GYD</span>
               </p>
             </div>
           </div>
@@ -265,11 +233,6 @@ export const Accounts: React.FC<AccountsProps> = ({
                         <p className="text-sm text-slate-500">
                           {txn.type === 'funds_added' ? `From: ${txn.source}` : `Source: ${txn.source}`}
                         </p>
-                        {txn.denominationBreakdown && (
-                          <p className="text-xs text-slate-400 mt-1">
-                            {txn.denominationBreakdown}
-                          </p>
-                        )}
                         <p className="text-xs text-slate-400 mt-1">
                           {new Date(txn.datetime).toLocaleString()}
                         </p>
@@ -447,7 +410,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-white text-lg">Cash Wallet</h3>
-                  <p className="text-slate-300 font-semibold text-base">${calculateWalletTotal().toLocaleString()} GYD</p>
+                  <p className="text-slate-300 font-semibold text-base">${walletBalance.toLocaleString()} GYD</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400" />
               </div>
@@ -634,43 +597,21 @@ export const Accounts: React.FC<AccountsProps> = ({
                 )}
               </div>
 
-              {/* Denomination Inputs */}
+              {/* Amount Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Cash Received (by denomination)
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Amount (GYD) <span className="text-red-500">*</span>
                 </label>
-                <div className="space-y-3">
-                  {GYD_DENOMINATIONS.map((denom) => (
-                    <div key={denom} className="flex items-center justify-between gap-4">
-                      <label className="font-semibold text-slate-700 min-w-[80px]">
-                        ${denom}
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={walletFundDenominations[denom] || 0}
-                        onChange={(e) => updateWalletFundDenomination(denom, e.target.value)}
-                        className="w-24 p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black text-center font-mono"
-                      />
-                      <span className="text-slate-600 font-medium min-w-[100px] text-right">
-                        = ${((walletFundDenominations[denom] || 0) * denom).toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Total Display */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-emerald-800">Total Amount:</span>
-                  <span className="text-2xl font-bold text-emerald-700">
-                    ${Object.entries(walletFundDenominations).reduce(
-                      (sum, [denom, count]) => sum + Number(denom) * Number(count),
-                      0
-                    ).toLocaleString()} GYD
-                  </span>
-                </div>
+                <input
+                  type="number"
+                  value={walletFundAmount}
+                  onChange={(e) => setWalletFundAmount(e.target.value)}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black text-lg"
+                  required
+                />
               </div>
 
               {/* Action Buttons */}
@@ -684,10 +625,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={!walletFundSource || Object.entries(walletFundDenominations).reduce(
-                    (sum, [denom, count]) => sum + Number(denom) * Number(count),
-                    0
-                  ) === 0}
+                  disabled={!walletFundSource || !walletFundAmount || Number(walletFundAmount) <= 0}
                   className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
                   Add Funds
