@@ -19,6 +19,7 @@ DO $$
 BEGIN
   IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'bank_in') THEN
     -- Migrate existing data
+    -- Note: bank_in doesn't have created_at/updated_at, so we use datetime for both
     INSERT INTO funds_in (id, datetime, source, amount, destination_account_id, created_at, updated_at)
     SELECT 
       id,
@@ -26,8 +27,8 @@ BEGIN
       source,
       amount,
       destination,
-      created_at,
-      updated_at
+      COALESCE(datetime, NOW()) as created_at,
+      COALESCE(datetime, NOW()) as updated_at
     FROM bank_in;
     
     -- Drop old table
