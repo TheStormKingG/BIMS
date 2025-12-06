@@ -22,10 +22,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
     setMessage(null);
 
-    // Get the correct redirect URL - redirect to overview after email confirmation
-    const currentOrigin = window.location.origin;
-    const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
-    const redirectUrl = `${currentOrigin}${basePath}/overview`;
+    // Always use production URL for redirects - NEVER localhost
+    const redirectUrl = 'https://thestormkingg.github.io/BIMS/overview';
 
     try {
       if (isSignUp) {
@@ -67,10 +65,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     setError(null);
 
-    // Get the correct redirect URL - always use current origin and redirect to overview after login
-    const currentOrigin = window.location.origin;
-    const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
-    const redirectUrl = `${currentOrigin}${basePath}/overview`;
+    // Always use production URL for redirects - NEVER localhost
+    const redirectUrl = 'https://thestormkingg.github.io/BIMS/overview';
 
     try {
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({

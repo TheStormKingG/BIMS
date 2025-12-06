@@ -28,21 +28,28 @@ const getSupabaseAnonKey = (): string => {
 // Initialize Supabase client
 let supabase: ReturnType<typeof createClient> | null = null;
 
+// Get production redirect URL - NEVER use localhost
+const getProductionRedirectUrl = (): string => {
+  // Always use production URL for OAuth redirects
+  const productionUrl = 'https://thestormkingg.github.io';
+  const basePath = '/BIMS';
+  return `${productionUrl}${basePath}/overview`;
+};
+
 export const getSupabase = () => {
   if (!supabase) {
     try {
       const supabaseUrl = getSupabaseUrl();
       const supabaseAnonKey = getSupabaseAnonKey();
-      // Determine base path for redirects (handles /BIMS/ base path)
-      const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
-      const redirectBase = window.location.origin + basePath;
+      // Always use production URL for redirects - NEVER localhost
+      const redirectUrl = getProductionRedirectUrl();
       
       supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          redirectTo: redirectBase + '/overview',
+          redirectTo: redirectUrl,
         },
       });
     } catch (error) {
@@ -54,16 +61,15 @@ export const getSupabase = () => {
       if (url && key) {
         localStorage.setItem('SUPABASE_URL', url);
         localStorage.setItem('SUPABASE_ANON_KEY', key);
-        // Determine base path for redirects (handles /BIMS/ base path)
-        const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
-        const redirectBase = window.location.origin + basePath;
+        // Always use production URL for redirects - NEVER localhost
+        const redirectUrl = getProductionRedirectUrl();
         
         supabase = createClient(url, key, {
           auth: {
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
-            redirectTo: redirectBase + '/overview',
+            redirectTo: redirectUrl,
           },
         });
       } else {
