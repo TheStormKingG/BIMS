@@ -294,10 +294,22 @@ export const createBankInTransaction = createFundsInTransaction;
 
 export const fetchWalletInTransactions = async (): Promise<DBWalletIn[]> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('wallet_in')
       .select('*')
       .order('datetime', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
@@ -326,6 +338,9 @@ export const createWalletInTransaction = async (
     20?: number;
   }
 ): Promise<DBWalletIn> => {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
   // Calculate total from denominations
   const total = 
     (denominations[5000] || 0) * 5000 +
@@ -339,6 +354,7 @@ export const createWalletInTransaction = async (
   const { data, error } = await supabase
     .from('wallet_in')
     .insert([{
+      user_id: user?.id || null,
       source: source,
       total: total,
       note_5000: denominations[5000] || 0,
@@ -348,6 +364,7 @@ export const createWalletInTransaction = async (
       note_100: denominations[100] || 0,
       note_50: denominations[50] || 0,
       note_20: denominations[20] || 0,
+      datetime: new Date().toISOString(),
     }])
     .select()
     .single();
