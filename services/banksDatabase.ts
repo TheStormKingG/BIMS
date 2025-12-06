@@ -30,19 +30,6 @@ export interface DBBankIn {
   datetime: string;
 }
 
-export interface DBWalletIn {
-  id: string;
-  source: string;
-  total: number;
-  note_5000: number;
-  note_2000: number;
-  note_1000: number;
-  note_500: number;
-  note_100: number;
-  note_50: number;
-  note_20: number;
-  datetime: string;
-}
 
 // BANKS TABLE OPERATIONS
 
@@ -290,88 +277,6 @@ const createBankInTransactionLegacy = async (
 export const fetchBankInTransactions = fetchFundsInTransactions;
 export const createBankInTransaction = createFundsInTransaction;
 
-// WALLET_IN TABLE OPERATIONS
-
-export const fetchWalletInTransactions = async (): Promise<DBWalletIn[]> => {
-  try {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    let query = supabase
-      .from('wallet_in')
-      .select('*')
-      .order('datetime', { ascending: false });
-    
-    // Filter by user_id if user is logged in
-    if (user) {
-      query = query.eq('user_id', user.id);
-    } else {
-      query = query.is('user_id', null);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        return [];
-      }
-      throw error;
-    }
-    return (data || []) as DBWalletIn[];
-  } catch (err: any) {
-    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
-      return [];
-    }
-    throw err;
-  }
-};
-
-export const createWalletInTransaction = async (
-  source: string,
-  denominations: {
-    5000?: number;
-    2000?: number;
-    1000?: number;
-    500?: number;
-    100?: number;
-    50?: number;
-    20?: number;
-  }
-): Promise<DBWalletIn> => {
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // Calculate total from denominations
-  const total = 
-    (denominations[5000] || 0) * 5000 +
-    (denominations[2000] || 0) * 2000 +
-    (denominations[1000] || 0) * 1000 +
-    (denominations[500] || 0) * 500 +
-    (denominations[100] || 0) * 100 +
-    (denominations[50] || 0) * 50 +
-    (denominations[20] || 0) * 20;
-  
-  const { data, error } = await supabase
-    .from('wallet_in')
-    .insert([{
-      user_id: user?.id || null,
-      source: source,
-      total: total,
-      note_5000: denominations[5000] || 0,
-      note_2000: denominations[2000] || 0,
-      note_1000: denominations[1000] || 0,
-      note_500: denominations[500] || 0,
-      note_100: denominations[100] || 0,
-      note_50: denominations[50] || 0,
-      note_20: denominations[20] || 0,
-      datetime: new Date().toISOString(),
-    }])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as DBWalletIn;
-};
 
 // SUMMARY / ANALYTICS
 

@@ -36,7 +36,6 @@ function App() {
   const {
     banks,
     fundsInTransactions,
-    walletInTransactions,
     fundsOutTransactions,
     totalInBanks,
     loading: banksLoading,
@@ -45,7 +44,6 @@ function App() {
     updateBank,
     deleteBank,
     addFundsInTransaction,
-    addWalletInTransaction,
   } = useBanks();
 
   // Use spent items hook

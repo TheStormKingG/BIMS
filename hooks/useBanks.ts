@@ -6,18 +6,14 @@ import {
   deleteBank as dbDeleteBank,
   fetchFundsInTransactions,
   createFundsInTransaction,
-  fetchWalletInTransactions,
-  createWalletInTransaction,
   DBBank,
   DBFundsIn,
-  DBWalletIn,
 } from '../services/banksDatabase';
 import { fetchFundsOut, DBFundsOut } from '../services/fundsOutDatabase';
 
 export const useBanks = () => {
   const [banks, setBanks] = useState<DBBank[]>([]);
   const [fundsInTransactions, setFundsInTransactions] = useState<DBFundsIn[]>([]);
-  const [walletInTransactions, setWalletInTransactions] = useState<DBWalletIn[]>([]);
   const [fundsOutTransactions, setFundsOutTransactions] = useState<DBFundsOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,16 +27,14 @@ export const useBanks = () => {
       setLoading(true);
       setError(null);
       
-      const [banksData, fundsInData, walletInsData, fundsOutData] = await Promise.all([
+      const [banksData, fundsInData, fundsOutData] = await Promise.all([
         fetchBanks(),
         fetchFundsInTransactions(),
-        fetchWalletInTransactions(),
         fetchFundsOut(),
       ]);
       
       setBanks(banksData);
       setFundsInTransactions(fundsInData);
-      setWalletInTransactions(walletInsData);
       setFundsOutTransactions(fundsOutData);
     } catch (err: any) {
       console.error('Failed to load banks data:', err);
@@ -48,7 +42,6 @@ export const useBanks = () => {
       if (err?.code === 'PGRST202' || err?.message?.includes('does not exist') || err?.message?.includes('relation')) {
         setBanks([]);
         setFundsInTransactions([]);
-        setWalletInTransactions([]);
         setFundsOutTransactions([]);
         setError(null);
       } else {
@@ -123,33 +116,9 @@ export const useBanks = () => {
     }
   };
 
-  // Wallet-In transaction operations
-  const addWalletInTransaction = async (
-    source: string,
-    denominations: {
-      5000?: number;
-      2000?: number;
-      1000?: number;
-      500?: number;
-      100?: number;
-      50?: number;
-      20?: number;
-    }
-  ) => {
-    try {
-      const newTransaction = await createWalletInTransaction(source, denominations);
-      setWalletInTransactions(prev => [newTransaction, ...prev]);
-      return newTransaction;
-    } catch (err) {
-      console.error('Failed to add wallet-in transaction:', err);
-      throw err;
-    }
-  };
-
   // Calculate totals
   const totalInBanks = banks.reduce((sum, bank) => sum + Number(bank.total), 0);
   const totalFundsInflows = fundsInTransactions.reduce((sum, txn) => sum + Number(txn.amount), 0);
-  const totalWalletInflows = walletInTransactions.reduce((sum, txn) => sum + Number(txn.total), 0);
 
   return {
     // Data
@@ -157,11 +126,9 @@ export const useBanks = () => {
     fundsInTransactions,
     // Legacy alias for backward compatibility
     bankInTransactions: fundsInTransactions,
-    walletInTransactions,
     fundsOutTransactions,
     totalInBanks,
     totalBankInflows: totalFundsInflows,
-    totalWalletInflows,
     loading,
     error,
     
@@ -172,7 +139,6 @@ export const useBanks = () => {
     addFundsInTransaction,
     // Legacy alias for backward compatibility
     addBankInTransaction: addFundsInTransaction,
-    addWalletInTransaction,
     refresh: loadData,
   };
 };
