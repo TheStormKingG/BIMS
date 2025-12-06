@@ -29,6 +29,9 @@ export interface FundsOutInput {
 
 export const addFundsOut = async (fundsOut: FundsOutInput): Promise<DBFundsOut> => {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('funds_out')
       .insert([{
@@ -39,6 +42,7 @@ export const addFundsOut = async (fundsOut: FundsOutInput): Promise<DBFundsOut> 
         transaction_datetime: fundsOut.transaction_datetime,
         spent_table_id: fundsOut.spent_table_id || null,
         source: fundsOut.source,
+        user_id: user?.id || null,
       }])
       .select()
       .single();
@@ -67,10 +71,22 @@ export const addFundsOut = async (fundsOut: FundsOutInput): Promise<DBFundsOut> 
 
 export const fetchFundsOut = async (): Promise<DBFundsOut[]> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('funds_out')
       .select('*')
       .order('transaction_datetime', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {

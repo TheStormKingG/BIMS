@@ -35,10 +35,22 @@ export interface DBBankIn {
 
 export const fetchBanks = async (): Promise<DBBank[]> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('banks')
       .select('*')
       .order('updated', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
@@ -56,9 +68,16 @@ export const fetchBanks = async (): Promise<DBBank[]> => {
 };
 
 export const createBank = async (bankName: string, initialTotal: number = 0): Promise<DBBank> => {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
   const { data, error } = await supabase
     .from('banks')
-    .insert([{ bank_name: bankName, total: initialTotal }])
+    .insert([{ 
+      bank_name: bankName, 
+      total: initialTotal,
+      user_id: user?.id || null
+    }])
     .select()
     .single();
   

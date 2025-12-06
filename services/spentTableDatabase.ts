@@ -65,10 +65,22 @@ const spentItemToDb = (item: Omit<SpentItem, 'id' | 'entryDate'>): Partial<DBSpe
 // Fetch all spent items
 export const fetchSpentItems = async (): Promise<SpentItem[]> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('spent_table')
       .select('*')
       .order('transaction_datetime', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
@@ -90,16 +102,28 @@ export const fetchSpentItems = async (): Promise<SpentItem[]> => {
 // Fetch spent items for current month
 export const fetchCurrentMonthSpentItems = async (): Promise<SpentItem[]> => {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     
-    const { data, error } = await supabase
+    let query = supabase
       .from('spent_table')
       .select('*')
       .gte('transaction_datetime', firstDay.toISOString())
       .lte('transaction_datetime', lastDay.toISOString())
       .order('transaction_datetime', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
@@ -120,11 +144,14 @@ export const fetchCurrentMonthSpentItems = async (): Promise<SpentItem[]> => {
 
 // Create a new spent item
 export const createSpentItem = async (item: Omit<SpentItem, 'id' | 'entryDate'>): Promise<SpentItem> => {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
   const dbData = spentItemToDb(item);
   
   const { data, error } = await supabase
     .from('spent_table')
-    .insert([dbData])
+    .insert([{ ...dbData, user_id: user?.id || null }])
     .select()
     .single();
   
@@ -135,7 +162,10 @@ export const createSpentItem = async (item: Omit<SpentItem, 'id' | 'entryDate'>)
 
 // Create multiple spent items (for transactions with multiple line items)
 export const createSpentItems = async (items: Omit<SpentItem, 'id' | 'entryDate'>[]): Promise<SpentItem[]> => {
-  const dbData = items.map(spentItemToDb);
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const dbData = items.map(item => ({ ...spentItemToDb(item), user_id: user?.id || null }));
   
   const { data, error } = await supabase
     .from('spent_table')
