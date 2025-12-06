@@ -10,6 +10,7 @@ import {
   DBFundsIn,
 } from '../services/banksDatabase';
 import { fetchFundsOut, DBFundsOut } from '../services/fundsOutDatabase';
+import { getSupabase } from '../services/supabaseClient';
 
 export const useBanks = () => {
   const [banks, setBanks] = useState<DBBank[]>([]);
