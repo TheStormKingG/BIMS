@@ -33,7 +33,34 @@ export const useBanks = () => {
         fetchFundsOut(),
       ]);
       
-      setBanks(banksData);
+      // Auto-create Cash Wallet if it doesn't exist for the current user
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Check if Cash Wallet exists for this user
+        const userCashWallet = banksData.find(
+          bank => bank.bank_name === 'Cash Wallet' && 
+          (bank as any).user_id === user.id
+        );
+        
+        // If no Cash Wallet exists for this user, create it
+        if (!userCashWallet) {
+          try {
+            const newWallet = await createBank('Cash Wallet', 0);
+            setBanks([newWallet, ...banksData]);
+          } catch (err) {
+            console.error('Failed to auto-create Cash Wallet:', err);
+            // Continue even if wallet creation fails
+            setBanks(banksData);
+          }
+        } else {
+          setBanks(banksData);
+        }
+      } else {
+        setBanks(banksData);
+      }
+      
       setFundsInTransactions(fundsInData);
       setFundsOutTransactions(fundsOutData);
     } catch (err: any) {
