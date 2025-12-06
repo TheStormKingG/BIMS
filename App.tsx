@@ -510,7 +510,7 @@ function App() {
                    type: bank.bank_name === 'Cash Wallet' ? 'CASH_WALLET' as const : 'BANK' as const,
                    balance: Number(bank.total)
                  }))}
-                 bankTransactions={bankInTransactions.map(txn => ({
+                 bankTransactions={fundsInTransactions.map(txn => ({
                    id: txn.destination_account_id,
                    txnId: txn.id,
                    amount: Number(txn.amount),
