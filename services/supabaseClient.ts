@@ -33,12 +33,16 @@ export const getSupabase = () => {
     try {
       const supabaseUrl = getSupabaseUrl();
       const supabaseAnonKey = getSupabaseAnonKey();
+      // Determine base path for redirects (handles /BIMS/ base path)
+      const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
+      const redirectBase = window.location.origin + basePath;
+      
       supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          redirectTo: window.location.origin + window.location.pathname,
+          redirectTo: redirectBase + '/overview',
         },
       });
     } catch (error) {
@@ -50,12 +54,16 @@ export const getSupabase = () => {
       if (url && key) {
         localStorage.setItem('SUPABASE_URL', url);
         localStorage.setItem('SUPABASE_ANON_KEY', key);
+        // Determine base path for redirects (handles /BIMS/ base path)
+        const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
+        const redirectBase = window.location.origin + basePath;
+        
         supabase = createClient(url, key, {
           auth: {
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
-            redirectTo: window.location.origin + window.location.pathname,
+            redirectTo: redirectBase + '/overview',
           },
         });
       } else {
