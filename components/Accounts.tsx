@@ -428,40 +428,47 @@ export const Accounts: React.FC<AccountsProps> = ({
       )}
 
       <div className="grid gap-4">
-        {/* Wallet Card - Show Cash Wallet from accounts list first */}
-        {accounts.filter(acc => acc.name === 'Cash Wallet' && acc.type === 'CASH_WALLET').map(walletAcc => (
-          <div key={walletAcc.id} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
-            <div 
-              className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
-              onClick={() => setViewingWallet(true)}
-            >
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white">
-                  <Wallet className="w-6 h-6" />
+        {/* Wallet Card - Always show Cash Wallet, even if balance is 0 */}
+        {(() => {
+          // Find Cash Wallet from accounts list, or use walletBalance prop as fallback
+          const walletAcc = accounts.find(acc => acc.name === 'Cash Wallet' && acc.type === 'CASH_WALLET');
+          const walletBalanceToShow = walletAcc?.balance ?? walletBalance ?? 0;
+          const walletId = walletAcc?.id ?? 'wallet';
+          
+          return (
+            <div key={walletId} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
+              <div 
+                className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
+                onClick={() => setViewingWallet(true)}
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white">
+                    <Wallet className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-white text-lg">Cash Wallet</h3>
+                    <p className="text-slate-300 font-semibold text-base">${walletBalanceToShow.toLocaleString()} GYD</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-slate-400" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-white text-lg">Cash Wallet</h3>
-                  <p className="text-slate-300 font-semibold text-base">${walletAcc.balance.toLocaleString()} GYD</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </div>
+              
+              {/* Add Funds Button */}
+              <div className="px-6 pb-6">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenWalletAddFunds();
+                  }}
+                  className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ArrowDownToLine className="w-4 h-4" />
+                  Add Funds
+                </button>
               </div>
             </div>
-            
-            {/* Add Funds Button */}
-            <div className="px-6 pb-6">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenWalletAddFunds();
-                }}
-                className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <ArrowDownToLine className="w-4 h-4" />
-                Add Funds
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })()}
 
         {/* Bank Account Cards - Exclude Cash Wallet */}
         {accounts.filter(acc => acc.name !== 'Cash Wallet').map(acc => (
