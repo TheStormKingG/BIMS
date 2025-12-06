@@ -35,7 +35,7 @@ function App() {
   // Use banks hook
   const {
     banks,
-    bankInTransactions,
+    fundsInTransactions,
     walletInTransactions,
     fundsOutTransactions,
     totalInBanks,
@@ -44,7 +44,7 @@ function App() {
     addBank,
     updateBank,
     deleteBank,
-    addBankInTransaction,
+    addFundsInTransaction,
     addWalletInTransaction,
   } = useBanks();
 
@@ -177,7 +177,7 @@ function App() {
 
   const handleAddBankFunds = async (bankId: string, amount: number, source: string) => {
     try {
-      await addBankInTransaction(bankId, amount, source);
+      await addFundsInTransaction(bankId, amount, source);
     } catch (err) {
       alert('Failed to add funds: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
@@ -188,10 +188,10 @@ function App() {
       // Add funds to the wallet (updates banks table)
       await addFundsToWallet(amount);
       
-      // Record the transaction in bank_in table (wallet is now a bank)
+      // Record the transaction in funds_in table (wallet is now a bank)
       const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
       if (walletBank) {
-        await addBankInTransaction(walletBank.id, amount, source);
+        await addFundsInTransaction(walletBank.id, amount, source);
       }
 
       // If source is a bank account, deduct the amount from it
@@ -511,7 +511,7 @@ function App() {
                    balance: Number(bank.total)
                  }))}
                  bankTransactions={bankInTransactions.map(txn => ({
-                   id: txn.destination,
+                   id: txn.destination_account_id,
                    txnId: txn.id,
                    amount: Number(txn.amount),
                    source: txn.source,
