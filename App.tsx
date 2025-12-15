@@ -216,6 +216,7 @@ function App() {
     if (path === '/funds' || path === '/accounts') return 'accounts';
     if (path === '/scan') return 'scan';
     if (path === '/spending' || path === '/expenses') return 'expenses';
+    if (path === '/settings') return 'settings';
     return 'dashboard'; // default
   };
 
