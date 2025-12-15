@@ -409,9 +409,17 @@ function App() {
           {/* User Info */}
           <div className="mb-4 p-3 bg-slate-800/50 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                <User className="w-5 h-5" />
-              </div>
+              {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                <img
+                  src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">
                   {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
@@ -449,9 +457,17 @@ function App() {
            </div>
            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
              <div className="flex items-center gap-3">
-               <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                 <User className="w-5 h-5 text-white" />
-               </div>
+               {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                 <img
+                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                   alt="Profile"
+                   className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                 />
+               ) : (
+                 <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                   <User className="w-5 h-5 text-white" />
+                 </div>
+               )}
                <div className="flex-1 min-w-0">
                  <p className="text-sm font-semibold text-slate-900 truncate">
                    {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
