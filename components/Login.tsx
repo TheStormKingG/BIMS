@@ -66,6 +66,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     // Always use production URL for redirects - NEVER localhost
+    // Force absolute URL to prevent Supabase from using current origin
     const redirectUrl = 'https://stashway.app/overview';
 
     try {
