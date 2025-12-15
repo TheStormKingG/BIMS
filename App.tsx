@@ -453,41 +453,43 @@ function App() {
          <div className="md:hidden mb-6">
            <div className="flex items-center justify-between mb-4">
              <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
-            <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
-           </div>
-           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
              <div className="flex items-center gap-3">
-               {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-                 <img
-                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
-                   alt="Profile"
-                   className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                 />
-               ) : (
-                 <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                   <User className="w-5 h-5 text-white" />
+               <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
+               <div className="flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-slate-200">
+                 {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                   <img
+                     src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                     alt="Profile"
+                     className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                   />
+                 ) : (
+                   <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                     <User className="w-5 h-5 text-white" />
+                   </div>
+                 )}
+                 <div className="flex-1 min-w-0">
+                   <p className="text-sm font-semibold text-slate-900 truncate">
+                     {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
+                   </p>
+                   <p className="text-xs text-slate-500 truncate">
+                     {user?.email || 'Not signed in'}
+                   </p>
                  </div>
-               )}
-               <div className="flex-1 min-w-0">
-                 <p className="text-sm font-semibold text-slate-900 truncate">
-                   {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
-                 </p>
-                 <p className="text-xs text-slate-500 truncate">
-                   {user?.email || 'Not signed in'}
-                 </p>
+                 <button
+                   onClick={async () => {
+                     await supabase.auth.signOut();
+                     setUser(null);
+                     navigate('/', { replace: true });
+                   }}
+                   className="p-1 text-slate-600 hover:text-slate-900 transition-colors"
+                   title="Sign Out"
+                 >
+                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                   </svg>
+                 </button>
                </div>
              </div>
-             <button
-               onClick={async () => {
-                 await supabase.auth.signOut();
-                 setUser(null);
-                 navigate('/', { replace: true });
-               }}
-               className="p-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
-               title="Sign Out"
-             >
-               <LogOut className="w-5 h-5" />
-             </button>
            </div>
          </div>
 
