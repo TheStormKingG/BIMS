@@ -66,14 +66,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     // Always use production URL for redirects - NEVER localhost
-    // Force absolute URL to prevent Supabase from using current origin
+    // Use absolute URL with full path to prevent Supabase from using current origin
     const redirectUrl = 'https://stashway.app/overview';
 
     try {
+      // Ensure we're using the production URL by explicitly setting it
+      console.log('Initiating OAuth with redirect URL:', redirectUrl);
+      
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
+          queryParams: {
+            redirect_to: redirectUrl,
+          },
         },
       });
 
