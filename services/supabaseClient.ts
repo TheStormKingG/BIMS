@@ -31,9 +31,7 @@ let supabase: ReturnType<typeof createClient> | null = null;
 // Get production redirect URL - NEVER use localhost
 const getProductionRedirectUrl = (): string => {
   // Always use production URL for OAuth redirects
-  const productionUrl = 'https://thestormkingg.github.io';
-  const basePath = '/BIMS';
-  return `${productionUrl}${basePath}/overview`;
+  return 'https://stashway.app/overview';
 };
 
 export const getSupabase = () => {
