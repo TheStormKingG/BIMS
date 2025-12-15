@@ -23,7 +23,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setMessage(null);
 
     // Always use production URL for redirects - NEVER localhost
-    const redirectUrl = 'https://thestormkingg.github.io/BIMS/overview';
+    const redirectUrl = 'https://stashway.app/overview';
 
     try {
       if (isSignUp) {
@@ -66,7 +66,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     // Always use production URL for redirects - NEVER localhost
-    const redirectUrl = 'https://thestormkingg.github.io/BIMS/overview';
+    const redirectUrl = 'https://stashway.app/overview';
 
     try {
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({

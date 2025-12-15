@@ -24,7 +24,7 @@ if (window.location.search.includes('?/')) {
     .split('&')[0];
   
   if (path) {
-    const newPath = '/BIMS/' + path + window.location.hash;
+    const newPath = '/' + path + window.location.hash;
     window.history.replaceState({}, '', newPath);
   }
 }
@@ -37,7 +37,7 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename="/BIMS">
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>

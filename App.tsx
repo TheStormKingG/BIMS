@@ -84,7 +84,7 @@ function App() {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
         // Redirect to overview if on login page
-        if (location.pathname === '/' || location.pathname === '/BIMS' || location.pathname === '/BIMS/') {
+        if (location.pathname === '/') {
           navigate('/overview', { replace: true });
         }
       } else if (event === 'SIGNED_OUT') {
@@ -110,12 +110,12 @@ function App() {
   }
 
   // If not authenticated and not on login page, show login
-  if (!user && location.pathname !== '/' && location.pathname !== '/BIMS' && location.pathname !== '/BIMS/') {
+  if (!user && location.pathname !== '/') {
     return <Navigate to="/" replace />;
   }
 
   // If authenticated and on login page, redirect to overview
-  if (user && (location.pathname === '/' || location.pathname === '/BIMS' || location.pathname === '/BIMS/')) {
+  if (user && location.pathname === '/') {
     return <Navigate to="/overview" replace />;
   }
 
