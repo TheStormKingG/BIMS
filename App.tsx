@@ -447,51 +447,52 @@ function App() {
         </div>
       </nav>
 
+      {/* Mobile Header */}
+      <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-4 pb-2 px-4 mb-4">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-bold text-slate-900 flex-shrink-0">Stashway</h1>
+          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
+            <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded flex-shrink-0">GYD</div>
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 min-w-0 flex-shrink">
+              {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                <img
+                  src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                  alt="Profile"
+                  className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <div className="min-w-0 flex-shrink">
+                <p className="text-xs font-semibold text-slate-900 truncate leading-tight">
+                  {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
+                </p>
+                <p className="text-[10px] text-slate-500 truncate leading-tight">
+                  {user?.email || 'Not signed in'}
+                </p>
+              </div>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setUser(null);
+                  navigate('/', { replace: true });
+                }}
+                className="p-0.5 text-slate-600 hover:text-slate-900 transition-colors flex-shrink-0"
+                title="Sign Out"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Area */}
       <main className="p-4 md:p-8 max-w-6xl mx-auto w-full">
-         {/* Mobile Header */}
-         <div className="md:hidden mb-6">
-           <div className="flex items-center justify-between mb-4">
-             <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
-             <div className="flex items-center gap-3">
-               <div className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">GYD</div>
-               <div className="flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-slate-200">
-                 {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-                   <img
-                     src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
-                     alt="Profile"
-                     className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                   />
-                 ) : (
-                   <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                     <User className="w-5 h-5 text-white" />
-                   </div>
-                 )}
-                 <div className="flex-1 min-w-0">
-                   <p className="text-sm font-semibold text-slate-900 truncate">
-                     {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
-                   </p>
-                   <p className="text-xs text-slate-500 truncate">
-                     {user?.email || 'Not signed in'}
-                   </p>
-                 </div>
-                 <button
-                   onClick={async () => {
-                     await supabase.auth.signOut();
-                     setUser(null);
-                     navigate('/', { replace: true });
-                   }}
-                   className="p-1 text-slate-600 hover:text-slate-900 transition-colors"
-                   title="Sign Out"
-                 >
-                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                   </svg>
-                 </button>
-               </div>
-             </div>
-           </div>
-         </div>
 
          <ProtectedRoute>
            <Routes>
