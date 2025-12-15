@@ -3,14 +3,17 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-// Unregister any existing service workers to prevent errors
+// Unregister any existing service workers to prevent errors and network issues
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.unregister().catch((err) => {
-        console.warn('Error unregistering service worker:', err);
-      });
-    }
+    const unregisterPromises = registrations.map((registration) => 
+      registration.unregister().catch(() => {
+        // Silently ignore errors - service worker may already be unregistered
+      })
+    );
+    return Promise.all(unregisterPromises);
+  }).catch(() => {
+    // Silently ignore if getRegistrations fails
   });
 }
 
