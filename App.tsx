@@ -6,6 +6,7 @@ import { Spending } from './components/Spending';
 import { Scanner } from './components/Scanner';
 import { Dashboard } from './components/Dashboard';
 import { Login } from './components/Login';
+import { Settings } from './components/Settings';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -556,6 +557,10 @@ function App() {
                    />
                  );
                })()
+             } />
+             
+             <Route path="/settings" element={
+               <Settings user={user} />
              } />
              
              <Route path="/spending" element={
