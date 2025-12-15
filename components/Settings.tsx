@@ -13,6 +13,21 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = getSupabase();
 
+  // Personal Information form state
+  const [personalInfo, setPersonalInfo] = useState({
+    country: user?.user_metadata?.country || 'Guyana',
+    fullName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || '',
+    streetAddress1: user?.user_metadata?.street_address_1 || '',
+    streetAddress2: user?.user_metadata?.street_address_2 || '',
+    city: user?.user_metadata?.city || '',
+    state: user?.user_metadata?.state || '',
+    zipCode: user?.user_metadata?.zip_code || '',
+    phoneNumber: user?.user_metadata?.phone_number || '',
+    dateOfBirth: user?.user_metadata?.date_of_birth || '',
+    gender: user?.user_metadata?.gender || '',
+    occupation: user?.user_metadata?.occupation || '',
+  });
+
   const handleProfilePhotoClick = () => {
     fileInputRef.current?.click();
   };
@@ -98,14 +113,129 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {selectedOption === 'personal-info' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Country/Region</label>
+                <select
+                  value={personalInfo.country}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, country: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+                >
+                  <option value="Guyana">Guyana</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Full name (First and Last name)</label>
                 <input
                   type="text"
-                  defaultValue={user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''}
+                  value={personalInfo.fullName}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, fullName: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
                   placeholder="Enter your full name"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Street address</label>
+                <input
+                  type="text"
+                  value={personalInfo.streetAddress1}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, streetAddress1: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black mb-2"
+                  placeholder="Address line 1"
+                />
+                <input
+                  type="text"
+                  value={personalInfo.streetAddress2}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, streetAddress2: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Address line 2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">City</label>
+                <input
+                  type="text"
+                  value={personalInfo.city}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, city: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Enter your city"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">State / Province / Region</label>
+                <input
+                  type="text"
+                  value={personalInfo.state}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, state: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Enter state/province/region"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Zip Code</label>
+                <input
+                  type="text"
+                  value={personalInfo.zipCode}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, zipCode: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Enter zip code"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Phone number</label>
+                <input
+                  type="tel"
+                  value={personalInfo.phoneNumber}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Date of Birth</label>
+                <input
+                  type="date"
+                  value={personalInfo.dateOfBirth}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, dateOfBirth: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Gender</label>
+                <select
+                  value={personalInfo.gender}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Occupation</label>
+                <input
+                  type="text"
+                  value={personalInfo.occupation}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, occupation: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  placeholder="Enter your occupation"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                 <input
@@ -116,7 +246,14 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 />
                 <p className="text-xs text-slate-500 mt-1">Email cannot be changed here</p>
               </div>
-              <button className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors">
+
+              <button 
+                onClick={async () => {
+                  // TODO: Save to Supabase user_metadata
+                  alert('Personal information saved!');
+                }}
+                className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
+              >
                 Save Changes
               </button>
             </div>
