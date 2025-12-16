@@ -6,9 +6,10 @@ import { Camera, Upload, Loader2, Check, AlertCircle, X } from 'lucide-react';
 interface ScannerProps {
   accounts: Account[];
   onSave: (transactionData: ReceiptScanResult, accountId: string) => void;
+  onTriggerScan?: () => void;
 }
 
-export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
+export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerScan }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
@@ -150,7 +151,9 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
               <div className="p-6">
                 <div className="text-center mb-6">
                   <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">Oops—this receipt played hide-and-seek.</h3>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">
+                    Oops—this receipt played<br />hide-and-seek.
+                  </h3>
                   <p className="text-slate-700 mb-4">
                     I found zero data—more like art or random paper. Maybe it's not even a receipt.
                   </p>
@@ -168,8 +171,13 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
 
                 <div className="flex justify-center">
                   <button
-                    onClick={handleCancel}
-                    className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+                    onClick={() => {
+                      handleCancel();
+                      if (onTriggerScan) {
+                        onTriggerScan();
+                      }
+                    }}
+                    className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 active:scale-95 shadow-lg hover:shadow-xl active:shadow-md text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200"
                   >
                     Try Again
                   </button>

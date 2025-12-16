@@ -566,12 +566,13 @@ function App() {
                        balance: Number(bank.total)
                      }));
                  
-                 return (
-                   <Scanner 
-                     accounts={allAccounts}
-                     onSave={handleSaveTransaction}
-                   />
-                 );
+                return (
+                  <Scanner 
+                    accounts={allAccounts}
+                    onTriggerScan={() => setShowScanModal(true)}
+                    onSave={handleSaveTransaction}
+                  />
+                );
                })()
              } />
              
