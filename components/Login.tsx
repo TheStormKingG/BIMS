@@ -100,9 +100,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">BIMS</h1>
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <img src="/stashway-logo.png" alt="Stashway Logo" className="w-12 h-12" />
+            <h1 className="text-3xl font-bold text-slate-900">
+              Stashway<sup className="text-sm">™</sup>
+            </h1>
+          </div>
           <p className="text-slate-600">
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
+            {isSignUp ? 'Create your account' : 'Grow your stash'}
           </p>
         </div>
 
