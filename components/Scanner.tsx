@@ -132,35 +132,52 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
         </div>
       )}
 
-      {scanResult && !isScanning && scanResult.total === 0 && (
-        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6 text-center">
-          <div className="mb-4">
-            <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-amber-900 mb-2">Oops—this receipt played hide-and-seek.</h3>
-            <p className="text-amber-800 mb-4">
-              I found zero data—more like art or random paper. Maybe it's not even a receipt.
-            </p>
-            <div className="bg-white rounded-lg p-4 text-left border border-amber-200 mb-4">
-              <p className="text-sm font-semibold text-amber-900 mb-2">Try again, but before ensure:</p>
-              <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
-                <li>Merchant name visible</li>
-                <li>Totals readable</li>
-                <li>Flat surface</li>
-                <li>Good lighting</li>
-              </ul>
-            </div>
-            <button
-              onClick={handleCancel}
-              className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      )}
+      {scanResult && !isScanning && (
+        <>
+          {(!scanResult.total || scanResult.total === 0 || !scanResult.items || scanResult.items.length === 0) ? (
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="relative h-32 bg-slate-100 overflow-hidden">
+                {previewUrl && (
+                  <img src={previewUrl} alt="Receipt Preview" className="w-full h-full object-cover opacity-50" />
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-amber-100/90 backdrop-blur px-4 py-2 rounded-full shadow-sm text-sm font-semibold text-amber-800 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" /> No Data Found
+                  </div>
+                </div>
+              </div>
 
-      {scanResult && !isScanning && scanResult.total > 0 && (
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">Oops—this receipt played hide-and-seek.</h3>
+                  <p className="text-slate-700 mb-4">
+                    I found zero data—more like art or random paper. Maybe it's not even a receipt.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 rounded-lg p-4 text-left border border-amber-200 mb-6">
+                  <p className="text-sm font-semibold text-amber-900 mb-2">Try again, but before ensure:</p>
+                  <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
+                    <li>Merchant name visible</li>
+                    <li>Totals readable</li>
+                    <li>Flat surface</li>
+                    <li>Good lighting</li>
+                  </ul>
+                </div>
+
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleCancel}
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
            <div className="relative h-32 bg-slate-100 overflow-hidden">
              {previewUrl && (
                 <img src={previewUrl} alt="Receipt Preview" className="w-full h-full object-cover opacity-50" />
@@ -267,7 +284,9 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
                 </div>
               </div>
            </div>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
