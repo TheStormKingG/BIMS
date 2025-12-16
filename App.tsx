@@ -448,37 +448,37 @@ function App() {
       </nav>
 
       {/* Mobile Header */}
-      <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-4 pb-2 px-4 mb-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-            <img src="/stashway-logo.png" alt="Stashway" className="w-[50px] h-[50px] flex-shrink-0" />
-            <h1 className="text-[24px] font-bold text-slate-900 truncate">Stashway</h1>
+      <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px]">
+        <div className="flex items-center justify-between gap-[8px]">
+          <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
+            <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
+            <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway</h1>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-[8px] flex-shrink-0">
             <button
               onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-              className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+              className="flex items-center gap-[8px] px-[8px] py-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
             >
               {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                 <img
                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                   alt="Profile"
-                  className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                  className="w-[26.6px] h-[26.6px] rounded-full object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-white" />
+                <div className="w-[26.6px] h-[26.6px] rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                  <User className="w-[15.2px] h-[15.2px] text-white" />
                 </div>
               )}
               <div className="min-w-0 flex-shrink">
-                <p className="text-xs font-semibold text-slate-900 truncate leading-tight">
+                <p className="text-[11.4px] font-semibold text-slate-900 truncate leading-tight">
                   {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
                 </p>
-                <p className="text-[10px] text-slate-500 truncate leading-tight">
+                <p className="text-[9.5px] text-slate-500 truncate leading-tight">
                   {user?.email || 'Not signed in'}
                 </p>
               </div>
-              <svg className="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-[15.2px] h-[15.2px] text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
