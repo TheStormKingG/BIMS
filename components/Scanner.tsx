@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { parseReceiptImage } from '../services/geminiService';
 import { ReceiptScanResult, Account, LineItem } from '../types';
 import { Camera, Upload, Loader2, Check, AlertCircle, X } from 'lucide-react';
@@ -10,6 +11,7 @@ interface ScannerProps {
 }
 
 export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerScan }) => {
+  const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
@@ -98,6 +100,7 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
     setPreviewUrl(null);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    navigate('/overview');
   };
 
   return (
@@ -172,9 +175,14 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
                 <div className="flex justify-center">
                   <button
                     onClick={() => {
-                      handleCancel();
+                      setScanResult(null);
+                      setPreviewUrl(null);
+                      setError(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
                       if (onTriggerScan) {
                         onTriggerScan();
+                      } else {
+                        navigate('/overview');
                       }
                     }}
                     className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 active:scale-95 shadow-lg hover:shadow-xl active:shadow-md text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200"
