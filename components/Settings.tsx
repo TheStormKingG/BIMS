@@ -408,18 +408,18 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <img
                   src={profileImage}
                   alt="Profile"
-                  className="w-72 h-72 rounded-full object-cover border-4 border-slate-200"
+                  className="w-44 h-44 rounded-full object-cover border-4 border-slate-200"
                 />
               ) : (
-                <div className="w-72 h-72 rounded-full bg-emerald-600 flex items-center justify-center border-4 border-slate-200">
-                  <User className="w-36 h-36 text-white" />
+                <div className="w-44 h-44 rounded-full bg-emerald-600 flex items-center justify-center border-4 border-slate-200">
+                  <User className="w-20 h-20 text-white" />
                 </div>
               )}
               <button
                 onClick={handleProfilePhotoClick}
-                className="absolute bottom-0 right-0 w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg hover:bg-emerald-700 transition-colors"
+                className="absolute bottom-0 right-0 w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg hover:bg-emerald-700 transition-colors"
               >
-                <Camera className="w-6 h-6 text-white" />
+                <Camera className="w-5 h-5 text-white" />
               </button>
               <input
                 ref={fileInputRef}
