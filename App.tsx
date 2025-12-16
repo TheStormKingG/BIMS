@@ -806,28 +806,31 @@ function App() {
                   <button
                     onClick={() => {
                       setShowScanModal(false);
-                      navigate('/scan');
-                      // Trigger camera after navigation
-                      setTimeout(() => {
-                        const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
-                        if (scannerInput) {
-                          // Create a new file input with camera capture
-                          const cameraInput = document.createElement('input');
-                          cameraInput.type = 'file';
-                          cameraInput.accept = 'image/*';
-                          cameraInput.capture = 'environment';
-                          cameraInput.onchange = (e: any) => {
-                            const file = e.target.files?.[0];
-                            if (file && scannerInput) {
+                      // Trigger camera input immediately
+                      const cameraInput = document.createElement('input');
+                      cameraInput.type = 'file';
+                      cameraInput.accept = 'image/*';
+                      cameraInput.capture = 'environment';
+                      cameraInput.onchange = (e: any) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          navigate('/scan');
+                          // Wait for Scanner component to mount, then trigger file input
+                          setTimeout(() => {
+                            const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+                            if (scannerInput) {
+                              // Create a DataTransfer to assign the file
                               const dataTransfer = new DataTransfer();
                               dataTransfer.items.add(file);
                               scannerInput.files = dataTransfer.files;
-                              scannerInput.dispatchEvent(new Event('change', { bubbles: true }));
+                              // Trigger the change event to analyze the image
+                              const changeEvent = new Event('change', { bubbles: true });
+                              scannerInput.dispatchEvent(changeEvent);
                             }
-                          };
-                          cameraInput.click();
+                          }, 500);
                         }
-                      }, 300);
+                      };
+                      cameraInput.click();
                     }}
                     className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
                   >
@@ -840,14 +843,30 @@ function App() {
                   <button
                     onClick={() => {
                       setShowScanModal(false);
-                      navigate('/scan');
-                      // Trigger file picker after navigation
-                      setTimeout(() => {
-                        const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
-                        if (scannerInput) {
-                          scannerInput.click();
+                      // Trigger file picker immediately
+                      const fileInput = document.createElement('input');
+                      fileInput.type = 'file';
+                      fileInput.accept = 'image/*';
+                      fileInput.onchange = (e: any) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          navigate('/scan');
+                          // Wait for Scanner component to mount, then trigger file input
+                          setTimeout(() => {
+                            const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+                            if (scannerInput) {
+                              // Create a DataTransfer to assign the file
+                              const dataTransfer = new DataTransfer();
+                              dataTransfer.items.add(file);
+                              scannerInput.files = dataTransfer.files;
+                              // Trigger the change event to analyze the image
+                              const changeEvent = new Event('change', { bubbles: true });
+                              scannerInput.dispatchEvent(changeEvent);
+                            }
+                          }, 500);
                         }
-                      }, 300);
+                      };
+                      fileInput.click();
                     }}
                     className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
                   >
