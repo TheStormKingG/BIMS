@@ -797,7 +797,12 @@ function App() {
           <>
             <div 
               className="fixed inset-0 bg-black/50 z-[60] md:hidden"
-              onClick={() => setShowScanModal(false)}
+              onClick={() => {
+                setShowScanModal(false);
+                if (location.pathname === '/scan') {
+                  navigate('/overview');
+                }
+              }}
             />
             <div className="fixed bottom-0 left-0 right-0 bg-slate-900 rounded-t-3xl z-[61] md:hidden safe-area-bottom">
               <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mt-3 mb-6" />
