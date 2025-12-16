@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter, LogOut } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 
 interface SettingsProps {
@@ -501,6 +501,22 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             </div>
           </div>
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={async () => {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+              alert('Error signing out: ' + error.message);
+            } else {
+              navigate('/', { replace: true });
+            }
+          }}
+          className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Log Out</span>
+        </button>
       </div>
     </div>
   );

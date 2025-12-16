@@ -101,7 +101,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
         <div className="text-center">
           <div className="flex flex-col items-center gap-2 mb-2">
-            <img src="/stashway-logo.png" alt="Stashway Logo" className="w-12 h-12" />
+            <img src="/stashway-logo.png" alt="Stashway Logo" className="w-36 h-36" />
             <h1 className="text-3xl font-bold text-slate-900">
               Stashway<sup className="text-sm">™</sup>
             </h1>
