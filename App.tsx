@@ -449,10 +449,10 @@ function App() {
 
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-4 pb-2 px-4 mb-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <img src="/stashway-logo.png" alt="Stashway" className="w-[51px] h-[51px]" />
-            <h1 className="text-[30px] font-bold text-slate-900">Stashway</h1>
+        <div className="flex items-center justify-between gap-2 overflow-hidden">
+          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
+            <img src="/stashway-logo.png" alt="Stashway" className="w-[40px] h-[40px] flex-shrink-0" />
+            <h1 className="text-[30px] font-bold text-slate-900 truncate">Stashway</h1>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <div className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 min-w-0 flex-shrink">
