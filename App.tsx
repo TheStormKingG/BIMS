@@ -747,21 +747,24 @@ function App() {
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 flex justify-between items-end z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        {NAV_ITEMS.filter(item => item.id !== 'scan').map(item => (
-          <button
-            key={item.id}
-            onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center justify-center flex-1 py-2 gap-1 transition-colors ${
-              activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
-            }`}
-          >
-            <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </button>
-        ))}
+        {/* Left side items */}
+        <div className="flex flex-1 justify-around">
+          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['dashboard', 'accounts'].includes(item.id)).map(item => (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center justify-center py-2 gap-1 transition-colors ${
+                activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
+              }`}
+            >
+              <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </button>
+          ))}
+        </div>
         
-        {/* Special Scan Button - Overlapping */}
-        <div className="relative flex-1 flex justify-center items-end">
+        {/* Special Scan Button - Center, Overlapping */}
+        <div className="relative flex justify-center items-end" style={{ width: '20%' }}>
           <button
             onClick={() => setShowScanModal(true)}
             className={`absolute bottom-[15%] w-16 h-16 rounded-full bg-emerald-600 shadow-lg hover:shadow-xl active:shadow-md active:scale-95 transition-all duration-200 flex items-center justify-center z-10 ${
@@ -770,6 +773,22 @@ function App() {
           >
             <ScanLine className="w-8 h-8 text-white" strokeWidth={2.5} />
           </button>
+        </div>
+        
+        {/* Right side items */}
+        <div className="flex flex-1 justify-around">
+          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['expenses', 'settings'].includes(item.id)).map(item => (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center justify-center py-2 gap-1 transition-colors ${
+                activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
+              }`}
+            >
+              <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </button>
+          ))}
         </div>
         
         {/* Scan Modal Overlay */}
