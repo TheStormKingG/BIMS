@@ -286,8 +286,8 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             <div className="bg-slate-900 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                <div className="flex items-center gap-2">
-                  <img src="/stashway-logo.png" alt="Stashway Logo" className="w-6 h-6" />
+                <div className="flex flex-col items-center gap-2">
+                  <img src="/stashway-logo.png" alt="Stashway Logo" className="w-20 h-20" />
                   <h2 className="text-base font-semibold text-white">Share in a post</h2>
                 </div>
                 <button
