@@ -449,7 +449,7 @@ function App() {
       </nav>
 
       {/* Mobile Header */}
-      <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px]">
+      <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px] shadow-md">
         <div className="flex items-center justify-between gap-[8px]">
           <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
             <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />

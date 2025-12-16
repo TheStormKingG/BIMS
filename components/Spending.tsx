@@ -263,16 +263,16 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-500 uppercase font-medium text-xs border-b border-slate-100">
               <tr>
-                <th className="px-4 py-3 text-left">Transaction Date/Time</th>
-                <th className="px-4 py-3 text-left">Category</th>
+                <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Item</th>
-                <th className="px-4 py-3 text-right">Item Cost</th>
-                <th className="px-4 py-3 text-right">Item Qty</th>
-                <th className="px-4 py-3 text-right">Item Total</th>
-                <th className="px-4 py-3 text-left">Payment Method</th>
+                <th className="px-4 py-3 text-right">Cost</th>
+                <th className="px-4 py-3 text-right">Qty</th>
+                <th className="px-4 py-3 text-right">Total</th>
+                <th className="px-4 py-3 text-left">Category</th>
+                <th className="px-4 py-3 text-left">Method</th>
                 <th className="px-4 py-3 text-left">Source</th>
-                <th className="px-4 py-3 text-left">Entry Date</th>
-                <th className="px-4 py-3 text-center">Action</th>
+                <th className="px-4 py-3 text-left">Entered</th>
+                <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -281,11 +281,6 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                       {formatDateTime(item.transactionDateTime)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-800">
-                        {item.category}
-                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-900">{item.item}</div>
@@ -299,6 +294,11 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                     <td className="px-4 py-3 text-right font-semibold text-slate-900">
                       ${item.itemTotal.toLocaleString()}
                     </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-800">
+                        {item.category}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-slate-600">
                       {item.paymentMethod || 'N/A'}
                     </td>
@@ -311,15 +311,17 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                       {formatEntryDate(item.entryDate)}
                     </td>
                     <td className="px-4 py-3">
-                      {onUpdateSpend && (
-                        <button
-                          onClick={() => handleEditClick(item)}
-                          className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                          title="Edit item"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                      )}
+                      <div className="flex items-center justify-center gap-2">
+                        {onUpdateSpend && (
+                          <button
+                            onClick={() => handleEditClick(item)}
+                            className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            title="Edit item"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
