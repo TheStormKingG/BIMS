@@ -208,56 +208,54 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Spending</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <button
-                onClick={handlePreviousMonth}
-                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Previous month"
-              >
-                <ChevronLeft className="w-5 h-5 text-slate-600" />
-              </button>
-              <button
-                onClick={handleToday}
-                className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium"
-                title="Go to current month"
-              >
-                {currentMonthName}
-              </button>
-              <button
-                onClick={handleNextMonth}
-                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Next month"
-              >
-                <ChevronRight className="w-5 h-5 text-slate-600" />
-              </button>
-            </div>
-          </div>
+      {/* Search Bar */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search items, categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
+          />
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search items, categories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black w-64"
-            />
-          </div>
-          {onAddSpend && (
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Spend
-            </button>
-          )}
+      </div>
+
+      {/* Month/Year Filter and Add Spend Button */}
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePreviousMonth}
+            className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+            title="Previous month"
+          >
+            <ChevronLeft className="w-5 h-5 text-slate-600" />
+          </button>
+          <button
+            onClick={handleToday}
+            className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium"
+            title="Go to current month"
+          >
+            {currentMonthName}
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+            title="Next month"
+          >
+            <ChevronRight className="w-5 h-5 text-slate-600" />
+          </button>
         </div>
+        {onAddSpend && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+Add Spend</span>
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
