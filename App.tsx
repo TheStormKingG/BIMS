@@ -452,7 +452,7 @@ function App() {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 flex-shrink-0">
             <img src="/stashway-logo.png" alt="Stashway" className="w-[51px] h-[51px]" />
-            <h1 className="text-xl font-bold text-slate-900">Stashway</h1>
+            <h1 className="text-[30px] font-bold text-slate-900">Stashway</h1>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <div className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 min-w-0 flex-shrink">
