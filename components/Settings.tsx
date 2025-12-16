@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 
 interface SettingsProps {
@@ -7,7 +8,18 @@ interface SettingsProps {
 }
 
 export const Settings: React.FC<SettingsProps> = ({ user }) => {
+  const location = useLocation();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  // Check if we should open personal info from navigation state
+  useEffect(() => {
+    const state = location.state as { openPersonalInfo?: boolean } | null;
+    if (state?.openPersonalInfo) {
+      setSelectedOption('personal-info');
+      // Clear the state to prevent reopening on subsequent renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
   const [profileImage, setProfileImage] = useState<string | null>(user?.user_metadata?.avatar_url || null);
   const [problemText, setProblemText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);

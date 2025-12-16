@@ -449,13 +449,16 @@ function App() {
 
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-4 pb-2 px-4 mb-4">
-        <div className="flex items-center justify-between gap-2 overflow-hidden">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <img src="/stashway-logo.png" alt="Stashway" className="w-[50px] h-[50px] flex-shrink-0" />
             <h1 className="text-[24px] font-bold text-slate-900 truncate">Stashway</h1>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-            <div className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 min-w-0 flex-shrink">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+              className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+            >
               {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                 <img
                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
@@ -475,20 +478,10 @@ function App() {
                   {user?.email || 'Not signed in'}
                 </p>
               </div>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  setUser(null);
-                  navigate('/', { replace: true });
-                }}
-                className="p-0.5 text-slate-600 hover:text-slate-900 transition-colors flex-shrink-0"
-                title="Sign Out"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+              <svg className="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
