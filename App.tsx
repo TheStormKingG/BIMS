@@ -817,9 +817,11 @@ function App() {
                       cameraInput.type = 'file';
                       cameraInput.accept = 'image/*';
                       cameraInput.capture = 'environment';
+                      let fileSelected = false;
                       cameraInput.onchange = (e: any) => {
                         const file = e.target.files?.[0];
                         if (file) {
+                          fileSelected = true;
                           navigate('/scan');
                           // Wait for Scanner component to mount, then trigger file input
                           setTimeout(() => {
@@ -837,6 +839,12 @@ function App() {
                         }
                       };
                       cameraInput.click();
+                      // If file picker is cancelled, navigate to overview after a short delay
+                      setTimeout(() => {
+                        if (!fileSelected && location.pathname === '/scan') {
+                          navigate('/overview');
+                        }
+                      }, 300);
                     }}
                     className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
                   >
@@ -853,9 +861,11 @@ function App() {
                       const fileInput = document.createElement('input');
                       fileInput.type = 'file';
                       fileInput.accept = 'image/*';
+                      let fileSelected = false;
                       fileInput.onchange = (e: any) => {
                         const file = e.target.files?.[0];
                         if (file) {
+                          fileSelected = true;
                           navigate('/scan');
                           // Wait for Scanner component to mount, then trigger file input
                           setTimeout(() => {
@@ -873,6 +883,12 @@ function App() {
                         }
                       };
                       fileInput.click();
+                      // If file picker is cancelled, navigate to overview after a short delay
+                      setTimeout(() => {
+                        if (!fileSelected && location.pathname === '/scan') {
+                          navigate('/overview');
+                        }
+                      }, 300);
                     }}
                     className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
                   >
