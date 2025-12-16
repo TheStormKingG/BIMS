@@ -384,7 +384,7 @@ function App() {
       {/* Desktop Navigation (Sidebar) */}
       <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-slate-900 text-white flex-col p-6 z-20">
         <div className="flex flex-col items-center gap-2 mb-10">
-           <img src="/stashway-logo.png" alt="Stashway" className="w-8 h-8" />
+           <img src="/stashway-logo.png" alt="Stashway" className="w-24 h-24" />
            <h1 className="text-xl font-bold tracking-tight">Stashway</h1>
         </div>
         
