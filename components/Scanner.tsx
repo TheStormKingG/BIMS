@@ -101,35 +101,13 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave }) => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-      <div className="bg-slate-900 text-white p-8 rounded-2xl shadow-xl text-center">
-        <h2 className="text-2xl font-bold mb-2">Scan Receipt</h2>
-        <p className="text-slate-400 mb-6">Take a photo or upload a screenshot (Email/SMS)</p>
-        
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
-
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-full font-semibold transition-transform active:scale-95"
-          >
-            <Camera className="w-5 h-5" />
-            Snap Photo
-          </button>
-          <button
-             onClick={() => fileInputRef.current?.click()}
-             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-6 py-3 rounded-full font-semibold transition-colors"
-          >
-            <Upload className="w-5 h-5" />
-            Upload File
-          </button>
-        </div>
-      </div>
+      <input
+        type="file"
+        accept="image/*"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+      />
 
       {isScanning && (
         <div className="flex flex-col items-center justify-center py-12 text-slate-500">
