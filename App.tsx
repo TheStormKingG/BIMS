@@ -12,11 +12,12 @@ import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, ScanLine, Camera, Image } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showScanModal, setShowScanModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -745,12 +746,12 @@ function App() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-2 flex justify-between items-center z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        {NAV_ITEMS.map(item => (
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 flex justify-between items-end z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        {NAV_ITEMS.filter(item => item.id !== 'scan').map(item => (
           <button
             key={item.id}
             onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center justify-center w-full py-2 gap-1 transition-colors ${
+            className={`flex flex-col items-center justify-center flex-1 py-2 gap-1 transition-colors ${
               activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
             }`}
           >
@@ -758,6 +759,89 @@ function App() {
             <span className="text-[10px] font-medium">{item.label}</span>
           </button>
         ))}
+        
+        {/* Special Scan Button - Overlapping */}
+        <div className="relative flex-1 flex justify-center items-end">
+          <button
+            onClick={() => setShowScanModal(true)}
+            className={`absolute bottom-[15%] w-16 h-16 rounded-full bg-emerald-600 shadow-lg hover:shadow-xl active:shadow-md active:scale-95 transition-all duration-200 flex items-center justify-center z-10 ${
+              activeTab === 'scan' ? 'ring-4 ring-emerald-200' : ''
+            }`}
+          >
+            <ScanLine className="w-8 h-8 text-white" strokeWidth={2.5} />
+          </button>
+        </div>
+        
+        {/* Scan Modal Overlay */}
+        {showScanModal && (
+          <>
+            <div 
+              className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+              onClick={() => setShowScanModal(false)}
+            />
+            <div className="fixed bottom-0 left-0 right-0 bg-slate-900 rounded-t-3xl z-[61] md:hidden safe-area-bottom">
+              <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mt-3 mb-6" />
+              <div className="px-6 pb-8">
+                <h2 className="text-xl font-bold text-white mb-6 text-center">Choose an action</h2>
+                <div className="flex gap-6 justify-center">
+                  <button
+                    onClick={() => {
+                      setShowScanModal(false);
+                      navigate('/scan');
+                      // Trigger camera after navigation
+                      setTimeout(() => {
+                        const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+                        if (scannerInput) {
+                          // Create a new file input with camera capture
+                          const cameraInput = document.createElement('input');
+                          cameraInput.type = 'file';
+                          cameraInput.accept = 'image/*';
+                          cameraInput.capture = 'environment';
+                          cameraInput.onchange = (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file && scannerInput) {
+                              const dataTransfer = new DataTransfer();
+                              dataTransfer.items.add(file);
+                              scannerInput.files = dataTransfer.files;
+                              scannerInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                          };
+                          cameraInput.click();
+                        }
+                      }, 300);
+                    }}
+                    className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
+                      <Camera className="w-8 h-8 text-white" strokeWidth={2} />
+                    </div>
+                    <span className="text-white font-medium text-sm">Camera</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowScanModal(false);
+                      navigate('/scan');
+                      // Trigger file picker after navigation
+                      setTimeout(() => {
+                        const scannerInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+                        if (scannerInput) {
+                          scannerInput.click();
+                        }
+                      }, 300);
+                    }}
+                    className="flex flex-col items-center gap-3 min-w-[100px] active:scale-95 transition-transform"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center shadow-lg">
+                      <Image className="w-8 h-8 text-white" strokeWidth={2} />
+                    </div>
+                    <span className="text-white font-medium text-sm">Photos and videos</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
