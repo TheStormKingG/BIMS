@@ -20,8 +20,9 @@ export const useGoals = (spentItems?: SpentItem[], currentBalance?: number) => {
   }, []);
 
   // Update goal progress when spentItems or balance changes
+  // Use a more comprehensive dependency check - update when spentItems array reference changes
   useEffect(() => {
-    if (goals.length > 0 && spentItems) {
+    if (goals.length > 0 && spentItems && spentItems.length >= 0) {
       updateAllGoalProgress(goals, spentItems, currentBalance || 0).then(() => {
         // Reload goals to get updated progress
         loadGoals();
@@ -29,7 +30,7 @@ export const useGoals = (spentItems?: SpentItem[], currentBalance?: number) => {
         console.error('Failed to update goal progress:', err);
       });
     }
-  }, [spentItems?.length, currentBalance]);
+  }, [spentItems, currentBalance, goals.length]);
 
   const loadGoals = async () => {
     try {

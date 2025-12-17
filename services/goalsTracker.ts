@@ -1,63 +1,54 @@
 import { Goal } from './goalsDatabase';
 import { SpentItem } from './spentTableDatabase';
 import { updateGoal } from './goalsDatabase';
+import { calculateTimeBasedAnalytics } from './analyticsService';
 
 /**
- * Calculate progress for a spending limit goal
+ * Calculate progress for a goal based on its type
  */
-export const calculateSpendingLimitProgress = (
+export const calculateGoalProgress = (
   goal: Goal,
   spentItems: SpentItem[]
 ): number => {
-  const now = new Date();
-  let startDate: Date;
+  const analytics = calculateTimeBasedAnalytics(spentItems);
 
-  if (goal.period === 'week') {
-    // Start of current week (Monday)
-    const monday = new Date(now);
-    const day = monday.getDay();
-    const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
-    monday.setDate(diff);
-    monday.setHours(0, 0, 0, 0);
-    startDate = monday;
-  } else {
-    // Start of current month
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  switch (goal.goalType) {
+    case 'spent_last_24h':
+      return analytics.spentLast24Hours;
+
+    case 'spent_last_7d':
+      return analytics.spentLast7Days;
+
+    case 'spent_last_30d':
+      return analytics.spentLast30Days;
+
+    case 'avg_daily':
+      return analytics.avgDaily;
+
+    case 'avg_weekly':
+      return analytics.avgWeekly;
+
+    case 'avg_monthly':
+      return analytics.avgMonthly;
+
+    case 'top_category_spent':
+      // For top category, use the category specified in goal.category if set,
+      // otherwise use the actual top category
+      if (goal.category && analytics.topCategory && analytics.topCategory.name === goal.category) {
+        return analytics.topCategory.amount;
+      }
+      // Calculate total for the specified category
+      if (goal.category) {
+        return spentItems
+          .filter(item => item.category === goal.category)
+          .reduce((sum, item) => sum + item.itemTotal, 0);
+      }
+      // If no category specified, use top category
+      return analytics.topCategory?.amount || 0;
+
+    default:
+      return 0;
   }
-
-  // Filter items within the period and matching criteria
-  const relevantItems = spentItems.filter(item => {
-    const itemDate = new Date(item.transactionDateTime);
-    
-    // Check date range
-    if (itemDate < startDate) return false;
-
-    // Check category if specified
-    if (goal.category && item.category !== goal.category) return false;
-
-    // Note: merchant matching would require merchant field in spent_table
-    // For now, we skip merchant filtering
-    
-    return true;
-  });
-
-  // Calculate total spent
-  const totalSpent = relevantItems.reduce((sum, item) => sum + item.itemTotal, 0);
-
-  return totalSpent;
-};
-
-/**
- * Calculate progress for a savings goal
- * Note: This is a placeholder - actual savings calculation would need account balance tracking
- */
-export const calculateSavingsProgress = (
-  goal: Goal,
-  currentBalance: number
-): number => {
-  // For savings goals, progress is the current balance
-  // This is a simplified version - you might want to track savings differently
-  return Math.max(0, currentBalance);
 };
 
 /**
