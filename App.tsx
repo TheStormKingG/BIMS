@@ -114,9 +114,39 @@ function App() {
     );
   }
 
-  // If not authenticated and not on login page, show login
-  if (!user && location.pathname !== '/') {
+  // Public routes that don't require authentication
+  const publicRoutes = ['/', '/privacy', '/terms'];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+
+  // If not authenticated and not on a public route, show login
+  if (!user && !isPublicRoute) {
     return <Navigate to="/" replace />;
+  }
+
+  // Handle public routes - render without authentication and without navigation
+  if (!user && isPublicRoute) {
+    return (
+      <Routes>
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/" element={
+          <Login onLoginSuccess={async () => {
+            try {
+              const { data: { session }, error } = await supabase.auth.getSession();
+              if (error) {
+                console.error('Error getting session after login:', error);
+              } else {
+                setUser(session?.user ?? null);
+                navigate('/overview', { replace: true });
+              }
+            } catch (err) {
+              console.error('Failed to get session after login:', err);
+            }
+          }} />
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
   }
 
   // If authenticated and on login page, redirect to overview
@@ -124,7 +154,7 @@ function App() {
     return <Navigate to="/overview" replace />;
   }
 
-  // Show login page if not authenticated
+  // Show login page if not authenticated (should not reach here if isPublicRoute is true)
   if (!user) {
     return <Login onLoginSuccess={async () => {
       try {
@@ -492,10 +522,10 @@ function App() {
 
       {/* Main Content Area */}
       <main className="p-4 md:p-8 max-w-6xl mx-auto w-full">
-
-         <ProtectedRoute>
-           <Routes>
-             <Route path="/overview" element={
+         <Routes>
+           {/* Protected routes */}
+           <Route path="/overview" element={
+             <ProtectedRoute>
                <Dashboard 
                  accounts={banks.map(bank => ({
                    id: bank.id,
@@ -506,9 +536,11 @@ function App() {
                  spentItems={spentItems}
                  totalBalance={totalInBanks}
                />
+             </ProtectedRoute>
              } />
              
              <Route path="/funds" element={
+               <ProtectedRoute>
                <Accounts 
                  wallet={wallet}
                  walletBalance={cashBalance}
@@ -542,54 +574,54 @@ function App() {
                  onAddFunds={handleAddBankFunds}
                  onAddWalletFunds={handleAddWalletFunds}
                />
+               </ProtectedRoute>
              } />
              
              <Route path="/scan" element={
-               (() => {
-                 const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
-                 const allAccounts = walletBank 
-                   ? [
-                       {
-                         id: walletBank.id,
-                         name: 'Cash Wallet',
-                         type: 'CASH_WALLET' as const,
-                         balance: Number(walletBank.total)
-                       },
-                       ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+               <ProtectedRoute>
+                 {(() => {
+                   const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                   const allAccounts = walletBank 
+                     ? [
+                         {
+                           id: walletBank.id,
+                           name: 'Cash Wallet',
+                           type: 'CASH_WALLET' as const,
+                           balance: Number(walletBank.total)
+                         },
+                         ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
+                           id: bank.id,
+                           name: bank.bank_name,
+                           type: 'BANK' as const,
+                           balance: Number(bank.total)
+                         }))
+                       ]
+                     : banks.map(bank => ({
                          id: bank.id,
                          name: bank.bank_name,
                          type: 'BANK' as const,
                          balance: Number(bank.total)
-                       }))
-                     ]
-                   : banks.map(bank => ({
-                       id: bank.id,
-                       name: bank.bank_name,
-                       type: 'BANK' as const,
-                       balance: Number(bank.total)
-                     }));
-                 
-                return (
-                  <Scanner 
-                    accounts={allAccounts}
-                    onTriggerScan={() => setShowScanModal(true)}
-                    onSave={handleSaveTransaction}
-                  />
-                );
-               })()
+                       }));
+                   
+                   return (
+                     <Scanner 
+                       accounts={allAccounts}
+                       onTriggerScan={() => setShowScanModal(true)}
+                       onSave={handleSaveTransaction}
+                     />
+                   );
+                 })()}
+               </ProtectedRoute>
              } />
              
             <Route path="/settings" element={
-              <Settings user={user} />
-            } />
-            <Route path="/privacy" element={
-              <PrivacyPolicy />
-            } />
-            <Route path="/terms" element={
-              <TermsAndConditions />
+              <ProtectedRoute>
+                <Settings user={user} />
+              </ProtectedRoute>
             } />
             
             <Route path="/spending" element={
+              <ProtectedRoute>
                <Spending 
                  spentItems={spentItems} 
                  loading={spentItemsLoading}
@@ -788,11 +820,11 @@ function App() {
                    }
                  }}
                />
+               </ProtectedRoute>
              } />
              
-             <Route path="*" element={<Navigate to="/overview" replace />} />
+             <Route path="*" element={<Navigate to={user ? "/overview" : "/"} replace />} />
            </Routes>
-         </ProtectedRoute>
       </main>
 
       {/* Mobile Bottom Navigation */}
