@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BankAccount, CashWallet } from '../types';
-import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet } from 'lucide-react';
+import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet, Archive, ArchiveRestore } from 'lucide-react';
 
 interface BankTransaction {
   id: string; // This is the bank_id (destination)
