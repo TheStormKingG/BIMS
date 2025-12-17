@@ -521,7 +521,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             <p>Guyana</p>
           </div>
           <div className="flex items-center justify-center gap-2 mt-4">
-            <button className="text-emerald-600 hover:text-emerald-700 font-medium">
+            <button 
+              onClick={() => navigate('/privacy')}
+              className="text-emerald-600 hover:text-emerald-700 font-medium"
+            >
               Privacy
             </button>
             <span className="text-slate-400">|</span>
