@@ -352,7 +352,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
             </div>
 
             {/* Input Area */}
-            <div className="bg-[#202c33] px-4 py-2 border-t border-[#2a3942]">
+            <div className="bg-[#202c33] px-4 py-2 border-t border-[#2a3942] md:relative fixed bottom-20 left-0 right-0 md:bottom-0 md:left-auto md:right-auto" style={{ zIndex: 45 }}>
               {error && (
                 <div className="mb-2 p-2 bg-red-900/30 border border-red-700/50 rounded-lg text-xs text-red-300">
                   {error}
