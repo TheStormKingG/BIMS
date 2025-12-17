@@ -427,9 +427,9 @@ export const Accounts: React.FC<AccountsProps> = ({
           const walletId = walletAcc?.id ?? 'wallet';
           
           return (
-            <div key={walletId} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
+            <div key={walletId} className="bg-slate-900 text-white rounded-2xl shadow-xl group overflow-hidden">
               <div 
-                className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
+                className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors"
                 onClick={() => setViewingWallet(true)}
               >
                 <div className="flex items-center gap-4 flex-1">
@@ -451,7 +451,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                     e.stopPropagation();
                     handleOpenWalletAddFunds();
                   }}
-                  className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-lg"
                 >
                   <ArrowDownToLine className="w-4 h-4" />
                   Add Funds
@@ -463,9 +463,9 @@ export const Accounts: React.FC<AccountsProps> = ({
 
         {/* Bank Account Cards - Exclude Cash Wallet */}
         {accounts.filter(acc => acc.name !== 'Cash Wallet').map(acc => (
-          <div key={acc.id} className="bg-slate-800 rounded-xl shadow-lg group overflow-hidden">
+          <div key={acc.id} className="bg-slate-900 text-white rounded-2xl shadow-xl group overflow-hidden">
              <div 
-               className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-700 transition-colors"
+               className="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors"
                onClick={() => setViewingBank(acc)}
              >
                <div className="flex items-center gap-4 flex-1">
@@ -480,12 +480,12 @@ export const Accounts: React.FC<AccountsProps> = ({
                </div>
                
                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemoveAccount(acc.id);
-                  }}
-                  className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
-                  title="Remove Account"
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   onRemoveAccount(acc.id);
+                 }}
+                 className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                 title="Remove Account"
                >
                  <Trash2 className="w-5 h-5" />
                </button>
@@ -495,7 +495,7 @@ export const Accounts: React.FC<AccountsProps> = ({
              <div className="px-6 pb-6">
                <button
                  onClick={() => handleOpenAddFunds(acc)}
-                 className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                 className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-lg"
                >
                  <ArrowDownToLine className="w-4 h-4" />
                  Add Funds
