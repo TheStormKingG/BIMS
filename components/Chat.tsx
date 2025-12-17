@@ -28,7 +28,8 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
 
   // Get current user
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const supabaseClient = getSupabase();
+    supabaseClient.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
     });
   }, []);
