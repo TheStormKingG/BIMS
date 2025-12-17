@@ -4,6 +4,7 @@ import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
 import { Spending } from './components/Spending';
 import { Scanner } from './components/Scanner';
+import { Upload } from './components/Upload';
 import { Dashboard } from './components/Dashboard';
 import { Login } from './components/Login';
 import { Settings } from './components/Settings';
@@ -603,13 +604,24 @@ function App() {
                          balance: Number(bank.total)
                        }));
                    
-                   return (
-                     <Scanner 
-                       accounts={allAccounts}
-                       onTriggerScan={() => setShowScanModal(true)}
-                       onSave={handleSaveTransaction}
-                     />
-                   );
+                   // Use Upload component for desktop, Scanner for mobile
+                   const isMobile = window.innerWidth < 768;
+                   if (isMobile) {
+                     return (
+                       <Scanner 
+                         accounts={allAccounts}
+                         onTriggerScan={() => setShowScanModal(true)}
+                         onSave={handleSaveTransaction}
+                       />
+                     );
+                   } else {
+                     return (
+                       <Upload 
+                         accounts={allAccounts}
+                         onSave={handleSaveTransaction}
+                       />
+                     );
+                   }
                  })()}
                </ProtectedRoute>
              } />

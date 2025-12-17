@@ -1,4 +1,4 @@
-import { ChartPie, Wallet, Landmark, ScanLine, Calculator, Settings as SettingsIcon } from 'lucide-react';
+import { ChartPie, Wallet, Landmark, ScanLine, Calculator, Settings as SettingsIcon, Upload } from 'lucide-react';
 
 export const GYD_DENOMINATIONS = [5000, 2000, 1000, 500, 100, 50, 20];
 
@@ -27,7 +27,7 @@ export const DEFAULT_CATEGORIES = [
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Overview', icon: ChartPie, path: '/overview' },
   { id: 'accounts', label: 'Funds', icon: Landmark, path: '/funds' },
-  { id: 'scan', label: 'Scan', icon: ScanLine, path: '/scan' },
+  { id: 'scan', label: 'Upload', icon: Upload, path: '/scan' },
   { id: 'expenses', label: 'Spending', icon: Calculator, path: '/spending' },
   { id: 'settings', label: 'Settings', icon: SettingsIcon, path: '/settings' },
 ];
