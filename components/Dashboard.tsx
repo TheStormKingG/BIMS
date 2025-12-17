@@ -3,6 +3,7 @@ import { Account } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, DollarSign, Clock } from 'lucide-react';
 import { SpentItem } from '../services/spentTableDatabase';
+import { calculateTimeBasedAnalytics } from '../services/analyticsService';
 
 interface DashboardProps {
   accounts: Account[];
@@ -39,46 +40,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     return Array.from(uniqueCategories).sort();
   }, [spentItems]);
 
-  // Calculate spending totals and averages
-  const spendingMetrics = React.useMemo(() => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const monthAgo = new Date(today);
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
-
-    // Total amounts spent
-    const spentToday = spentItems
-      .filter(item => new Date(item.transactionDateTime) >= today)
-      .reduce((sum, item) => sum + item.itemTotal, 0);
-
-    const spentLast7Days = spentItems
-      .filter(item => new Date(item.transactionDateTime) >= weekAgo)
-      .reduce((sum, item) => sum + item.itemTotal, 0);
-
-    const spentLast30Days = spentItems
-      .filter(item => new Date(item.transactionDateTime) >= monthAgo)
-      .reduce((sum, item) => sum + item.itemTotal, 0);
-
-    // Calculate days in period for averages
-    const daysInWeek = Math.max(1, Math.ceil((now.getTime() - weekAgo.getTime()) / (1000 * 60 * 60 * 24)));
-    const daysInMonth = Math.max(1, Math.ceil((now.getTime() - monthAgo.getTime()) / (1000 * 60 * 60 * 24)));
-
-    // Averages
-    const avgDaily = spentLast30Days / daysInMonth;
-    const avgWeekly = spentLast30Days / (daysInMonth / 7);
-    const avgMonthly = spentLast30Days;
-
-    return {
-      spentToday,
-      spentLast7Days,
-      spentLast30Days,
-      avgDaily,
-      avgWeekly,
-      avgMonthly,
-    };
+  // Calculate comprehensive time-based analytics using analytics service
+  const analytics = React.useMemo(() => {
+    return calculateTimeBasedAnalytics(spentItems);
   }, [spentItems]);
+
+  // Legacy spendingMetrics for backward compatibility (uses analytics data)
+  const spendingMetrics = React.useMemo(() => {
+    return {
+      spentToday: analytics.spentLast24Hours, // Use 24h for "today" (Pro feature: rolling 24h)
+      spentLast7Days: analytics.spentLast7Days,
+      spentLast30Days: analytics.spentLast30Days,
+      avgDaily: analytics.avgDaily,
+      avgWeekly: analytics.avgWeekly,
+      avgMonthly: analytics.avgMonthly,
+    };
+  }, [analytics]);
 
   // Calculate spending over time based on selected period
   const spendingOverTime = React.useMemo(() => {
@@ -236,9 +213,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     return result;
   }, [spentItems, timePeriod, selectedCategory]);
 
-  const recentTransactions = [...spentItems]
-    .sort((a, b) => new Date(b.transactionDateTime).getTime() - new Date(a.transactionDateTime).getTime())
-    .slice(0, 3);
+  // Use recentActivity from analytics (last 10 items)
+  const recentTransactions = analytics.recentActivity.slice(0, 3); // Show top 3 in compact view
 
   // Find the item with most money spent
   const topItem = React.useMemo(() => {
@@ -352,16 +328,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       </div>
 
       {/* Spending Totals */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-slate-600">Spent Last 24h</h3>
+            <Clock className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-3xl font-bold text-slate-900">
+            ${analytics.spentLast24Hours.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">Rolling 24 hours</p>
+        </div>
+        
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Today</h3>
-            <Clock className="w-5 h-5 text-emerald-600" />
+            <Calendar className="w-5 h-5 text-emerald-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900">
             ${spendingMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Total spent today</p>
+          <p className="text-xs text-slate-500 mt-1">Since midnight</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -534,7 +521,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Activity - Show 10 most recent items */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
            <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-800">Recent Activity</h3>
@@ -543,22 +530,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
               </span>
            </div>
            
-           <div className="space-y-4">
-             {recentTransactions.length > 0 ? (
-               recentTransactions.map(item => (
-                 <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center">
+           <div className="space-y-3 max-h-[600px] overflow-y-auto">
+             {analytics.recentActivity.length > 0 ? (
+               analytics.recentActivity.slice(0, 10).map(item => (
+                 <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                       <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
                           <ArrowDownRight className="w-5 h-5 text-rose-500" />
                        </div>
-                       <div>
-                         <p className="font-semibold text-slate-900 line-clamp-1">{item.item}</p>
-                         <p className="text-xs text-slate-500">{new Date(item.transactionDateTime).toLocaleDateString()}</p>
+                       <div className="flex-1 min-w-0">
+                         <p className="font-semibold text-slate-900 truncate">{item.item}</p>
+                         <div className="flex items-center gap-2 mt-1">
+                           <p className="text-xs text-slate-500">{new Date(item.transactionDateTime).toLocaleString()}</p>
+                           <span className="text-xs px-2 py-0.5 bg-slate-200 text-slate-700 rounded">{item.category}</span>
+                         </div>
                        </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-slate-900">-${item.itemTotal.toLocaleString()}</p>
-                      <p className="text-xs text-slate-500">{item.category}</p>
+                    <div className="text-right flex-shrink-0 ml-3">
+                      <p className="font-bold text-slate-900">${item.itemTotal.toLocaleString()}</p>
+                      <p className="text-xs text-slate-500">Qty: {item.itemQty}</p>
                     </div>
                  </div>
                ))
@@ -571,11 +561,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         </div>
       </div>
 
-      {/* Most Money Spent On Section */}
+      {/* Recent Activity Section */}
+      {analytics.recentActivity.length > 0 && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-4">Recent Activity</h3>
+          <div className="space-y-3">
+            {analytics.recentActivity.slice(0, 10).map((item, idx) => (
+              <div key={item.id || idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">{item.item}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-slate-500">{new Date(item.transactionDateTime).toLocaleString()}</span>
+                    <span className="text-xs px-2 py-0.5 bg-slate-200 text-slate-700 rounded">{item.category}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-slate-900">${item.itemTotal.toLocaleString()}</p>
+                  <p className="text-xs text-slate-500">Qty: {item.itemQty}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Most Money Spent On Section - Top Category */}
+      {analytics.topCategory && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 className="font-bold text-slate-800 mb-6 text-xl">
+            Most Money Spent On Category: <span className="text-emerald-600">{analytics.topCategory.name}</span>
+          </h3>
+          <div className="mb-4">
+            <p className="text-2xl font-bold text-slate-900">
+              ${analytics.topCategory.amount.toLocaleString()} GYD
+            </p>
+            <p className="text-sm text-slate-500 mt-1">Total spent on {analytics.topCategory.name}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Most Money Spent On Section - Top Item (keep for compatibility) */}
       {topItem && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-6 text-xl">
-            Most Money Spent On: <span className="text-emerald-600">{topItem.name}</span>
+            Most Money Spent On Item: <span className="text-emerald-600">{topItem.name}</span>
           </h3>
           
           {/* Spending Totals for Top Item */}
