@@ -102,6 +102,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
     setSelectedOption('invite-contact');
   };
 
+  const handleTipsFrequency = () => {
+    setSelectedOption('tips-frequency');
+  };
+
   const handleProblemSuggestions = () => {
     setSelectedOption('problem-suggestions');
   };
