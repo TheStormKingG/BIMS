@@ -513,7 +513,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
         {/* Copyright and Address Information */}
         <div className="mt-8 text-center text-sm text-slate-600 space-y-2">
-          <p>(c) Copyright 2025-26 Dr. Stefan Gravesande & Preqal Inc.</p>
+          <p>Dr. Stefan Gravesande | Preqal Inc © 2025-26</p>
           <div className="space-y-1">
             <p>90 Waiakabra</p>
             <p>Soesdyke Linden Highway</p>
