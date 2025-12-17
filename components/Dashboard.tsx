@@ -561,50 +561,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         </div>
       </div>
 
-      {/* Recent Activity Section */}
-      {analytics.recentActivity.length > 0 && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <h3 className="font-bold text-slate-800 mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            {analytics.recentActivity.slice(0, 10).map((item, idx) => (
-              <div key={item.id || idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">{item.item}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-slate-500">{new Date(item.transactionDateTime).toLocaleString()}</span>
-                    <span className="text-xs px-2 py-0.5 bg-slate-200 text-slate-700 rounded">{item.category}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-slate-900">${item.itemTotal.toLocaleString()}</p>
-                  <p className="text-xs text-slate-500">Qty: {item.itemQty}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Most Money Spent On Section - Top Category */}
+      {/* Most Money Spent On Section - Show Top Category (Pro feature) */}
       {analytics.topCategory && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-6 text-xl">
-            Most Money Spent On Category: <span className="text-emerald-600">{analytics.topCategory.name}</span>
+            Most Money Spent On: <span className="text-emerald-600">{analytics.topCategory.name}</span>
           </h3>
           <div className="mb-4">
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-3xl font-bold text-slate-900">
               ${analytics.topCategory.amount.toLocaleString()} GYD
             </p>
-            <p className="text-sm text-slate-500 mt-1">Total spent on {analytics.topCategory.name}</p>
+            <p className="text-sm text-slate-500 mt-1">Total spent on {analytics.topCategory.name} category</p>
           </div>
         </div>
       )}
 
-      {/* Most Money Spent On Section - Top Item (keep for compatibility) */}
+      {/* Most Money Spent On Item (Detailed breakdown - optional, show if topItem exists) */}
       {topItem && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-6 text-xl">
-            Most Money Spent On Item: <span className="text-emerald-600">{topItem.name}</span>
+            Top Spending Item: <span className="text-emerald-600">{topItem.name}</span>
           </h3>
           
           {/* Spending Totals for Top Item */}
