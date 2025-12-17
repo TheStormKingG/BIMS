@@ -17,6 +17,7 @@ import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
+import { saveReceipt } from './services/receiptService';
 import { LogOut, User, ScanLine, Camera, Image } from 'lucide-react';
 
 function App() {
@@ -304,8 +305,10 @@ function App() {
   };
 
   // Handler functions
-  const handleSaveTransaction = async (receiptData: any, accountId: string) => {
+  const handleSaveTransaction = async (receiptData: any, accountId: string, file?: File) => {
     try {
+      console.log('handleSaveTransaction called with:', { receiptData, accountId, hasFile: !!file });
+      
       // Get wallet from banks table (it's now stored as "Cash Wallet" bank entry)
       const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
       const allAccounts = walletBank 
@@ -332,7 +335,10 @@ function App() {
       
       // Find the account to get payment method name
       const account = allAccounts.find(acc => acc.id === accountId);
-      const paymentMethod = account?.type === 'CASH_WALLET' ? 'Cash Wallet' : account?.name || 'Unknown';
+      if (!account) {
+        throw new Error(`Account with ID ${accountId} not found`);
+      }
+      const paymentMethod = account.type === 'CASH_WALLET' ? 'Cash Wallet' : account.name || 'Unknown';
       
       // Convert receipt items to spent_table format
       let transactionDate: string;
@@ -349,18 +355,42 @@ function App() {
         transactionDate = new Date().toISOString();
       }
       
+      if (!receiptData.items || !Array.isArray(receiptData.items) || receiptData.items.length === 0) {
+        throw new Error('Receipt data has no items to save');
+      }
+      
       const spentItemsToAdd = receiptData.items.map((item: any) => ({
         transactionDateTime: transactionDate,
-        category: item.category,
-        item: item.description,
-        itemCost: item.unitPrice,
-        itemQty: item.quantity,
-        itemTotal: item.total,
+        category: item.category || 'Other',
+        item: item.description || 'Unknown item',
+        itemCost: Number(item.unitPrice) || 0,
+        itemQty: Number(item.quantity) || 1,
+        itemTotal: Number(item.total) || 0,
         paymentMethod: paymentMethod,
         source: 'SCAN_RECEIPT' as const,
       }));
       
+      console.log('Adding spent items:', spentItemsToAdd);
       const addedSpentItems = await addSpentItems(spentItemsToAdd);
+      console.log('Successfully added spent items:', addedSpentItems);
+      
+      // Save receipt image if file is provided (for scanned receipts)
+      if (file && addedSpentItems.length > 0) {
+        try {
+          console.log('Saving receipt image for spent_table_id:', addedSpentItems[0].id);
+          // Use the first spent_table entry ID to link the receipt
+          const receiptId = await saveReceipt(file, addedSpentItems[0].id, receiptData);
+          console.log('Successfully saved receipt image, receipt ID:', receiptId);
+        } catch (receiptError) {
+          console.error('Failed to save receipt image:', receiptError);
+          console.error('Receipt error details:', receiptError);
+          // Don't fail the entire transaction if receipt save fails
+          // The transaction data is already saved, receipt image is optional
+        }
+      } else {
+        console.log('Skipping receipt image save:', { hasFile: !!file, hasItems: addedSpentItems.length > 0 });
+      }
+      
       await loadCurrentMonth();
       
       // Deduct total from selected payment method
@@ -409,10 +439,30 @@ function App() {
         });
       }
       
+      console.log('Transaction saved successfully, navigating to spending page');
       alert('Receipt scanned and saved successfully!');
       navigate('/spending');
-    } catch (err) {
-      alert('Failed to save receipt: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } catch (err: any) {
+      console.error('Error in handleSaveTransaction:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+        stack: err instanceof Error ? err.stack : undefined,
+        fullError: err
+      });
+      
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : (err?.message || err?.error?.message || 'Unknown error');
+      
+      const errorDetails = err?.details || err?.hint || '';
+      const fullErrorMessage = errorDetails 
+        ? `${errorMessage}\n\nDetails: ${errorDetails}`
+        : errorMessage;
+      
+      alert('Failed to save receipt:\n\n' + fullErrorMessage + '\n\nCheck console (F12) for more details.');
     }
   };
 

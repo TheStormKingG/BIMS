@@ -13,7 +13,7 @@ interface DashboardProps {
 const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b'];
 
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, totalBalance }) => {
-  const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '3months' | '6months' | '1year'>('1month');
+  const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '90days' | '3months' | '6months' | '1year' | 'alltime'>('1month');
   const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
   
   // Calculate category spend
@@ -95,6 +95,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         daysBack = 30;
         dateFormat = 'day';
         break;
+      case '90days':
+        daysBack = 90;
+        dateFormat = 'week';
+        break;
       case '3months':
         daysBack = 90;
         dateFormat = 'week';
@@ -107,10 +111,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         daysBack = 365;
         dateFormat = 'month';
         break;
+      case 'alltime':
+        // For all-time, we calculate from the oldest transaction
+        if (spentItems.length > 0) {
+          const oldestDate = new Date(Math.min(...spentItems.map(item => new Date(item.transactionDateTime).getTime())));
+          const oldestDay = new Date(oldestDate.getFullYear(), oldestDate.getMonth(), oldestDate.getDate());
+          const diffTime = now.getTime() - oldestDay.getTime();
+          daysBack = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          // Use monthly aggregation for all-time if more than 1 year, otherwise weekly
+          dateFormat = daysBack > 365 ? 'month' : 'week';
+        } else {
+          daysBack = 365;
+          dateFormat = 'month';
+        }
+        break;
     }
 
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - daysBack);
+    let startDate: Date;
+    if (timePeriod === 'alltime' && spentItems.length > 0) {
+      // For all-time, use the oldest transaction date
+      const oldestTimestamp = Math.min(...spentItems.map(item => new Date(item.transactionDateTime).getTime()));
+      startDate = new Date(oldestTimestamp);
+    } else {
+      startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - daysBack);
+    }
 
     // Filter by date and category
     const filtered = spentItems.filter(item => {
@@ -415,14 +440,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             </select>
             <select
               value={timePeriod}
-              onChange={(e) => setTimePeriod(e.target.value as '7days' | '1month' | '3months' | '6months' | '1year')}
+              onChange={(e) => setTimePeriod(e.target.value as '7days' | '1month' | '90days' | '3months' | '6months' | '1year' | 'alltime')}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="7days">7 Days</option>
               <option value="1month">1 Month</option>
+              <option value="90days">90 Days</option>
               <option value="3months">3 Months</option>
               <option value="6months">6 Months</option>
               <option value="1year">1 Year</option>
+              <option value="alltime">All Time</option>
             </select>
           </div>
         </div>

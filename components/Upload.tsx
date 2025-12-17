@@ -6,7 +6,7 @@ import { Upload as UploadIcon, Loader2, Check, AlertCircle, X, FileImage } from 
 
 interface UploadProps {
   accounts: Account[];
-  onSave: (transactionData: ReceiptScanResult, accountId: string) => void;
+  onSave: (transactionData: ReceiptScanResult, accountId: string, file?: File) => void;
 }
 
 export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
@@ -17,6 +17,7 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null); // Store the original file for receipt storage
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -59,6 +60,9 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   };
 
   const handleFileProcess = async (file: File) => {
+    // Store the file for later receipt storage
+    setReceiptFile(file);
+
     // Create preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
@@ -75,6 +79,7 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
       setScanResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setReceiptFile(null); // Clear file on error
     } finally {
       setIsScanning(false);
     }
@@ -112,18 +117,37 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   };
 
   const handleSave = () => {
+    console.log('Upload handleSave called:', { 
+      hasScanResult: !!scanResult, 
+      selectedAccountId, 
+      hasFile: !!receiptFile 
+    });
+    
     if (scanResult && selectedAccountId) {
-      onSave(scanResult, selectedAccountId);
+      console.log('Calling onSave with:', { 
+        scanResult, 
+        accountId: selectedAccountId, 
+        file: receiptFile 
+      });
+      // Pass the file along with scan result for receipt storage
+      onSave(scanResult, selectedAccountId, receiptFile || undefined);
       // Reset
       setScanResult(null);
       setPreviewUrl(null);
+      setReceiptFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    } else {
+      console.warn('Cannot save - missing data:', { 
+        hasScanResult: !!scanResult, 
+        selectedAccountId 
+      });
     }
   };
 
   const handleCancel = () => {
     setScanResult(null);
     setPreviewUrl(null);
+    setReceiptFile(null);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     navigate('/overview');
@@ -244,8 +268,11 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
                     onClick={() => {
                       setScanResult(null);
                       setPreviewUrl(null);
+                      setReceiptFile(null);
                       setError(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
+                      // Re-open file picker
+                      fileInputRef.current?.click();
                     }}
                     className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 active:scale-95 shadow-lg hover:shadow-xl active:shadow-md text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200"
                   >

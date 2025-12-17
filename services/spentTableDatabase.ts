@@ -50,16 +50,17 @@ const dbToSpentItem = (row: DBSpentItem): SpentItem => {
 
 // Convert app format to database row
 const spentItemToDb = (item: Omit<SpentItem, 'id' | 'entryDate'>): Partial<DBSpentItem> => {
-  return {
+  const dbItem = {
     transaction_datetime: item.transactionDateTime,
-    category: item.category,
-    item: item.item,
-    item_cost: item.itemCost,
-    item_qty: item.itemQty,
-    item_total: item.itemTotal,
-    payment_method: item.paymentMethod,
-    source: item.source,
+    category: item.category || 'Other',
+    item: item.item || 'Unknown',
+    item_cost: Number(item.itemCost) || 0,
+    item_qty: Number(item.itemQty) || 1,
+    item_total: Number(item.itemTotal) || 0,
+    payment_method: item.paymentMethod || null,
+    source: item.source || 'MANUAL',
   };
+  return dbItem;
 };
 
 // Fetch all spent items
@@ -162,19 +163,42 @@ export const createSpentItem = async (item: Omit<SpentItem, 'id' | 'entryDate'>)
 
 // Create multiple spent items (for transactions with multiple line items)
 export const createSpentItems = async (items: Omit<SpentItem, 'id' | 'entryDate'>[]): Promise<SpentItem[]> => {
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  const dbData = items.map(item => ({ ...spentItemToDb(item), user_id: user?.id || null }));
-  
-  const { data, error } = await supabase
-    .from('spent_table')
-    .insert(dbData)
-    .select();
-  
-  if (error) throw error;
-  
-  return (data || []).map(dbToSpentItem);
+  try {
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      console.error('Auth error in createSpentItems:', authError);
+      throw new Error('Failed to get user: ' + authError.message);
+    }
+    
+    console.log('Creating spent items, user:', user?.id, 'items count:', items.length);
+    console.log('Items to insert:', items);
+    
+    const dbData = items.map(item => ({ ...spentItemToDb(item), user_id: user?.id || null }));
+    console.log('DB data to insert:', dbData);
+    
+    const { data, error } = await supabase
+      .from('spent_table')
+      .insert(dbData)
+      .select();
+    
+    if (error) {
+      console.error('Supabase error inserting spent items:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      throw error;
+    }
+    
+    console.log('Successfully inserted spent items:', data);
+    return (data || []).map(dbToSpentItem);
+  } catch (err) {
+    console.error('Exception in createSpentItems:', err);
+    throw err;
+  }
 };
 
 // Update a spent item

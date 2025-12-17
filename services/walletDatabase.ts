@@ -26,11 +26,22 @@ const dbToWallet = (bank: DBWallet): CashWallet => {
 // Fetch the wallet from banks table
 export const fetchWallet = async (): Promise<CashWallet | null> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('banks')
       .select('*')
-      .eq('bank_name', 'Cash Wallet')
-      .single();
+      .eq('bank_name', 'Cash Wallet');
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query.single();
     
     if (error) {
       // PGRST116 = No rows found
@@ -41,6 +52,7 @@ export const fetchWallet = async (): Promise<CashWallet | null> => {
         console.warn('banks table does not exist yet');
         return null;
       }
+      console.error('Error fetching wallet:', error);
       throw error;
     }
     
@@ -59,11 +71,22 @@ export const fetchWallet = async (): Promise<CashWallet | null> => {
 // Get wallet balance
 export const getWalletBalance = async (): Promise<number> => {
   try {
-    const { data, error } = await supabase
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
       .from('banks')
       .select('total')
-      .eq('bank_name', 'Cash Wallet')
-      .single();
+      .eq('bank_name', 'Cash Wallet');
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query.single();
     
     if (error) {
       if (error.code === 'PGRST116') {
@@ -72,6 +95,7 @@ export const getWalletBalance = async (): Promise<number> => {
       if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
         return 0;
       }
+      console.error('Error getting wallet balance:', error);
       throw error;
     }
     
@@ -87,9 +111,16 @@ export const getWalletBalance = async (): Promise<number> => {
 // Create wallet if it doesn't exist
 export const createWallet = async (initialBalance: number = 0): Promise<CashWallet> => {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('banks')
-      .insert([{ bank_name: 'Cash Wallet', total: initialBalance }])
+      .insert([{ 
+        bank_name: 'Cash Wallet', 
+        total: initialBalance,
+        user_id: user?.id || null
+      }])
       .select()
       .single();
     
@@ -99,6 +130,7 @@ export const createWallet = async (initialBalance: number = 0): Promise<CashWall
         const existing = await fetchWallet();
         if (existing) return existing;
       }
+      console.error('Error creating wallet:', error);
       throw error;
     }
     
@@ -123,17 +155,30 @@ export const updateWalletBalance = async (newBalance: number): Promise<CashWalle
     }
     
     // Update wallet balance
-    const { data, error } = await supabase
+    // Get current user for filtering
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let updateQuery = supabase
       .from('banks')
       .update({ 
         total: newBalance,
         updated: new Date().toISOString()
       })
-      .eq('bank_name', 'Cash Wallet')
-      .select()
-      .single();
+      .eq('bank_name', 'Cash Wallet');
     
-    if (error) throw error;
+    // Filter by user_id if user is logged in
+    if (user) {
+      updateQuery = updateQuery.eq('user_id', user.id);
+    } else {
+      updateQuery = updateQuery.is('user_id', null);
+    }
+    
+    const { data, error } = await updateQuery.select().single();
+    
+    if (error) {
+      console.error('Error updating wallet balance:', error);
+      throw error;
+    }
     
     return dbToWallet(data as DBWallet);
   } catch (err: any) {

@@ -6,7 +6,7 @@ import { Camera, Upload, Loader2, Check, AlertCircle, X } from 'lucide-react';
 
 interface ScannerProps {
   accounts: Account[];
-  onSave: (transactionData: ReceiptScanResult, accountId: string) => void;
+  onSave: (transactionData: ReceiptScanResult, accountId: string, file?: File) => void;
   onTriggerScan?: () => void;
 }
 
@@ -17,6 +17,7 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null); // Store the original file for receipt storage
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,6 +53,9 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Store the file for later receipt storage
+    setReceiptFile(file);
+
     // Create preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
@@ -71,6 +75,7 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
       setScanResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
+      setReceiptFile(null); // Clear file on error
     } finally {
       setIsScanning(false);
     }
@@ -86,18 +91,37 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
   };
 
   const handleSave = () => {
+    console.log('Scanner handleSave called:', { 
+      hasScanResult: !!scanResult, 
+      selectedAccountId, 
+      hasFile: !!receiptFile 
+    });
+    
     if (scanResult && selectedAccountId) {
-      onSave(scanResult, selectedAccountId);
+      console.log('Calling onSave with:', { 
+        scanResult, 
+        accountId: selectedAccountId, 
+        file: receiptFile 
+      });
+      // Pass the file along with scan result for receipt storage
+      onSave(scanResult, selectedAccountId, receiptFile || undefined);
       // Reset
       setScanResult(null);
       setPreviewUrl(null);
+      setReceiptFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    } else {
+      console.warn('Cannot save - missing data:', { 
+        hasScanResult: !!scanResult, 
+        selectedAccountId 
+      });
     }
   };
 
   const handleCancel = () => {
     setScanResult(null);
     setPreviewUrl(null);
+    setReceiptFile(null);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     navigate('/overview');
@@ -177,6 +201,7 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
                     onClick={() => {
                       setScanResult(null);
                       setPreviewUrl(null);
+                      setReceiptFile(null);
                       setError(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                       if (onTriggerScan) {
