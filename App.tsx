@@ -8,6 +8,8 @@ import { Upload } from './components/Upload';
 import { Dashboard } from './components/Dashboard';
 import { Login } from './components/Login';
 import { Settings } from './components/Settings';
+import { Goals } from './components/Goals';
+import { GoalModal } from './components/GoalModal';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
@@ -980,7 +982,7 @@ function App() {
         
         {/* Right side items */}
         <div className="flex flex-1 justify-around">
-          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['expenses', 'settings'].includes(item.id)).map(item => (
+          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['expenses', 'goals', 'settings'].includes(item.id)).map(item => (
             <button
               key={item.id}
               onClick={() => navigate(item.path)}

@@ -15,6 +15,7 @@ export interface UserPreferences {
   id: string;
   userId: string;
   tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off';
+  tipsCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,13 +68,21 @@ export const getUserPreferences = async (): Promise<UserPreferences> => {
 /**
  * Update user preferences
  */
-export const updateUserPreferences = async (tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off'): Promise<void> => {
+export const updateUserPreferences = async (
+  tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off',
+  tipsCount?: number
+): Promise<void> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  const updateData: any = { tips_frequency: tipsFrequency };
+  if (tipsCount !== undefined) {
+    updateData.tips_count = tipsCount;
+  }
+
   const { error } = await supabase
     .from('user_preferences')
-    .update({ tips_frequency: tipsFrequency })
+    .update(updateData)
     .eq('user_id', user.id);
 
   if (error) throw error;

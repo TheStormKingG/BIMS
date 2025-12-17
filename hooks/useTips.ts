@@ -87,10 +87,10 @@ export const useTips = () => {
     }
   };
 
-  const updatePreferences = async (tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off') => {
+  const updatePreferences = async (tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off', tipsCount?: number) => {
     try {
-      await updateUserPreferences(tipsFrequency);
-      setPreferences(prev => prev ? { ...prev, tipsFrequency } : null);
+      await updateUserPreferences(tipsFrequency, tipsCount);
+      setPreferences(prev => prev ? { ...prev, tipsFrequency, tipsCount: tipsCount ?? prev.tipsCount ?? 5 } : null);
     } catch (err) {
       console.error('Failed to update preferences:', err);
       throw err;
