@@ -2,6 +2,9 @@
 -- First, drop the existing check constraint
 ALTER TABLE goals DROP CONSTRAINT IF EXISTS goals_goal_type_check;
 
+-- Make period column nullable (new goal types don't require period)
+ALTER TABLE goals ALTER COLUMN period DROP NOT NULL;
+
 -- Add new goal types
 ALTER TABLE goals ADD CONSTRAINT goals_goal_type_check 
   CHECK (goal_type IN (
