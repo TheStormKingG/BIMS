@@ -436,13 +436,13 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                     className={`flex mb-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[65%] md:max-w-[70%] rounded-lg px-2 py-1 ${
+                      className={`max-w-[65%] md:max-w-[70%] rounded-lg px-3 py-2 ${
                         message.role === 'user'
                           ? 'bg-[#005c4b] text-[#e9edef]'
                           : 'bg-[#202c33] text-[#e9edef]'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                       <div className={`flex items-center justify-end gap-1 mt-1 ${message.role === 'user' ? 'text-[#667781]' : 'text-[#8696a0]'}`}>
                         <span className="text-[10px]">{formatMessageTime(message.createdAt)}</span>
                         {message.role === 'user' && (
