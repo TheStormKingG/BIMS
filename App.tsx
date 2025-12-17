@@ -627,8 +627,16 @@ function App() {
                    type: 'deposit' as const
                  }))}
                  walletTransactionsForBanks={[]}
+                 archivedAccounts={archivedBanks.map(bank => ({
+                   id: bank.id,
+                   name: bank.bank_name,
+                   type: 'BANK' as const,
+                   balance: Number(bank.total),
+                 }))}
                  onAddAccount={handleAddBank}
                  onRemoveAccount={handleDeleteBank}
+                 onArchiveAccount={archiveBank}
+                 onUnarchiveAccount={unarchiveBank}
                  onAddFunds={handleAddBankFunds}
                  onAddWalletFunds={handleAddWalletFunds}
                />
