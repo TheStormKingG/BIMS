@@ -405,7 +405,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 pb-24">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
 
         {/* Profile Photo Section */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-4">
@@ -436,12 +435,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 className="hidden"
               />
             </div>
-            <button
-              onClick={handleProfilePhotoClick}
-              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
-            >
-              Edit Photo
-            </button>
           </div>
         </div>
 
@@ -517,6 +510,26 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           <LogOut className="w-5 h-5" />
           <span>Log Out</span>
         </button>
+
+        {/* Copyright and Address Information */}
+        <div className="mt-8 text-center text-sm text-slate-600 space-y-2">
+          <p>(c) Copyright 2025-26 Dr. Stefan Gravesande & Preqal Inc.</p>
+          <div className="space-y-1">
+            <p>90 Waiakabra</p>
+            <p>Soesdyke Linden Highway</p>
+            <p>East Bank Demerara</p>
+            <p>Guyana</p>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <button className="text-emerald-600 hover:text-emerald-700 font-medium">
+              Privacy
+            </button>
+            <span className="text-slate-400">|</span>
+            <button className="text-emerald-600 hover:text-emerald-700 font-medium">
+              Terms
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
