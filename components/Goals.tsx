@@ -95,32 +95,23 @@ export const Goals: React.FC<GoalsProps> = ({
                 {/* Goal Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-3 flex-1">
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        isSpendingLimit
-                          ? 'bg-amber-100 text-amber-600'
-                          : 'bg-emerald-100 text-emerald-600'
-                      }`}
-                    >
-                      {isSpendingLimit ? (
-                        <TrendingDown className="w-6 h-6" />
-                      ) : (
-                        <TrendingUp className="w-6 h-6" />
-                      )}
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600">
+                      <GoalIcon className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-bold text-slate-900 text-lg">
-                          {isSpendingLimit ? 'Spending Limit' : 'Savings Goal'}
+                          {goalLabel}
                         </h3>
                         {achieved && (
                           <Trophy className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                         )}
                       </div>
-                      <p className="text-slate-600 text-sm">
-                        {goal.period === 'week' ? 'Weekly' : 'Monthly'}
-                        {goal.category && ` • ${goal.category}`}
-                      </p>
+                      {goal.category && goal.goalType === 'top_category_spent' && (
+                        <p className="text-slate-600 text-sm">
+                          Category: {goal.category}
+                        </p>
+                      )}
                     </div>
                   </div>
                   {!goal.active && (
