@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 import { Login } from './components/Login';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsAndConditions } from './components/TermsAndConditions';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -583,6 +584,9 @@ function App() {
             } />
             <Route path="/privacy" element={
               <PrivacyPolicy />
+            } />
+            <Route path="/terms" element={
+              <TermsAndConditions />
             } />
             
             <Route path="/spending" element={
