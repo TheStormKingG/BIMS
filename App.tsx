@@ -563,31 +563,24 @@ function App() {
           </div>
           <div className="flex items-center gap-[8px] flex-shrink-0">
             <button
+              onClick={() => navigate('/settings')}
+              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+            >
+              <SettingsIcon className="w-6 h-6 text-slate-600" />
+            </button>
+            <button
               onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-              className="flex items-center gap-[8px] px-[8px] py-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
             >
               {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                 <img
                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                   alt="Profile"
-                  className="w-[26.6px] h-[26.6px] rounded-full object-cover flex-shrink-0"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-[26.6px] h-[26.6px] rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                  <User className="w-[15.2px] h-[15.2px] text-white" />
-                </div>
+                <User className="w-8 h-8 text-slate-500" />
               )}
-              <div className="min-w-0 flex-shrink">
-                <p className="text-[11.4px] font-semibold text-slate-900 truncate leading-tight">
-                  {user?.email?.split('@')[0] || user?.user_metadata?.full_name || 'User'}
-                </p>
-                <p className="text-[9.5px] text-slate-500 truncate leading-tight">
-                  {user?.email || 'Not signed in'}
-                </p>
-              </div>
-              <svg className="w-[15.2px] h-[15.2px] text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
             </button>
           </div>
         </div>
