@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Plus, Trash2, MessageCircle, Bot, User, Loader2, Search, MoreVertical } from 'lucide-react';
 import { useChat } from '../hooks/useChat';
 import { ChatSession, ChatMessage } from '../services/chatDatabase';
+import { getSupabase } from '../services/supabaseClient';
 
 interface ChatProps {
   spentItems: any[];
