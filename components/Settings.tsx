@@ -523,14 +523,14 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           </div>
           <div className="flex items-center justify-center gap-2 mt-4">
             <button 
-              onClick={() => navigate('/privacy', { state: { from: 'settings' } })}
+              onClick={() => navigate('/settings/privacy')}
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
               Privacy
             </button>
             <span className="text-slate-400">|</span>
             <button 
-              onClick={() => navigate('/terms', { state: { from: 'settings' } })}
+              onClick={() => navigate('/settings/terms')}
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
               Terms

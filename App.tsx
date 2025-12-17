@@ -10,6 +10,8 @@ import { Login } from './components/Login';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
+import { SettingsPrivacy } from './components/SettingsPrivacy';
+import { SettingsTerms } from './components/SettingsTerms';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
