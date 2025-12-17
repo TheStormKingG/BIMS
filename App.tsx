@@ -63,6 +63,7 @@ function App() {
     updateItem: updateSpentItem,
     deleteItem: deleteSpentItemFromHook,
     loadCurrentMonth,
+    refresh: loadSpentItems,
   } = useSpentItems();
 
   // Check auth state on mount and listen for changes
@@ -391,7 +392,8 @@ function App() {
         console.log('Skipping receipt image save:', { hasFile: !!file, hasItems: addedSpentItems.length > 0 });
       }
       
-      await loadCurrentMonth();
+      // Refresh spent items (load all, not just current month)
+      await loadSpentItems();
       
       // Deduct total from selected payment method
       if (account?.type === 'BANK') {
