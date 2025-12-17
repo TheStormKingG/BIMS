@@ -11,6 +11,7 @@ import { Settings } from './components/Settings';
 import { Goals } from './components/Goals';
 import { GoalModal } from './components/GoalModal';
 import { Chat } from './components/Chat';
+import { ChatButton } from './components/ChatButton';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
