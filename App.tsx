@@ -15,6 +15,7 @@ import { SettingsTerms } from './components/SettingsTerms';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
+import { useGoals } from './hooks/useGoals';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
@@ -68,6 +69,17 @@ function App() {
     loadCurrentMonth,
     refresh: loadSpentItems,
   } = useSpentItems();
+
+  // Use goals hook
+  const {
+    goals,
+    loading: goalsLoading,
+    error: goalsError,
+    addGoal,
+    editGoal,
+    removeGoal,
+    toggleGoalActive,
+  } = useGoals(spentItems, totalInBanks);
 
   // Check auth state on mount and listen for changes
   useEffect(() => {
