@@ -559,36 +559,38 @@ function App() {
       </nav>
 
       {/* Mobile Header */}
-      {!isChatRoute && <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px] shadow-md">
-        <div className="flex items-center justify-between gap-[8px]">
-          <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
-            <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
-            <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h1>
-          </div>
-          <div className="flex items-center gap-[8px] flex-shrink-0">
-            <button
-              onClick={() => navigate('/settings')}
-              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
-            >
-              <SettingsIcon className="w-6 h-6 text-slate-600" />
-            </button>
-            <button
-              onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
-            >
-              {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-                <img
-                  src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
-                  alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <User className="w-8 h-8 text-slate-500" />
-              )}
-            </button>
+      {!isChatRoute && (
+        <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px] shadow-md">
+          <div className="flex items-center justify-between gap-[8px]">
+            <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
+              <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
+              <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h1>
+            </div>
+            <div className="flex items-center gap-[8px] flex-shrink-0">
+              <button
+                onClick={() => navigate('/settings')}
+                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+              >
+                <SettingsIcon className="w-6 h-6 text-slate-600" />
+              </button>
+              <button
+                onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+              >
+                {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                  <img
+                    src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-slate-500" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content Area */}
       <main className={`${isChatRoute ? 'p-0 max-w-none w-full h-full m-0' : 'p-4 md:p-8 max-w-6xl'} ${isChatRoute ? '' : 'mx-auto'} w-full ${isChatRoute ? 'h-screen md:h-screen' : ''}`}>
