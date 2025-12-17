@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { getSupabase } from '../services/supabaseClient';
 
 export const PrivacyPolicy: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    // Use React Router's navigate(-1) to go back in history
+    navigate(-1);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 pb-24">
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
