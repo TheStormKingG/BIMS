@@ -493,7 +493,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                        onArchiveAccount(acc.id);
                      }
                    }}
-                   className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                   className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-500/20 rounded-full transition-colors ml-2"
                    title="Archive Account"
                  >
                    <Archive className="w-5 h-5" />
