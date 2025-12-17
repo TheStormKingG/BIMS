@@ -372,15 +372,6 @@ export const Accounts: React.FC<AccountsProps> = ({
   // Main accounts list view
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Funds</h2>
-        <button 
-          onClick={() => setIsAdding(!isAdding)}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Add Account
-        </button>
-      </div>
 
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-lg border border-emerald-100">
@@ -517,6 +508,16 @@ export const Accounts: React.FC<AccountsProps> = ({
              No bank accounts added yet.
           </div>
         )}
+      </div>
+
+      {/* Add Account Button - Centered below accounts */}
+      <div className="flex justify-center">
+        <button 
+          onClick={() => setIsAdding(!isAdding)}
+          className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+        >
+          <span>+Add Account</span>
+        </button>
       </div>
 
       {/* Add Funds Modal */}
