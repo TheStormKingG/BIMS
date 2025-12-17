@@ -80,7 +80,8 @@ export const Goals: React.FC<GoalsProps> = ({
           {goals.map(goal => {
             const achieved = isGoalAchieved(goal);
             const progressPercentage = getGoalProgressPercentage(goal);
-            const isSpendingLimit = goal.goalType === 'spending_limit';
+            const GoalIcon = GOAL_TYPE_ICONS[goal.goalType] || Target;
+            const goalLabel = GOAL_TYPE_LABELS[goal.goalType] || goal.goalType;
 
             return (
               <div

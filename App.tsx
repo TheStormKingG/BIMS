@@ -1118,7 +1118,7 @@ const GoalsPageWrapper: React.FC<{
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);
   
-  // Get unique categories from spentItems
+  // Get unique categories from spentItems for top_category_spent goals
   const categories = useMemo(() => {
     const uniqueCategories = new Set<string>();
     spentItems.forEach((item: any) => {
