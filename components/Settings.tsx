@@ -147,6 +147,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             <h1 className="text-2xl font-bold text-slate-900">
               {selectedOption === 'personal-info' && 'Personal Information'}
               {selectedOption === 'invite-contact' && 'Share in a post'}
+              {selectedOption === 'tips-frequency' && 'Tips Frequency'}
               {selectedOption === 'problem-suggestions' && 'Problem/Suggestions'}
             </h1>
             <button
@@ -374,6 +375,51 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                     Copy
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tips Frequency */}
+          {selectedOption === 'tips-frequency' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+              <p className="text-slate-600">Choose how often you'd like to receive spending tips based on your financial activity.</p>
+              <div className="space-y-3">
+                {(['daily', 'weekly', 'monthly', 'off'] as const).map((frequency) => (
+                  <button
+                    key={frequency}
+                    onClick={async () => {
+                      try {
+                        await updatePreferences(frequency);
+                        alert('Tips frequency updated!');
+                      } catch (err) {
+                        alert('Failed to update tips frequency');
+                        console.error(err);
+                      }
+                    }}
+                    className={`w-full p-4 rounded-lg border-2 transition-all ${
+                      preferences?.tipsFrequency === frequency
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-left">
+                        <p className="font-semibold text-slate-900 capitalize">{frequency === 'off' ? 'Off' : frequency}</p>
+                        <p className="text-sm text-slate-500">
+                          {frequency === 'daily' && 'Receive tips every day'}
+                          {frequency === 'weekly' && 'Receive tips once per week'}
+                          {frequency === 'monthly' && 'Receive tips once per month'}
+                          {frequency === 'off' && 'Don\'t receive tips'}
+                        </p>
+                      </div>
+                      {preferences?.tipsFrequency === frequency && (
+                        <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           )}
