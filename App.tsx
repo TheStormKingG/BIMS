@@ -274,7 +274,6 @@ function App() {
     if (path === '/scan') return 'scan';
     if (path === '/spending' || path === '/expenses') return 'expenses';
     if (path === '/goals' || path.startsWith('/goals')) return 'goals';
-    if (path === '/chat' || path.startsWith('/chat')) return 'chat';
     if (path === '/settings' || path.startsWith('/settings')) return 'settings';
     return 'dashboard'; // default
   };
@@ -951,6 +950,12 @@ function App() {
              <Route path="*" element={<Navigate to={user ? "/overview" : "/"} replace />} />
            </Routes>
       </main>
+
+      {/* Floating Chat Button - Desktop (bottom right) */}
+      <ChatButton className="hidden md:flex fixed bottom-6 right-6 w-14 h-14" />
+
+      {/* Floating Chat Button - Mobile (above bottom nav, extreme right) */}
+      <ChatButton className="md:hidden fixed bottom-20 right-4 w-12 h-12" />
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 flex justify-between items-end z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">

@@ -30,6 +30,5 @@ export const NAV_ITEMS = [
   { id: 'scan', label: 'Upload', icon: Upload, path: '/scan' },
   { id: 'expenses', label: 'Spending', icon: Calculator, path: '/spending' },
   { id: 'goals', label: 'Goals', icon: Target, path: '/goals' },
-  { id: 'chat', label: 'AI Chat', icon: MessageCircle, path: '/chat' },
   { id: 'settings', label: 'Settings', icon: SettingsIcon, path: '/settings' },
 ];
