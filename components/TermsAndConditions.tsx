@@ -10,11 +10,11 @@ export const TermsAndConditions: React.FC = () => {
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          Back to Settings
+          Back
         </button>
 
         {/* Terms & Conditions Content */}
