@@ -488,8 +488,10 @@ function App() {
     }
   };
 
+  const isChatRoute = location.pathname === '/chat';
+
   return (
-    <div className="min-h-screen pb-24 md:pb-0 md:pl-64">
+    <div className={`${isChatRoute ? 'h-screen overflow-hidden' : 'min-h-screen'} ${isChatRoute ? 'pb-0 md:pb-0 md:pl-64' : 'pb-24 md:pb-0 md:pl-64'}`} style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* Desktop Navigation (Sidebar) */}
       <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-slate-900 text-white flex-col p-6 z-20">
         <div className="flex flex-col items-center gap-2 mb-10">

@@ -138,9 +138,9 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#0b141a] animate-fade-in overflow-hidden">
+    <div className="flex h-full w-full bg-[#0b141a] animate-fade-in overflow-hidden" style={{ maxWidth: '100vw', overflowX: 'hidden', width: '100%' }}>
       {/* Chat List Sidebar */}
-      <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-[#2a3942] bg-[#111b21]`}>
+      <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-[#2a3942] bg-[#111b21] overflow-hidden`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Header */}
         <div className="bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-[#2a3942]">
           <div className="flex items-center gap-3 flex-1">
