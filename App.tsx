@@ -55,6 +55,7 @@ function App() {
     error: spentItemsError,
     addSpentItems,
     updateItem: updateSpentItem,
+    deleteItem: deleteSpentItemFromHook,
     loadCurrentMonth,
   } = useSpentItems();
 
@@ -666,6 +667,46 @@ function App() {
                      }
                    } catch (err) {
                      alert('Failed to update spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                   }
+                 }}
+                 onDeleteSpend={async (id) => {
+                   try {
+                     const itemToDelete = spentItems.find(item => item.id === id);
+                     if (!itemToDelete) {
+                       throw new Error('Item not found');
+                     }
+
+                     // Find associated funds_out entry
+                     const fundsOutEntry = fundsOutTransactions.find(
+                       txn => txn.spent_table_id === id
+                     );
+
+                     // Delete the spent item (this will update the hook state)
+                     await deleteSpentItemFromHook(id);
+
+                     // Reverse the balance change if there's a funds_out entry
+                     if (fundsOutEntry && itemToDelete.paymentMethod) {
+                       const isWallet = itemToDelete.paymentMethod === 'Cash Wallet';
+                       const walletBankEntry = banks.find(bank => bank.bank_name === 'Cash Wallet');
+                       const account = isWallet 
+                         ? walletBankEntry 
+                         : banks.find(bank => bank.bank_name === itemToDelete.paymentMethod);
+                       
+                       if (account) {
+                         // Add the amount back to the account
+                         const newBalance = Number(account.total) + itemToDelete.itemTotal;
+                         await updateBank(account.id, account.bank_name, newBalance);
+                         
+                         // Delete the funds_out entry
+                         await supabase
+                           .from('funds_out')
+                           .delete()
+                           .eq('id', fundsOutEntry.id);
+                       }
+                     }
+                   } catch (err) {
+                     alert('Failed to delete spending: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                     throw err;
                    }
                  }}
                  onAddSpend={async (item) => {
