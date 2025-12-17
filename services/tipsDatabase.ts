@@ -39,7 +39,7 @@ export const getUserPreferences = async (): Promise<UserPreferences> => {
     if (error.code === 'PGRST116') {
       const { data: newPrefs, error: insertError } = await supabase
         .from('user_preferences')
-        .insert([{ user_id: user.id, tips_frequency: 'weekly' }])
+        .insert([{ user_id: user.id, tips_frequency: 'weekly', tips_count: 5 }])
         .select()
         .single();
 
@@ -49,6 +49,7 @@ export const getUserPreferences = async (): Promise<UserPreferences> => {
         id: newPrefs.id,
         userId: newPrefs.user_id,
         tipsFrequency: newPrefs.tips_frequency as 'daily' | 'weekly' | 'monthly' | 'off',
+        tipsCount: newPrefs.tips_count ? Number(newPrefs.tips_count) : 5,
         createdAt: newPrefs.created_at,
         updatedAt: newPrefs.updated_at,
       };
