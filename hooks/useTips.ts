@@ -17,13 +17,41 @@ export const useTips = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPreferences();
+    const init = async () => {
+      try {
+        setLoading(true);
+        // Load preferences first
+        const prefs = await getUserPreferences();
+        setPreferences(prefs);
+        // Then load tips with the correct count
+        const tipsLimit = prefs?.tipsCount || 5;
+        const data = await fetchUnreadTips(tipsLimit);
+        setTips(data);
+      } catch (err: any) {
+        console.error('Failed to initialize tips:', err);
+        // Try loading tips with default count even if preferences fail
+        try {
+          const data = await fetchUnreadTips(5);
+          setTips(data);
+        } catch (tipErr) {
+          // Ignore
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
   }, []);
 
-  // Load tips when preferences change (to respect tipsCount)
+  // Reload tips when preferences count changes
   useEffect(() => {
-    if (preferences) {
-      loadTips();
+    if (preferences?.tipsCount !== undefined) {
+      const tipsLimit = preferences.tipsCount || 5;
+      fetchUnreadTips(tipsLimit).then(data => {
+        setTips(data);
+      }).catch(err => {
+        console.error('Failed to reload tips:', err);
+      });
     }
   }, [preferences?.tipsCount]);
 
