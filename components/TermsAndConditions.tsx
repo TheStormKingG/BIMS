@@ -1,13 +1,19 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 export const TermsAndConditions: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
-    // Use React Router's navigate(-1) to go back in history
-    navigate(-1);
+    // Check if we came from Settings via location state, otherwise go to login
+    const fromSettings = (location.state as any)?.from === 'settings';
+    if (fromSettings) {
+      navigate('/settings');
+    } else {
+      navigate('/');
+    }
   };
 
   return (
