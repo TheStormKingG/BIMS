@@ -1,7 +1,27 @@
 import React, { useState } from 'react';
-import { Target, Plus, Edit2, Trash2, Check, X, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
-import { Goal } from '../services/goalsDatabase';
+import { Target, Plus, Edit2, Trash2, Check, X, TrendingDown, TrendingUp, Trophy, Clock, Calendar, DollarSign, BarChart3 } from 'lucide-react';
+import { Goal, GoalType } from '../services/goalsDatabase';
 import { isGoalAchieved, getGoalProgressPercentage } from '../services/goalsTracker';
+
+const GOAL_TYPE_LABELS: Record<GoalType, string> = {
+  spent_last_24h: 'Spent Last 24h',
+  spent_last_7d: 'Spent Last 7 Days',
+  spent_last_30d: 'Spent Last 30 Days',
+  avg_daily: 'Average Daily',
+  avg_weekly: 'Average Weekly',
+  avg_monthly: 'Average Monthly',
+  top_category_spent: 'Most Money Spent On Category',
+};
+
+const GOAL_TYPE_ICONS: Record<GoalType, React.ElementType> = {
+  spent_last_24h: Clock,
+  spent_last_7d: Calendar,
+  spent_last_30d: Calendar,
+  avg_daily: TrendingDown,
+  avg_weekly: TrendingDown,
+  avg_monthly: TrendingDown,
+  top_category_spent: BarChart3,
+};
 
 interface GoalsProps {
   goals: Goal[];
@@ -112,17 +132,9 @@ export const Goals: React.FC<GoalsProps> = ({
                 {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-slate-700">Progress</span>
+                    <span className="text-sm font-semibold text-slate-700">Current</span>
                     <span className="text-sm font-bold text-slate-900">
-                      {isSpendingLimit ? (
-                        <>
-                          ${goal.currentProgress.toLocaleString()} / ${goal.targetAmount.toLocaleString()} GYD
-                        </>
-                      ) : (
-                        <>
-                          ${goal.currentProgress.toLocaleString()} / ${goal.targetAmount.toLocaleString()} GYD
-                        </>
-                      )}
+                      ${goal.currentProgress.toLocaleString(undefined, { maximumFractionDigits: 0 })} / ${goal.targetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })} GYD
                     </span>
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
@@ -130,20 +142,18 @@ export const Goals: React.FC<GoalsProps> = ({
                       className={`h-full transition-all duration-300 ${
                         achieved
                           ? 'bg-emerald-500'
-                          : isSpendingLimit
-                          ? progressPercentage > 80
-                            ? 'bg-red-500'
-                            : progressPercentage > 60
-                            ? 'bg-amber-500'
-                            : 'bg-amber-400'
-                          : 'bg-emerald-400'
+                          : progressPercentage > 90
+                          ? 'bg-red-500'
+                          : progressPercentage > 75
+                          ? 'bg-amber-500'
+                          : 'bg-amber-400'
                       }`}
                       style={{ width: `${Math.min(100, progressPercentage)}%` }}
                     />
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-xs text-slate-500">
-                      {progressPercentage.toFixed(1)}% {isSpendingLimit ? 'used' : 'complete'}
+                      {progressPercentage.toFixed(1)}% of target
                     </span>
                     {achieved && (
                       <span className="text-xs font-semibold text-emerald-600">
@@ -152,15 +162,6 @@ export const Goals: React.FC<GoalsProps> = ({
                     )}
                   </div>
                 </div>
-
-                {/* Goal Details */}
-                {goal.category && (
-                  <div className="mb-3">
-                    <span className="inline-block px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded">
-                      Category: {goal.category}
-                    </span>
-                  </div>
-                )}
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-200">

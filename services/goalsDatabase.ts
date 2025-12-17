@@ -2,13 +2,22 @@ import { getSupabase } from './supabaseClient';
 
 const supabase = getSupabase();
 
+export type GoalType = 
+  | 'spent_last_24h'
+  | 'spent_last_7d'
+  | 'spent_last_30d'
+  | 'avg_daily'
+  | 'avg_weekly'
+  | 'avg_monthly'
+  | 'top_category_spent';
+
 export interface Goal {
   id: string;
   userId: string;
-  goalType: 'spending_limit' | 'savings';
+  goalType: GoalType;
   targetAmount: number;
-  period: 'week' | 'month';
-  category: string | null;
+  period: 'week' | 'month' | null; // Kept for backward compatibility, not used for new goal types
+  category: string | null; // Used for top_category_spent to store category name
   merchant: string | null;
   active: boolean;
   currentProgress: number;
@@ -17,9 +26,9 @@ export interface Goal {
 }
 
 export interface CreateGoalInput {
-  goalType: 'spending_limit' | 'savings';
+  goalType: GoalType;
   targetAmount: number;
-  period: 'week' | 'month';
+  period?: 'week' | 'month' | null;
   category?: string;
   merchant?: string;
 }

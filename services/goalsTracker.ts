@@ -71,13 +71,7 @@ export const updateAllGoalProgress = async (
   const activeGoals = goals.filter(g => g.active);
 
   for (const goal of activeGoals) {
-    let progress: number;
-
-    if (goal.goalType === 'spending_limit') {
-      progress = calculateSpendingLimitProgress(goal, spentItems);
-    } else {
-      progress = calculateSavingsProgress(goal, currentBalance);
-    }
+    const progress = calculateGoalProgress(goal, spentItems);
 
     // Only update if progress has changed (to avoid unnecessary DB writes)
     if (Math.abs(progress - goal.currentProgress) > 0.01) {
@@ -88,29 +82,30 @@ export const updateAllGoalProgress = async (
 
 /**
  * Check if a goal is achieved
+ * For spending goals (lower is better), achievement means staying at or below target
+ * For other goals (higher is better), achievement means reaching or exceeding target
  */
 export const isGoalAchieved = (goal: Goal): boolean => {
-  if (goal.goalType === 'spending_limit') {
-    // For spending limits, goal is achieved if we stayed under the limit
+  // Spending-based goals: achieved if we stayed at or below the target (lower is better)
+  const isSpendingGoal = ['spent_last_24h', 'spent_last_7d', 'spent_last_30d', 'top_category_spent'].includes(goal.goalType);
+  
+  if (isSpendingGoal) {
     return goal.currentProgress <= goal.targetAmount;
   } else {
-    // For savings, goal is achieved if we reached the target
-    return goal.currentProgress >= goal.targetAmount;
+    // Average goals: achieved if we're at or below target (lower average is better)
+    // Actually, for averages, lower is also better (spending less per day/week/month)
+    return goal.currentProgress <= goal.targetAmount;
   }
 };
 
 /**
  * Get goal progress percentage
+ * For spending goals, show percentage of target used (we want to stay under)
  */
 export const getGoalProgressPercentage = (goal: Goal): number => {
-  if (goal.goalType === 'spending_limit') {
-    // For spending limits, progress is inverse (we want to stay under)
-    // Show percentage of limit used (clamped to 0-100%)
-    return Math.min(100, Math.max(0, (goal.currentProgress / goal.targetAmount) * 100));
-  } else {
-    // For savings, show percentage of target reached
-    if (goal.targetAmount === 0) return 0;
-    return Math.min(100, Math.max(0, (goal.currentProgress / goal.targetAmount) * 100));
-  }
+  if (goal.targetAmount === 0) return 0;
+  // For all these goal types, lower is better (spending less)
+  // Show percentage of target used (clamped to 0-100%)
+  return Math.min(100, Math.max(0, (goal.currentProgress / goal.targetAmount) * 100));
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target } from 'lucide-react';
-import { Goal, CreateGoalInput } from '../services/goalsDatabase';
+import { Goal, CreateGoalInput, GoalType } from '../services/goalsDatabase';
 
 interface GoalModalProps {
   isOpen: boolean;
@@ -10,6 +10,16 @@ interface GoalModalProps {
   categories?: string[];
 }
 
+const GOAL_TYPES: Array<{ value: GoalType; label: string; description: string }> = [
+  { value: 'spent_last_24h', label: 'Spent Last 24h', description: 'Track total spending in the last 24 hours' },
+  { value: 'spent_last_7d', label: 'Spent Last 7 Days', description: 'Track total spending in the last 7 days' },
+  { value: 'spent_last_30d', label: 'Spent Last 30 Days', description: 'Track total spending in the last 30 days' },
+  { value: 'avg_daily', label: 'Average Daily', description: 'Track average daily spending' },
+  { value: 'avg_weekly', label: 'Average Weekly', description: 'Track average weekly spending' },
+  { value: 'avg_monthly', label: 'Average Monthly', description: 'Track average monthly spending' },
+  { value: 'top_category_spent', label: 'Most Money Spent On Category', description: 'Track total spent on a specific category' },
+];
+
 export const GoalModal: React.FC<GoalModalProps> = ({
   isOpen,
   onClose,
@@ -17,26 +27,20 @@ export const GoalModal: React.FC<GoalModalProps> = ({
   existingGoal,
   categories = [],
 }) => {
-  const [goalType, setGoalType] = useState<'spending_limit' | 'savings'>('spending_limit');
+  const [goalType, setGoalType] = useState<GoalType>('spent_last_30d');
   const [targetAmount, setTargetAmount] = useState('');
-  const [period, setPeriod] = useState<'week' | 'month'>('month');
   const [category, setCategory] = useState('');
-  const [merchant, setMerchant] = useState('');
 
   useEffect(() => {
     if (existingGoal) {
       setGoalType(existingGoal.goalType);
       setTargetAmount(existingGoal.targetAmount.toString());
-      setPeriod(existingGoal.period);
       setCategory(existingGoal.category || '');
-      setMerchant(existingGoal.merchant || '');
     } else {
       // Reset form for new goal
-      setGoalType('spending_limit');
+      setGoalType('spent_last_30d');
       setTargetAmount('');
-      setPeriod('month');
       setCategory('');
-      setMerchant('');
     }
   }, [existingGoal, isOpen]);
 
@@ -55,28 +59,27 @@ export const GoalModal: React.FC<GoalModalProps> = ({
       // Update existing goal
       onSave({
         targetAmount: amount,
-        period,
-        category: category || null,
-        merchant: merchant || null,
+        category: goalType === 'top_category_spent' ? (category || null) : null,
       });
     } else {
       // Create new goal
       onSave({
         goalType,
         targetAmount: amount,
-        period,
-        category: category || undefined,
-        merchant: merchant || undefined,
+        period: null,
+        category: goalType === 'top_category_spent' ? category : undefined,
       });
     }
 
     onClose();
   };
 
+  const selectedGoalType = GOAL_TYPES.find(gt => gt.value === goalType);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -105,36 +108,42 @@ export const GoalModal: React.FC<GoalModalProps> = ({
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Goal Type
               </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setGoalType('spending_limit')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    goalType === 'spending_limit'
-                      ? 'border-emerald-500 bg-emerald-50'
-                      : 'border-slate-200 bg-white hover:border-emerald-300'
-                  }`}
-                >
-                  <div className="text-left">
-                    <p className="font-semibold text-slate-900">Spending Limit</p>
-                    <p className="text-xs text-slate-500 mt-1">Stay under budget</p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGoalType('savings')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    goalType === 'savings'
-                      ? 'border-emerald-500 bg-emerald-50'
-                      : 'border-slate-200 bg-white hover:border-emerald-300'
-                  }`}
-                >
-                  <div className="text-left">
-                    <p className="font-semibold text-slate-900">Savings</p>
-                    <p className="text-xs text-slate-500 mt-1">Save target amount</p>
-                  </div>
-                </button>
-              </div>
+              <select
+                value={goalType}
+                onChange={(e) => setGoalType(e.target.value as GoalType)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+              >
+                {GOAL_TYPES.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+              {selectedGoalType && (
+                <p className="text-xs text-slate-500 mt-1">{selectedGoalType.description}</p>
+              )}
+            </div>
+          )}
+
+          {/* Category selection (only for top_category_spent) */}
+          {goalType === 'top_category_spent' && categories.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+                required={goalType === 'top_category_spent'}
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
@@ -153,73 +162,12 @@ export const GoalModal: React.FC<GoalModalProps> = ({
               required
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
             />
+            <p className="text-xs text-slate-500 mt-1">
+              {goalType === 'top_category_spent' 
+                ? 'Set the maximum amount you want to spend on this category'
+                : 'Set your spending limit or target amount'}
+            </p>
           </div>
-
-          {/* Period */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Period
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setPeriod('week')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  period === 'week'
-                    ? 'border-emerald-500 bg-emerald-50'
-                    : 'border-slate-200 bg-white hover:border-emerald-300'
-                }`}
-              >
-                <span className="font-medium text-slate-900">Weekly</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPeriod('month')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  period === 'month'
-                    ? 'border-emerald-500 bg-emerald-50'
-                    : 'border-slate-200 bg-white hover:border-emerald-300'
-                }`}
-              >
-                <span className="font-medium text-slate-900">Monthly</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Category (only for spending_limit goals) */}
-          {(!existingGoal || existingGoal.goalType === 'spending_limit') && (
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Category (Optional)
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Merchant (optional, future feature) */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Merchant (Optional)
-            </label>
-            <input
-              type="text"
-              value={merchant}
-              onChange={(e) => setMerchant(e.target.value)}
-              placeholder="Specific merchant name"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
-            />
-          </div> */}
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
@@ -242,4 +190,3 @@ export const GoalModal: React.FC<GoalModalProps> = ({
     </div>
   );
 };
-
