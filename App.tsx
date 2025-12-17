@@ -272,7 +272,8 @@ function App() {
     if (path === '/funds' || path === '/accounts') return 'accounts';
     if (path === '/scan') return 'scan';
     if (path === '/spending' || path === '/expenses') return 'expenses';
-    if (path === '/settings') return 'settings';
+    if (path === '/goals' || path.startsWith('/goals')) return 'goals';
+    if (path === '/settings' || path.startsWith('/settings')) return 'settings';
     return 'dashboard'; // default
   };
 
@@ -982,7 +983,7 @@ function App() {
         
         {/* Right side items */}
         <div className="flex flex-1 justify-around">
-          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['expenses', 'goals', 'settings'].includes(item.id)).map(item => (
+          {NAV_ITEMS.filter(item => item.id !== 'scan' && ['expenses', 'goals'].includes(item.id)).map(item => (
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
