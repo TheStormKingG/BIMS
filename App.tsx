@@ -633,6 +633,16 @@ function App() {
                 <Settings user={user} />
               </ProtectedRoute>
             } />
+            <Route path="/settings/privacy" element={
+              <ProtectedRoute>
+                <SettingsPrivacy />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings/terms" element={
+              <ProtectedRoute>
+                <SettingsTerms />
+              </ProtectedRoute>
+            } />
             
             <Route path="/spending" element={
               <ProtectedRoute>
