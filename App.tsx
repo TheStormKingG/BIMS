@@ -589,7 +589,7 @@ function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className={`${location.pathname === '/chat' ? 'p-0 max-w-none' : 'p-4 md:p-8 max-w-6xl'} mx-auto w-full h-full`}>
+      <main className={`${isChatRoute ? 'p-0 max-w-none w-full h-full m-0' : 'p-4 md:p-8 max-w-6xl'} ${isChatRoute ? '' : 'mx-auto'} w-full ${isChatRoute ? 'h-screen md:h-screen' : ''}`}>
          <Routes>
            {/* Protected routes */}
            <Route path="/overview" element={
