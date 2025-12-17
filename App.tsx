@@ -21,7 +21,7 @@ import { useGoals } from './hooks/useGoals';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
-import { LogOut, User, ScanLine, Camera, Image } from 'lucide-react';
+import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState<any>(null);
