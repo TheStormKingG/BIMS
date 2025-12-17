@@ -1,4 +1,4 @@
-import { ChartPie, Wallet, Landmark, ScanLine, Calculator, Settings as SettingsIcon, Upload, Target } from 'lucide-react';
+import { ChartPie, Wallet, Landmark, ScanLine, Calculator, Settings as SettingsIcon, Upload, Target, MessageCircle } from 'lucide-react';
 
 export const GYD_DENOMINATIONS = [5000, 2000, 1000, 500, 100, 50, 20];
 
@@ -30,5 +30,6 @@ export const NAV_ITEMS = [
   { id: 'scan', label: 'Upload', icon: Upload, path: '/scan' },
   { id: 'expenses', label: 'Spending', icon: Calculator, path: '/spending' },
   { id: 'goals', label: 'Goals', icon: Target, path: '/goals' },
+  { id: 'chat', label: 'AI Chat', icon: MessageCircle, path: '/chat' },
   { id: 'settings', label: 'Settings', icon: SettingsIcon, path: '/settings' },
 ];

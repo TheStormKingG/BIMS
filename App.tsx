@@ -10,6 +10,7 @@ import { Login } from './components/Login';
 import { Settings } from './components/Settings';
 import { Goals } from './components/Goals';
 import { GoalModal } from './components/GoalModal';
+import { Chat } from './components/Chat';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
@@ -273,6 +274,7 @@ function App() {
     if (path === '/scan') return 'scan';
     if (path === '/spending' || path === '/expenses') return 'expenses';
     if (path === '/goals' || path.startsWith('/goals')) return 'goals';
+    if (path === '/chat' || path.startsWith('/chat')) return 'chat';
     if (path === '/settings' || path.startsWith('/settings')) return 'settings';
     return 'dashboard'; // default
   };
@@ -721,6 +723,12 @@ function App() {
                </ProtectedRoute>
              } />
              
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <Chat spentItems={spentItems} />
+              </ProtectedRoute>
+            } />
+            
             <Route path="/settings" element={
               <ProtectedRoute>
                 <Settings user={user} />
