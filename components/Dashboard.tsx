@@ -19,6 +19,18 @@ const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857'
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, totalBalance }) => {
   const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '90days' | '3months' | '6months' | '1year' | 'alltime'>('1month');
   const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
+  const { tips, markAsRead, removeTip, refresh: refreshTips } = useTips();
+
+  // Generate tips on mount and when spentItems change (if needed)
+  React.useEffect(() => {
+    if (spentItems.length > 0) {
+      generateAndSaveTips(spentItems).then(() => {
+        refreshTips();
+      }).catch(err => {
+        console.error('Failed to generate tips:', err);
+      });
+    }
+  }, [spentItems.length]); // Only run when count changes to avoid infinite loops
   
   // Calculate category spend
   const categoryData = React.useMemo(() => {
@@ -302,6 +314,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
+      {/* Tips Section */}
+      {tips.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-4">💡 Spending Tips</h3>
+          <Tips 
+            tips={tips} 
+            onMarkAsRead={markAsRead}
+            onDismiss={removeTip}
+          />
+        </div>
+      )}
+
       {/* Total Balance Card */}
       <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
         <div className="flex justify-between items-start">
