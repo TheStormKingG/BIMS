@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter, LogOut } from 'lucide-react';
+import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter, LogOut, Lightbulb } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
+import { useTips } from '../hooks/useTips';
 
 interface SettingsProps {
   user: any;
@@ -11,6 +12,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const { preferences, updatePreferences } = useTips();
 
   // Check if we should open personal info from navigation state
   useEffect(() => {
