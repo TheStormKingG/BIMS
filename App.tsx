@@ -1109,4 +1109,79 @@ function App() {
   );
 }
 
+// Goals Page Wrapper Component
+const GoalsPageWrapper: React.FC<{
+  goals: any[];
+  spentItems: any[];
+  totalBalance: number;
+  onAddGoal: (input: any) => Promise<void>;
+  onEditGoal: (goalId: string, updates: any) => Promise<void>;
+  onDeleteGoal: (goalId: string) => Promise<void>;
+  onToggleActive: (goalId: string) => Promise<void>;
+}> = ({ goals, onAddGoal, onEditGoal, onDeleteGoal, onToggleActive, spentItems }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+  
+  // Get unique categories from spentItems
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    spentItems.forEach((item: any) => {
+      if (item.category) {
+        uniqueCategories.add(item.category);
+      }
+    });
+    // Add default categories if not present
+    const defaultCategories = ['Groceries', 'Dining Out', 'Transport', 'Utilities', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other'];
+    defaultCategories.forEach(cat => uniqueCategories.add(cat));
+    return Array.from(uniqueCategories).sort();
+  }, [spentItems]);
+
+  const handleAddGoal = () => {
+    setEditingGoal(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditGoal = (goal: any) => {
+    setEditingGoal(goal);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (input: any) => {
+    try {
+      if (editingGoal) {
+        await onEditGoal(editingGoal.id, input);
+      } else {
+        await onAddGoal(input);
+      }
+      setIsModalOpen(false);
+      setEditingGoal(null);
+    } catch (err) {
+      console.error('Failed to save goal:', err);
+      alert('Failed to save goal. Please try again.');
+    }
+  };
+
+  return (
+    <>
+      <Goals
+        goals={goals}
+        onAddGoal={handleAddGoal}
+        onEditGoal={handleEditGoal}
+        onDeleteGoal={onDeleteGoal}
+        onToggleActive={onToggleActive}
+      />
+      <GoalModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingGoal(null);
+        }}
+        onSave={handleSave}
+        existingGoal={editingGoal}
+        categories={categories}
+      />
+    </>
+  );
+};
+
 export default App;
