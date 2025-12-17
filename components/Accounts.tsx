@@ -42,11 +42,14 @@ interface AccountsProps {
   walletTransactions?: WalletTransaction[];
   walletFundsOut?: WalletFundsOut[];
   accounts: BankAccount[];
+  archivedAccounts?: BankAccount[];
   bankTransactions?: BankTransaction[];
   walletTransactionsForBanks?: Array<{ id: string; source: string; total: number; datetime: string }>;
   fundsOutTransactions?: FundsOutTransaction[];
   onAddAccount: (name: string, initialBalance: number) => void;
   onRemoveAccount: (id: string) => void;
+  onArchiveAccount?: (id: string) => void;
+  onUnarchiveAccount?: (id: string) => void;
   onAddFunds?: (bankId: string, amount: number, source: string) => void;
   onAddWalletFunds?: (source: string, amount: number) => void;
   walletBalance?: number;
@@ -58,11 +61,14 @@ export const Accounts: React.FC<AccountsProps> = ({
   walletFundsOut = [],
   walletBalance = 0,
   accounts, 
+  archivedAccounts = [],
   bankTransactions = [], 
   walletTransactionsForBanks = [],
   fundsOutTransactions = [],
   onAddAccount, 
   onRemoveAccount, 
+  onArchiveAccount,
+  onUnarchiveAccount,
   onAddFunds,
   onAddWalletFunds 
 }) => {
@@ -479,16 +485,31 @@ export const Accounts: React.FC<AccountsProps> = ({
                  <ChevronRight className="w-5 h-5 text-slate-400" />
                </div>
                
-               <button 
-                 onClick={(e) => {
-                   e.stopPropagation();
-                   onRemoveAccount(acc.id);
-                 }}
-                 className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
-                 title="Remove Account"
-               >
-                 <Trash2 className="w-5 h-5" />
-               </button>
+               {onArchiveAccount ? (
+                 <button 
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     if (confirm(`Archive "${acc.name}"? You can restore it later.`)) {
+                       onArchiveAccount(acc.id);
+                     }
+                   }}
+                   className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                   title="Archive Account"
+                 >
+                   <Archive className="w-5 h-5" />
+                 </button>
+               ) : (
+                 <button 
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     onRemoveAccount(acc.id);
+                   }}
+                   className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                   title="Remove Account"
+                 >
+                   <Trash2 className="w-5 h-5" />
+                 </button>
+               )}
              </div>
              
              {/* Add Funds Button */}
@@ -519,6 +540,56 @@ export const Accounts: React.FC<AccountsProps> = ({
           <span>+Add Account</span>
         </button>
       </div>
+
+      {/* Archived Accounts Section */}
+      {archivedAccounts.length > 0 && (
+        <div className="mt-8 pt-8 border-t border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-600 mb-4">Archived Accounts</h3>
+          <div className="space-y-4">
+            {archivedAccounts.map(acc => (
+              <div key={acc.id} className="bg-slate-50 text-slate-600 p-6 rounded-2xl border border-slate-200 group opacity-75">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-500">
+                      <Building2 className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-slate-600 text-lg">{acc.name}</h3>
+                      <p className="text-slate-500 font-semibold text-base">${acc.balance.toLocaleString()} GYD</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {onUnarchiveAccount && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`Restore "${acc.name}"?`)) {
+                            onUnarchiveAccount(acc.id);
+                          }
+                        }}
+                        className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors"
+                        title="Restore Account"
+                      >
+                        <ArchiveRestore className="w-5 h-5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        if (confirm(`Permanently delete "${acc.name}"? This cannot be undone.`)) {
+                          onRemoveAccount(acc.id);
+                        }
+                      }}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                      title="Permanently Delete"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Add Funds Modal */}
       {showAddFundsModal && selectedBank && (

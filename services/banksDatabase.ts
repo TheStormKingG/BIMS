@@ -8,6 +8,7 @@ export interface DBBank {
   bank_name: string;
   total: number;
   updated: string;
+  archived_at?: string | null; // ISO timestamp when archived, null if not archived
 }
 
 export interface DBFundsIn {
@@ -33,7 +34,7 @@ export interface DBBankIn {
 
 // BANKS TABLE OPERATIONS
 
-export const fetchBanks = async (): Promise<DBBank[]> => {
+export const fetchBanks = async (includeArchived: boolean = false): Promise<DBBank[]> => {
   try {
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
@@ -48,6 +49,11 @@ export const fetchBanks = async (): Promise<DBBank[]> => {
       query = query.eq('user_id', user.id);
     } else {
       query = query.is('user_id', null);
+    }
+    
+    // Filter out archived accounts by default
+    if (!includeArchived) {
+      query = query.is('archived_at', null);
     }
     
     const { data, error } = await query;
@@ -105,6 +111,59 @@ export const deleteBank = async (id: string): Promise<void> => {
     .eq('id', id);
   
   if (error) throw error;
+};
+
+export const archiveBank = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('banks')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const unarchiveBank = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('banks')
+    .update({ archived_at: null })
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const fetchArchivedBanks = async (): Promise<DBBank[]> => {
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let query = supabase
+      .from('banks')
+      .select('*')
+      .not('archived_at', 'is', null)
+      .order('archived_at', { ascending: false });
+    
+    // Filter by user_id if user is logged in
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        return [];
+      }
+      throw error;
+    }
+    return (data || []) as DBBank[];
+  } catch (err: any) {
+    if (err?.code === 'PGRST202' || err?.message?.includes('relation') || err?.message?.includes('does not exist')) {
+      return [];
+    }
+    throw err;
+  }
 };
 
 // FUNDS_IN TABLE OPERATIONS (replaces bank_in)

@@ -43,6 +43,7 @@ function App() {
   // Use banks hook
   const {
     banks,
+    archivedBanks,
     fundsInTransactions,
     fundsOutTransactions,
     totalInBanks,
@@ -51,6 +52,8 @@ function App() {
     addBank,
     updateBank,
     deleteBank,
+    archiveBank,
+    unarchiveBank,
     addFundsInTransaction,
   } = useBanks();
 

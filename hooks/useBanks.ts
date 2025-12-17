@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   fetchBanks,
+  fetchArchivedBanks,
   createBank,
   updateBank as dbUpdateBank,
   deleteBank as dbDeleteBank,
+  archiveBank as dbArchiveBank,
+  unarchiveBank as dbUnarchiveBank,
   fetchFundsInTransactions,
   createFundsInTransaction,
   DBBank,
@@ -14,6 +17,7 @@ import { getSupabase } from '../services/supabaseClient';
 
 export const useBanks = () => {
   const [banks, setBanks] = useState<DBBank[]>([]);
+  const [archivedBanks, setArchivedBanks] = useState<DBBank[]>([]);
   const [fundsInTransactions, setFundsInTransactions] = useState<DBFundsIn[]>([]);
   const [fundsOutTransactions, setFundsOutTransactions] = useState<DBFundsOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +32,9 @@ export const useBanks = () => {
       setLoading(true);
       setError(null);
       
-      const [banksData, fundsInData, fundsOutData] = await Promise.all([
-        fetchBanks(),
+      const [banksData, archivedBanksData, fundsInData, fundsOutData] = await Promise.all([
+        fetchBanks(false), // Fetch only non-archived
+        fetchArchivedBanks(), // Fetch archived separately
         fetchFundsInTransactions(),
         fetchFundsOut(),
       ]);
@@ -67,6 +72,7 @@ export const useBanks = () => {
         setBanks(banksData);
       }
       
+      setArchivedBanks(archivedBanksData);
       setFundsInTransactions(fundsInData);
       setFundsOutTransactions(fundsOutData);
     } catch (err: any) {
@@ -117,8 +123,39 @@ export const useBanks = () => {
     try {
       await dbDeleteBank(id);
       setBanks(prev => prev.filter(bank => bank.id !== id));
+      setArchivedBanks(prev => prev.filter(bank => bank.id !== id));
     } catch (err) {
       console.error('Failed to delete bank:', err);
+      throw err;
+    }
+  };
+
+  const archiveBank = async (id: string) => {
+    try {
+      await dbArchiveBank(id);
+      // Move bank from active to archived
+      const bankToArchive = banks.find(bank => bank.id === id);
+      if (bankToArchive) {
+        setBanks(prev => prev.filter(bank => bank.id !== id));
+        setArchivedBanks(prev => [{ ...bankToArchive, archived_at: new Date().toISOString() }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to archive bank:', err);
+      throw err;
+    }
+  };
+
+  const unarchiveBank = async (id: string) => {
+    try {
+      await dbUnarchiveBank(id);
+      // Move bank from archived to active
+      const bankToUnarchive = archivedBanks.find(bank => bank.id === id);
+      if (bankToUnarchive) {
+        setArchivedBanks(prev => prev.filter(bank => bank.id !== id));
+        setBanks(prev => [{ ...bankToUnarchive, archived_at: null }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to unarchive bank:', err);
       throw err;
     }
   };
@@ -156,6 +193,7 @@ export const useBanks = () => {
   return {
     // Data
     banks,
+    archivedBanks,
     fundsInTransactions,
     // Legacy alias for backward compatibility
     bankInTransactions: fundsInTransactions,
@@ -169,6 +207,8 @@ export const useBanks = () => {
     addBank,
     updateBank,
     deleteBank,
+    archiveBank,
+    unarchiveBank,
     addFundsInTransaction,
     // Legacy alias for backward compatibility
     addBankInTransaction: addFundsInTransaction,
