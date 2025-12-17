@@ -9,6 +9,7 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   // Check if we should open personal info from navigation state
