@@ -79,6 +79,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           redirectTo: redirectUrl,
           queryParams: {
             redirect_to: redirectUrl,
+            prompt: 'consent',
+            access_type: 'offline',
           },
         },
       });
