@@ -328,7 +328,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       </div>
 
       {/* Spending Totals */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 24h</h3>
@@ -338,17 +338,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             ${analytics.spentLast24Hours.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Rolling 24 hours</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spent Today</h3>
-            <Calendar className="w-5 h-5 text-emerald-600" />
-          </div>
-          <p className="text-3xl font-bold text-slate-900">
-            ${spendingMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">Since midnight</p>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
