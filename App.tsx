@@ -489,7 +489,7 @@ function App() {
         <div className="flex items-center justify-between gap-[8px]">
           <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
             <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
-            <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway</h1>
+            <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h1>
           </div>
           <div className="flex items-center gap-[8px] flex-shrink-0">
             <button
