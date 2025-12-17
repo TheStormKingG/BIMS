@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
@@ -700,6 +700,28 @@ function App() {
                      );
                    }
                  })()}
+               </ProtectedRoute>
+             } />
+
+             <Route path="/goals" element={
+               <ProtectedRoute>
+                 <GoalsPageWrapper
+                   goals={goals}
+                   spentItems={spentItems}
+                   totalBalance={totalInBanks}
+                   onAddGoal={async (input) => {
+                     await addGoal(input);
+                   }}
+                   onEditGoal={async (goalId, updates) => {
+                     await editGoal(goalId, updates);
+                   }}
+                   onDeleteGoal={async (goalId) => {
+                     await removeGoal(goalId);
+                   }}
+                   onToggleActive={async (goalId) => {
+                     await toggleGoalActive(goalId);
+                   }}
+                 />
                </ProtectedRoute>
              } />
              
