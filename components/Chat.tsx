@@ -90,6 +90,77 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
     }
   }, [currentSession]);
 
+  // Initialize Speech Recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognitionInstance = new SpeechRecognition();
+        recognitionInstance.continuous = false;
+        recognitionInstance.interimResults = false;
+        recognitionInstance.lang = 'en-US';
+
+        recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript;
+          setInputValue(transcript);
+          setIsRecording(false);
+          
+          // Auto-send the transcribed text
+          if (transcript.trim() && currentSession) {
+            handleSendTranscribedMessage(transcript);
+          }
+        };
+
+        recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
+          console.error('Speech recognition error:', event.error);
+          setIsRecording(false);
+          alert('Speech recognition failed. Please try typing instead.');
+        };
+
+        recognitionInstance.onend = () => {
+          setIsRecording(false);
+        };
+
+        setRecognition(recognitionInstance);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSession]);
+
+  const handleSendTranscribedMessage = async (transcript: string) => {
+    if (!transcript.trim() || sending || !currentSession) return;
+
+    const messageToSend = transcript.trim();
+    setInputValue('');
+
+    try {
+      await sendMessage(messageToSend);
+    } catch (err) {
+      console.error('Failed to send transcribed message:', err);
+    }
+  };
+
+  const handleVoiceRecord = () => {
+    if (!recognition) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        recognition.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error('Failed to start recording:', err);
+        setIsRecording(false);
+        alert('Failed to start recording. Please try again.');
+      }
+    }
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || sending) return;
