@@ -138,7 +138,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)] md:h-[calc(100vh-60px)] bg-[#0b141a] animate-fade-in">
+    <div className="flex h-full w-full bg-[#0b141a] animate-fade-in">
       {/* Chat List Sidebar */}
       <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-[#2a3942] bg-[#111b21]`}>
         {/* Header */}
