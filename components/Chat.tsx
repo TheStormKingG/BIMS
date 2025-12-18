@@ -285,27 +285,20 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
             <span className="text-[22.8px] md:text-lg font-bold md:font-semibold text-slate-900 md:text-white truncate">Chats</span>
           </div>
           <div className="flex items-center gap-[8px] flex-shrink-0">
-            {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-              <button
-                onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
-              >
+            <button
+              onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
+            >
+              {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                 <img
                   src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                   alt="Profile"
-                  className="w-5 h-5 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
-              >
-                <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
-                  <User className="w-3 h-3 text-white" />
-                </div>
-              </button>
-            )}
+              ) : (
+                <User className="w-8 h-8 text-slate-500" />
+              )}
+            </button>
             <button
               onClick={handleNewChat}
               className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors hidden md:block"
