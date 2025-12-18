@@ -3,6 +3,7 @@ import { SpentItem } from '../services/spentTableDatabase';
 import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search, Trash2 } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
+import { ReceiptModal } from './ReceiptModal';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -20,6 +21,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   const [editingItem, setEditingItem] = useState<SpentItem | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedReceiptItem, setSelectedReceiptItem] = useState<SpentItem | null>(null);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -303,9 +305,19 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                       {item.paymentMethod || 'N/A'}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
-                        {item.source}
-                      </span>
+                      {item.source === 'SCAN_RECEIPT' ? (
+                        <button
+                          onClick={() => setSelectedReceiptItem(item)}
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer transition-colors"
+                          title="View receipt"
+                        >
+                          {item.source}
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                          {item.source}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                       {formatEntryDate(item.entryDate)}
@@ -514,6 +526,14 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
             </form>
           </div>
         </div>
+      )}
+
+      {/* Receipt Modal */}
+      {selectedReceiptItem && (
+        <ReceiptModal
+          spentItem={selectedReceiptItem}
+          onClose={() => setSelectedReceiptItem(null)}
+        />
       )}
     </div>
   );
