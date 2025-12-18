@@ -109,16 +109,23 @@ export const getReceipt = async (id: string): Promise<Receipt | null> => {
  * Get receipt by spent_table_id
  */
 export const getReceiptBySpentTableId = async (spentTableId: string): Promise<Receipt | null> => {
+  // Use maybeSingle() to handle 0 or 1 rows gracefully
+  // Order by created_at descending and limit to 1 in case duplicates exist
   const { data, error } = await supabase
     .from('receipts')
     .select('*')
     .eq('spent_table_id', spentTableId)
-    .single();
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
+    // maybeSingle() shouldn't throw PGRST116, but handle other errors
     if (error.code === 'PGRST116') return null; // Not found
     throw error;
   }
+
+  if (!data) return null;
 
   return {
     id: data.id,
