@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { SpentItem } from '../services/spentTableDatabase';
-import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search, Trash2 } from 'lucide-react';
+import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search, Trash2, Download } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
 import { ReceiptModal } from './ReceiptModal';
+import { exportSpendingToCSV, exportSpendingToExcel } from '../services/exportsService';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -250,14 +251,37 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
             <ChevronRight className="w-5 h-5 text-slate-600" />
           </button>
         </div>
-        {onAddSpend && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>+Add Spend</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Export Buttons */}
+          {filteredItems.length > 0 && (
+            <>
+              <button
+                onClick={() => exportSpendingToCSV(filteredItems)}
+                className="text-emerald-600 border border-emerald-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                title="Export as CSV"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </button>
+              <button
+                onClick={() => exportSpendingToExcel(filteredItems)}
+                className="text-emerald-600 border border-emerald-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                title="Export as Excel"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Export Excel</span>
+              </button>
+            </>
+          )}
+          {onAddSpend && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              <span>+Add Spend</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
