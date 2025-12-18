@@ -181,7 +181,7 @@ export const downloadReceiptPdf = async (
     }
 
     // Footer
-    checkPageBreak(15);
+    checkPageBreak(40); // Increased height for branding
     doc.setLineWidth(0.3);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
     yPosition += 8;
@@ -190,7 +190,60 @@ export const downloadReceiptPdf = async (
     const footerText = 'Digitized Receipt - Generated from OCR';
     const footerWidth = doc.getTextWidth(footerText);
     doc.text(footerText, (pageWidth - footerWidth) / 2, yPosition);
+    yPosition += 12;
     doc.setTextColor(0, 0, 0); // Reset to black
+
+    // Stashway Branding - Logo and Text
+    try {
+      // Load logo image (using fetch to get base64)
+      const logoUrl = '/stashway-logo.png';
+      const logoResponse = await fetch(logoUrl);
+      const logoBlob = await logoResponse.blob();
+      const logoBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(logoBlob);
+      });
+
+      // Add logo image (15mm height, centered)
+      const logoHeight = 15; // mm
+      const logoWidth = (logoHeight * 3); // Maintain aspect ratio (assuming logo is wider than tall)
+      const logoX = (pageWidth - logoWidth) / 2;
+      doc.addImage(logoBase64, 'PNG', logoX, yPosition, logoWidth, logoHeight);
+      yPosition += logoHeight + 5;
+
+      // Add "Stashway™" text with superscript
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      
+      const stashwayText = 'Stashway';
+      const stashwayWidth = doc.getTextWidth(stashwayText);
+      const stashwayX = (pageWidth - stashwayWidth - 4) / 2; // 4mm for TM symbol
+      
+      doc.text(stashwayText, stashwayX, yPosition);
+      
+      // Add ™ superscript (smaller, slightly higher)
+      doc.setFontSize(8);
+      doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
+      
+    } catch (err) {
+      console.warn('Could not load logo, showing text only:', err);
+      // Fallback: Just show text if logo fails to load
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      const stashwayText = 'Stashway';
+      const stashwayWidth = doc.getTextWidth(stashwayText);
+      const stashwayX = (pageWidth - stashwayWidth - 4) / 2;
+      doc.text(stashwayText, stashwayX, yPosition);
+      doc.setFontSize(8);
+      doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
+    }
 
     // Generate filename
     const merchantSlug = merchantName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
