@@ -179,23 +179,47 @@ export const exportOverviewToPdf = async (
     doc.text(formatCurrency(totalBalance), margin, yPosition);
     yPosition += 10;
 
-    // Account breakdown
+    // Account breakdown - filter unique accounts and non-zero balances
     if (accounts.length > 0) {
-      checkPageBreak(15);
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text('Account Breakdown:', margin, yPosition);
-      yPosition += 6;
+      // Process accounts: combine Cash Wallets into one, filter zero balances
+      const processedAccounts: Array<{ name: string; balance: number }> = [];
+      let cashWalletBalance = 0;
+      let hasCashWallet = false;
 
       accounts.forEach(acc => {
-        const bal = acc.type === 'CASH_WALLET' 
-          ? ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((sum:number, [d, c]: any) => sum + Number(d)*c, 0)) || acc.balance || 0
-          : acc.balance || 0;
-        const accName = acc.type === 'CASH_WALLET' ? 'Cash Wallet' : acc.name;
-        doc.text(`${accName}: ${formatCurrency(bal)}`, margin + 5, yPosition);
-        yPosition += 6;
+        if (acc.type === 'CASH_WALLET') {
+          const bal = ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((sum:number, [d, c]: any) => sum + Number(d)*c, 0)) || 0;
+          if (bal > 0) {
+            cashWalletBalance += bal;
+            hasCashWallet = true;
+          }
+        } else {
+          const bal = acc.balance || 0;
+          if (bal > 0) {
+            processedAccounts.push({ name: acc.name, balance: bal });
+          }
+        }
       });
-      yPosition += 5;
+
+      // Add combined Cash Wallet if it has balance
+      if (hasCashWallet && cashWalletBalance > 0) {
+        processedAccounts.push({ name: 'Cash Wallet', balance: cashWalletBalance });
+      }
+
+      // Only show if we have accounts to display
+      if (processedAccounts.length > 0) {
+        checkPageBreak(15);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('Account Breakdown:', margin, yPosition);
+        yPosition += 6;
+
+        processedAccounts.forEach(acc => {
+          doc.text(`${acc.name}: ${formatCurrency(acc.balance)}`, margin + 5, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 5;
+      }
     }
 
     // Spending Metrics Section
@@ -326,8 +350,11 @@ export const exportOverviewToPdf = async (
 
     yPosition += 10;
 
-    // Recent Activity
-    checkPageBreak(40);
+    // Recent Activity - ensure table fits on one page
+    const recentActivityRows = Math.min(analytics.recentActivity.length, 10);
+    const recentActivityTableHeight = recentActivityRows > 0 ? 10 + 10 + 6 + 6 + (recentActivityRows * 8) : 25;
+    
+    checkPageBreak(recentActivityTableHeight);
     doc.setLineWidth(0.3);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
     yPosition += 10;
@@ -351,7 +378,6 @@ export const exportOverviewToPdf = async (
       yPosition += 6;
 
       analytics.recentActivity.slice(0, 10).forEach(item => {
-        checkPageBreak(8);
         const dateStr = formatDate(item.transactionDateTime);
         doc.text(dateStr, margin, yPosition);
         
