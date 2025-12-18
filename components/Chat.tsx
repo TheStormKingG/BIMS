@@ -269,8 +269,8 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
       <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-gray-200 md:border-[#2a3942] bg-white md:bg-[#111b21] overflow-hidden`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Header */}
         <div className="bg-white md:bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-gray-200 md:border-[#2a3942]">
-          <div className="flex items-center gap-3 flex-1">
-            <img src="/stashway-logo.png" alt="Stashway" className="w-8 h-8 md:hidden" />
+          <div className="flex items-center gap-[8px] flex-1">
+            <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0 md:hidden" />
             {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
               <img
                 src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
@@ -282,26 +282,29 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                 <User className="w-5 h-5 text-gray-700 md:text-white" />
               </div>
             )}
-            <span className="text-black md:text-white font-semibold text-lg">Chats</span>
+            <span className="text-[22.8px] md:text-lg font-bold md:font-semibold text-slate-900 md:text-white truncate">Chats</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/settings')}
-              className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors md:hidden"
-              title="Settings"
-            >
-              <SettingsIcon className="w-5 h-5 text-gray-700" />
-            </button>
+          <div className="flex items-center gap-[8px] flex-shrink-0">
             {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-              <img
-                src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover md:hidden"
-              />
+              <button
+                onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
+              >
+                <img
+                  src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                  alt="Profile"
+                  className="w-5 h-5 rounded-full object-cover"
+                />
+              </button>
             ) : (
-              <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center md:hidden">
-                <User className="w-5 h-5 text-white" />
-              </div>
+              <button
+                onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
+              >
+                <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
+                  <User className="w-3 h-3 text-white" />
+                </div>
+              </button>
             )}
             <button
               onClick={handleNewChat}
@@ -423,19 +426,19 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
           <>
             {/* Chat Header */}
             <div className="bg-white md:bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-gray-200 md:border-[#2a3942] sticky top-0 z-40">
-              <div className="flex items-center gap-3 flex-1">
+              <div className="flex items-center gap-[8px] flex-1">
                 {window.innerWidth < 768 ? (
                   <>
                     <button
                       onClick={() => setShowChatList(true)}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer flex-shrink-0"
                     >
                       <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <img src="/stashway-logo.png" alt="Stashway" className="w-8 h-8" />
-                    <h3 className="text-black font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
+                    <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
+                    <h3 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h3>
                   </>
                 ) : (
                   <>
@@ -450,26 +453,20 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                 )}
               </div>
               {window.innerWidth < 768 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-[8px] flex-shrink-0">
                   <button
-                    onClick={() => navigate('/settings')}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <SettingsIcon className="w-5 h-5 text-gray-700" />
-                  </button>
-                  <button
-                    onClick={() => navigate('/settings')}
-                    className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
+                    onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
+                    className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
                   >
                     {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                       <img
                         src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                         alt="Profile"
-                        className="w-full h-full object-cover"
+                        className="w-5 h-5 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-emerald-600 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
+                        <User className="w-3 h-3 text-white" />
                       </div>
                     )}
                   </button>
