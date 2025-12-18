@@ -115,7 +115,9 @@ export const exportSpendingToExcel = async (spentItems: SpentItem[]): Promise<vo
 export const exportOverviewToPdf = async (
   accounts: Account[],
   spentItems: SpentItem[],
-  totalBalance: number
+  totalBalance: number,
+  userEmail?: string,
+  userAvatarUrl?: string | null
 ): Promise<void> => {
   try {
     const doc = new jsPDF();
@@ -151,6 +153,109 @@ export const exportOverviewToPdf = async (
 
     // Calculate analytics
     const analytics = calculateTimeBasedAnalytics(spentItems);
+
+    // Header - Mobile style header (without settings icon)
+    const headerHeight = 18;
+    checkPageBreak(headerHeight + 10);
+    
+    // Header background (light gray, simulating gradient)
+    doc.setFillColor(248, 250, 252); // slate-50
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+    
+    // Logo and Stashway text on the left
+    const logoSize = 12; // PDF units (mm)
+    const logoX = margin;
+    const logoY = headerHeight / 2;
+    
+    // Try to load and add logo image
+    try {
+      const logoUrl = '/stashway-logo.png';
+      const logoResponse = await fetch(logoUrl);
+      if (logoResponse.ok) {
+        const logoBlob = await logoResponse.blob();
+        const logoBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(logoBlob);
+        });
+        doc.addImage(logoBase64, 'PNG', logoX, logoY - logoSize / 2, logoSize, logoSize);
+      } else {
+        throw new Error('Logo not found');
+      }
+    } catch (e) {
+      // Logo loading failed, use placeholder circle with S
+      doc.setFillColor(16, 185, 129); // emerald-500
+      doc.circle(logoX + logoSize / 2, logoY, logoSize / 2, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('S', logoX + logoSize / 2 - 1.5, logoY + 1.5);
+    }
+    
+    // Stashway text
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('Stashway™', logoX + logoSize + 3, logoY + 3);
+    
+    // User email and profile picture on the right
+    const rightMargin = margin;
+    let rightX = pageWidth - rightMargin;
+    
+    // Profile picture (small circle)
+    const avatarSize = 8;
+    const avatarX = rightX - avatarSize / 2;
+    const avatarY = logoY;
+    
+    // Try to load user avatar image if available
+    let avatarLoaded = false;
+    if (userAvatarUrl) {
+      try {
+        const avatarResponse = await fetch(userAvatarUrl);
+        if (avatarResponse.ok) {
+          const avatarBlob = await avatarResponse.blob();
+          const avatarBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(avatarBlob);
+          });
+          // Create a circular clipping path for avatar
+          doc.setFillColor(255, 255, 255);
+          doc.circle(avatarX, avatarY, avatarSize / 2, 'F'); // White background
+          doc.addImage(avatarBase64, 'PNG', avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
+          avatarLoaded = true;
+        }
+      } catch (e) {
+        // Avatar loading failed, use placeholder
+      }
+    }
+    
+    // Draw avatar placeholder if image not loaded
+    if (!avatarLoaded) {
+      doc.setFillColor(226, 232, 240); // slate-300
+      doc.circle(avatarX, avatarY, avatarSize / 2, 'F');
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.setFontSize(6);
+      doc.setFont(undefined, 'normal');
+      doc.text('U', avatarX - 1.5, avatarY + 1.5);
+    }
+    
+    // User email to the left of avatar
+    if (userEmail) {
+      doc.setTextColor(51, 65, 85); // slate-700
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      const emailText = userEmail.length > 30 ? userEmail.substring(0, 27) + '...' : userEmail;
+      const emailWidth = doc.getTextWidth(emailText);
+      doc.text(emailText, avatarX - emailWidth - 5, avatarY + 3);
+    }
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
+    yPosition = headerHeight + 15;
 
     // Title
     doc.setFontSize(20);

@@ -315,7 +315,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
   const handleExportPdf = async () => {
     try {
-      await exportOverviewToPdf(accounts, spentItems, totalBalance);
+      // Get user info for header
+      const { getSupabase } = await import('../services/supabaseClient');
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const userEmail = user?.email || undefined;
+      const userAvatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+      
+      await exportOverviewToPdf(accounts, spentItems, totalBalance, userEmail, userAvatarUrl);
     } catch (err) {
       console.error('Error exporting overview PDF:', err);
       alert('Failed to generate PDF. Please try again.');
