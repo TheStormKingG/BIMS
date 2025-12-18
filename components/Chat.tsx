@@ -335,7 +335,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                   >
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
-                        <img src="/stashway-logo.png" alt="StashGPT" className="w-12 h-12 object-cover" />
+                        <img src="/stashway-logo.png" alt="Stashway" className="w-12 h-12 object-cover" />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0 text-left">
