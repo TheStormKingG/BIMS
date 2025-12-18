@@ -567,12 +567,14 @@ function App() {
               <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h1>
             </div>
             <div className="flex items-center gap-[8px] flex-shrink-0">
-              <button
-                onClick={() => navigate('/settings')}
-                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
-              >
-                <SettingsIcon className="w-6 h-6 text-slate-600" />
-              </button>
+              {location.pathname !== '/settings' && (
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                >
+                  <SettingsIcon className="w-6 h-6 text-slate-600" />
+                </button>
+              )}
               <button
                 onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
                 className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
