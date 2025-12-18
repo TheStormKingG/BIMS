@@ -462,12 +462,10 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                       <img
                         src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                         alt="Profile"
-                        className="w-5 h-5 rounded-full object-cover"
+                        className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center">
-                        <User className="w-3 h-3 text-white" />
-                      </div>
+                      <User className="w-8 h-8 text-slate-500" />
                     )}
                   </button>
                 </div>
