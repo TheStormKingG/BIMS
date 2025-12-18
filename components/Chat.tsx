@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Plus, Trash2, MessageCircle, Bot, User, Loader2, Search, MoreVertical, Settings as SettingsIcon } from 'lucide-react';
+import { Send, Plus, Trash2, MessageCircle, Bot, User, Loader2, Search, MoreVertical, Settings as SettingsIcon, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useChat } from '../hooks/useChat';
 import { ChatSession, ChatMessage } from '../services/chatDatabase';
@@ -69,8 +69,11 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
     startNewSession,
     sendMessage,
     deleteSession,
+    renameSession,
     setCurrentSession,
   } = useChat(spentItems);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editName, setEditName] = useState<string>('');
 
   // Get current user
   useEffect(() => {
@@ -353,26 +356,89 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                 const isSelected = currentSession?.id === session.id;
                 
                 return (
-                  <button
+                  <div
                     key={session.id}
-                    onClick={() => handleSessionSelect(session)}
                     className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-100 md:hover:bg-[#202c33] transition-colors border-b border-gray-200 md:border-[#2a3942] ${
                       isSelected ? 'bg-gray-100 md:bg-[#2a3942]' : 'bg-white md:bg-transparent'
                     }`}
                   >
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
-                        <img src="/stashway-logo.png" alt="Stashway" className="w-12 h-12 object-cover" />
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
+                        <img src="/stashway-logo.png" alt="Stashway" className="w-6 h-6 object-cover" />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-gray-900 md:text-white font-medium text-sm truncate">Stashway<sup className="text-xs">™</sup></span>
-                        <span className="text-gray-500 md:text-[#8696a0] text-xs ml-2 flex-shrink-0">{lastMessage.time}</span>
+                        {editingSessionId === session.id ? (
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            onBlur={async () => {
+                              if (editName.trim()) {
+                                try {
+                                  await renameSession(session.id, editName.trim());
+                                } catch (err) {
+                                  console.error('Failed to rename:', err);
+                                }
+                              }
+                              setEditingSessionId(null);
+                              setEditName('');
+                            }}
+                            onKeyDown={async (e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (editName.trim()) {
+                                  try {
+                                    await renameSession(session.id, editName.trim());
+                                  } catch (err) {
+                                    console.error('Failed to rename:', err);
+                                  }
+                                }
+                                setEditingSessionId(null);
+                                setEditName('');
+                              } else if (e.key === 'Escape') {
+                                setEditingSessionId(null);
+                                setEditName('');
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-1 bg-transparent border-b border-emerald-600 md:border-emerald-500 text-gray-900 md:text-white font-medium text-sm focus:outline-none"
+                            autoFocus
+                          />
+                        ) : (
+                          <>
+                            <span 
+                              className="text-gray-900 md:text-white font-medium text-sm truncate flex-1 cursor-pointer"
+                              onClick={() => handleSessionSelect(session)}
+                            >
+                              {session.name || 'New Chat'}
+                            </span>
+                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingSessionId(session.id);
+                                  setEditName(session.name || '');
+                                }}
+                                className="p-1 hover:bg-gray-200 md:hover:bg-[#3a4549] rounded transition-colors"
+                                title="Rename chat"
+                              >
+                                <Pencil className="w-3 h-3 text-gray-600 md:text-[#8696a0]" />
+                              </button>
+                              <span className="text-gray-500 md:text-[#8696a0] text-xs">{lastMessage.time}</span>
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-gray-600 md:text-[#8696a0] text-sm truncate">{lastMessage.text}</p>
-                        {isSelected && (
+                        <p 
+                          className="text-gray-600 md:text-[#8696a0] text-sm truncate cursor-pointer"
+                          onClick={() => handleSessionSelect(session)}
+                        >
+                          {lastMessage.text}
+                        </p>
+                        {isSelected && editingSessionId !== session.id && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -386,7 +452,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                         )}
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

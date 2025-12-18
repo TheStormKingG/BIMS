@@ -5,6 +5,7 @@ const supabase = getSupabase();
 export interface ChatSession {
   id: string;
   userId: string;
+  name: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +46,7 @@ export const createChatSession = async (): Promise<ChatSession> => {
   return {
     id: data.id,
     userId: data.user_id,
+    name: data.name || null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -73,6 +75,7 @@ export const fetchChatSessions = async (): Promise<ChatSession[]> => {
   return (data || []).map(item => ({
     id: item.id,
     userId: item.user_id,
+    name: item.name || null,
     createdAt: item.created_at,
     updatedAt: item.updated_at,
   }));

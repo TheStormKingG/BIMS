@@ -7,8 +7,9 @@ import {
   fetchChatMessages,
   createChatMessage,
   deleteChatSession,
+  updateChatSessionName,
 } from '../services/chatDatabase';
-import { generateChatResponse } from '../services/chatService';
+import { generateChatResponse, generateChatName } from '../services/chatService';
 import { SpentItem } from '../services/spentTableDatabase';
 
 export const useChat = (spentItems: SpentItem[] = []) => {
@@ -85,9 +86,11 @@ export const useChat = (spentItems: SpentItem[] = []) => {
 
   const sendMessage = async (content: string) => {
     let sessionToUse = currentSession;
+    let isNewSession = false;
     if (!sessionToUse) {
       // Create a new session if none exists
       sessionToUse = await startNewSession();
+      isNewSession = true;
     }
 
     try {
@@ -101,6 +104,22 @@ export const useChat = (spentItems: SpentItem[] = []) => {
         content,
       });
       setMessages(prev => [...prev, userMessage]);
+
+      // Auto-generate name for new session based on first message
+      if (isNewSession && (!sessionToUse.name || sessionToUse.name.trim() === '')) {
+        try {
+          const generatedName = await generateChatName(content);
+          await updateChatSessionName(sessionToUse.id, generatedName);
+          // Update local session state
+          setSessions(prev => prev.map(s => 
+            s.id === sessionToUse.id ? { ...s, name: generatedName } : s
+          ));
+          setCurrentSession({ ...sessionToUse, name: generatedName });
+        } catch (nameError) {
+          console.error('Failed to generate chat name:', nameError);
+          // Continue even if name generation fails
+        }
+      }
 
       // Generate AI response with updated messages including the new user message
       const updatedMessages = [...messages, userMessage];
@@ -141,6 +160,21 @@ export const useChat = (spentItems: SpentItem[] = []) => {
     }
   };
 
+  const renameSession = async (sessionId: string, newName: string) => {
+    try {
+      await updateChatSessionName(sessionId, newName);
+      setSessions(prev => prev.map(s => 
+        s.id === sessionId ? { ...s, name: newName } : s
+      ));
+      if (currentSession?.id === sessionId) {
+        setCurrentSession({ ...currentSession, name: newName });
+      }
+    } catch (err) {
+      console.error('Failed to rename session:', err);
+      throw err;
+    }
+  };
+
   return {
     sessions,
     currentSession,
@@ -151,6 +185,7 @@ export const useChat = (spentItems: SpentItem[] = []) => {
     startNewSession,
     sendMessage,
     deleteSession,
+    renameSession,
     setCurrentSession,
     refreshSessions: loadSessions,
   };

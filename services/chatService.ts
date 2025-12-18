@@ -126,3 +126,35 @@ function buildFinancialContext(analytics: ReturnType<typeof calculateTimeBasedAn
   return context.join('\n');
 }
 
+/**
+ * Generate a short, descriptive name for a chat session based on the first user message
+ */
+export const generateChatName = async (firstUserMessage: string): Promise<string> => {
+  try {
+    const prompt = `Based on this user message, generate a short, descriptive chat title (maximum 4-5 words). 
+Make it concise and relevant to the topic. Examples: "Monthly Spending Review", "Budget Planning", "Dining Expenses Question".
+Just return the title, nothing else.
+
+User message: "${firstUserMessage}"`;
+
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        temperature: 0.5,
+        maxOutputTokens: 50,
+      }
+    });
+
+    const name = (response.text || firstUserMessage.substring(0, 30)).trim();
+    // Ensure name is not too long
+    return name.length > 50 ? name.substring(0, 47) + '...' : name;
+  } catch (error) {
+    console.error('Error generating chat name:', error);
+    // Fallback to truncated first message
+    return firstUserMessage.length > 30 
+      ? firstUserMessage.substring(0, 27) + '...' 
+      : firstUserMessage;
+  }
+}
+
