@@ -41,7 +41,12 @@ export const fetchWallet = async (): Promise<CashWallet | null> => {
       query = query.is('user_id', null);
     }
     
-    const { data, error } = await query.maybeSingle();
+    // Order by updated descending to get the latest wallet, limit to 1
+    // This handles cases where there are duplicate wallets
+    const { data, error } = await query
+      .order('updated', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     
     if (error) {
       // Only log unexpected errors (maybeSingle shouldn't throw PGRST116)
@@ -81,7 +86,12 @@ export const getWalletBalance = async (): Promise<number> => {
       query = query.is('user_id', null);
     }
     
-    const { data, error } = await query.maybeSingle();
+    // Order by updated descending to get the latest wallet, limit to 1
+    // This handles cases where there are duplicate wallets
+    const { data, error } = await query
+      .order('updated', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     
     if (error) {
       // Only log unexpected errors (maybeSingle shouldn't throw PGRST116)
