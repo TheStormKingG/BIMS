@@ -289,6 +289,13 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
           </div>
           <div className="flex items-center gap-[8px] flex-shrink-0">
             <button
+              onClick={handleNewChat}
+              className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+              title="New chat"
+            >
+              <Plus className="w-5 h-5 text-slate-700 md:text-[#aebac1]" />
+            </button>
+            <button
               onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
               className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer md:hidden"
             >

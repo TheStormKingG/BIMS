@@ -117,10 +117,11 @@ export const useChat = (spentItems: SpentItem[] = []) => {
       });
       setMessages(prev => [...prev, aiMessage]);
 
-      // Auto-generate name for session if it doesn't have one
+      // Auto-generate name for session if it doesn't have one or is "New Chat"
       // Do this after getting the AI response so we have more context
       const finalMessages = [...updatedMessages, aiMessage];
-      if (!sessionToUse.name || sessionToUse.name.trim() === '') {
+      const currentName = sessionToUse.name?.trim() || '';
+      if (!currentName || currentName === '' || currentName.toLowerCase() === 'new chat') {
         try {
           const generatedName = await generateChatName(finalMessages);
           await updateChatSessionName(sessionToUse.id, generatedName);
