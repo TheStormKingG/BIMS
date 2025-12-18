@@ -145,6 +145,22 @@ export const createChatMessage = async (input: CreateChatMessageInput): Promise<
 };
 
 /**
+ * Update a chat session's name
+ */
+export const updateChatSessionName = async (sessionId: string, name: string): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const { error } = await supabase
+    .from('chat_sessions')
+    .update({ name })
+    .eq('id', sessionId)
+    .eq('user_id', user.id);
+
+  if (error) throw error;
+};
+
+/**
  * Delete a chat session (cascades to messages)
  */
 export const deleteChatSession = async (sessionId: string): Promise<void> => {
@@ -154,7 +170,8 @@ export const deleteChatSession = async (sessionId: string): Promise<void> => {
   const { error } = await supabase
     .from('chat_sessions')
     .delete()
-    .eq('id', sessionId);
+    .eq('id', sessionId)
+    .eq('user_id', user.id);
 
   if (error) throw error;
 };
