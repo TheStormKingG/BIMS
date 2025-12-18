@@ -290,8 +290,24 @@ function App() {
       return (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-600">Loading wallet from Supabase...</p>
+            {/* Hexagonal Spinner */}
+            <div className="inline-block mb-4">
+              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M12 2 L20 7 L20 17 L12 22 L4 17 L4 7 Z"
+                  stroke="rgb(16 185 129)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                  strokeDasharray="40"
+                  style={{
+                    animation: 'hexagon-spin 1.5s linear infinite',
+                  }}
+                />
+              </svg>
+            </div>
+            <p className="text-slate-600">...finding your stash</p>
           </div>
         </div>
       );

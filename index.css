@@ -26,4 +26,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Hexagonal spinner animation */
+@keyframes hexagon-spin {
+  0% {
+    stroke-dashoffset: 40;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -40;
+  }
+}
+
 
