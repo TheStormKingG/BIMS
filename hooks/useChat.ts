@@ -105,22 +105,6 @@ export const useChat = (spentItems: SpentItem[] = []) => {
       });
       setMessages(prev => [...prev, userMessage]);
 
-      // Auto-generate name for new session based on first message
-      if (isNewSession && (!sessionToUse.name || sessionToUse.name.trim() === '')) {
-        try {
-          const generatedName = await generateChatName(content);
-          await updateChatSessionName(sessionToUse.id, generatedName);
-          // Update local session state
-          setSessions(prev => prev.map(s => 
-            s.id === sessionToUse.id ? { ...s, name: generatedName } : s
-          ));
-          setCurrentSession({ ...sessionToUse, name: generatedName });
-        } catch (nameError) {
-          console.error('Failed to generate chat name:', nameError);
-          // Continue even if name generation fails
-        }
-      }
-
       // Generate AI response with updated messages including the new user message
       const updatedMessages = [...messages, userMessage];
       const aiResponseText = await generateChatResponse(content, updatedMessages, spentItems);
@@ -132,6 +116,24 @@ export const useChat = (spentItems: SpentItem[] = []) => {
         content: aiResponseText,
       });
       setMessages(prev => [...prev, aiMessage]);
+
+      // Auto-generate name for session if it doesn't have one
+      // Do this after getting the AI response so we have more context
+      const finalMessages = [...updatedMessages, aiMessage];
+      if (!sessionToUse.name || sessionToUse.name.trim() === '') {
+        try {
+          const generatedName = await generateChatName(finalMessages);
+          await updateChatSessionName(sessionToUse.id, generatedName);
+          // Update local session state
+          setSessions(prev => prev.map(s => 
+            s.id === sessionToUse.id ? { ...s, name: generatedName } : s
+          ));
+          setCurrentSession({ ...sessionToUse, name: generatedName });
+        } catch (nameError) {
+          console.error('Failed to generate chat name:', nameError);
+          // Continue even if name generation fails
+        }
+      }
 
       // Refresh sessions to update updated_at timestamp
       await loadSessions();

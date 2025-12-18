@@ -127,15 +127,23 @@ function buildFinancialContext(analytics: ReturnType<typeof calculateTimeBasedAn
 }
 
 /**
- * Generate a short, descriptive name for a chat session based on the first user message
+ * Generate a short, descriptive name for a chat session based on the conversation content
  */
-export const generateChatName = async (firstUserMessage: string): Promise<string> => {
+export const generateChatName = async (messages: ChatMessage[]): Promise<string> => {
   try {
-    const prompt = `Based on this user message, generate a short, descriptive chat title (maximum 4-5 words). 
-Make it concise and relevant to the topic. Examples: "Monthly Spending Review", "Budget Planning", "Dining Expenses Question".
+    // Extract conversation content (user messages and assistant responses)
+    const conversationText = messages
+      .slice(0, 10) // Use first 10 messages for context
+      .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
+
+    const prompt = `Based on this conversation, generate a short, descriptive chat title (maximum 4-5 words). 
+Analyze the main topic and theme of the conversation to create an appropriate title.
+Make it concise and relevant to the topic. Examples: "Monthly Spending Review", "Budget Planning", "Dining Expenses Question", "Transaction Analysis".
 Just return the title, nothing else.
 
-User message: "${firstUserMessage}"`;
+Conversation:
+${conversationText}`;
 
     const response = await ai.models.generateContent({
       model: modelName,
@@ -146,12 +154,22 @@ User message: "${firstUserMessage}"`;
       }
     });
 
-    const name = (response.text || firstUserMessage.substring(0, 30)).trim();
+    const name = (response.text || '').trim();
+    
+    // Fallback to first user message if name is empty or too short
+    if (!name || name.length < 3) {
+      const firstUserMessage = messages.find(m => m.role === 'user')?.content || 'New Chat';
+      return firstUserMessage.length > 30 
+        ? firstUserMessage.substring(0, 27) + '...' 
+        : firstUserMessage;
+    }
+    
     // Ensure name is not too long
     return name.length > 50 ? name.substring(0, 47) + '...' : name;
   } catch (error) {
     console.error('Error generating chat name:', error);
-    // Fallback to truncated first message
+    // Fallback to first user message
+    const firstUserMessage = messages.find(m => m.role === 'user')?.content || 'New Chat';
     return firstUserMessage.length > 30 
       ? firstUserMessage.substring(0, 27) + '...' 
       : firstUserMessage;
