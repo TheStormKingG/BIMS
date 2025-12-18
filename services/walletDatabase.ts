@@ -41,25 +41,14 @@ export const fetchWallet = async (): Promise<CashWallet | null> => {
       query = query.is('user_id', null);
     }
     
-    const { data, error } = await query.single();
+    const { data, error } = await query.maybeSingle();
     
     if (error) {
-      // PGRST116 = No rows found
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      // 406 = Not Acceptable (often RLS or query format issue)
-      if (error.code === 'PGRST204' || error.message?.includes('406')) {
-        return null;
-      }
-      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        return null;
-      }
-      // Only log unexpected errors
-      if (!error.message?.includes('406')) {
+      // Only log unexpected errors (maybeSingle shouldn't throw PGRST116)
+      if (error.code !== 'PGRST202' && !error.message?.includes('relation') && !error.message?.includes('does not exist')) {
         console.error('Error fetching wallet:', error);
       }
-      return null; // Return null instead of throwing for graceful handling
+      return null;
     }
     
     if (!data) return null;
@@ -92,24 +81,14 @@ export const getWalletBalance = async (): Promise<number> => {
       query = query.is('user_id', null);
     }
     
-    const { data, error } = await query.single();
+    const { data, error } = await query.maybeSingle();
     
     if (error) {
-      if (error.code === 'PGRST116') {
-        return 0; // No wallet found, return 0
-      }
-      // 406 = Not Acceptable (often RLS or query format issue)
-      if (error.code === 'PGRST204' || error.message?.includes('406')) {
-        return 0;
-      }
-      if (error.code === 'PGRST202' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        return 0;
-      }
-      // Only log unexpected errors
-      if (!error.message?.includes('406')) {
+      // Only log unexpected errors (maybeSingle shouldn't throw PGRST116)
+      if (error.code !== 'PGRST202' && !error.message?.includes('relation') && !error.message?.includes('does not exist')) {
         console.error('Error getting wallet balance:', error);
       }
-      return 0; // Return 0 instead of throwing for graceful handling
+      return 0;
     }
     
     return Number(data?.total || 0);
