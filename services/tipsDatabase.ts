@@ -35,15 +35,25 @@ export const getUserPreferences = async (): Promise<UserPreferences> => {
     .single();
 
   if (error) {
-    // If no preferences exist, create default
+    // If no preferences exist, create default using upsert
     if (error.code === 'PGRST116') {
-      const { data: newPrefs, error: insertError } = await supabase
+      const { data: newPrefs, error: upsertError } = await supabase
         .from('user_preferences')
-        .insert([{ user_id: user.id, tips_frequency: 'weekly', tips_count: 5 }])
+        .upsert({ 
+          user_id: user.id, 
+          tips_frequency: 'weekly', 
+          tips_count: 5 
+        }, { 
+          onConflict: 'user_id' 
+        })
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (upsertError) throw upsertError;
+
+      if (!newPrefs) {
+        throw new Error('Failed to create user preferences');
+      }
 
       return {
         id: newPrefs.id,
@@ -61,13 +71,14 @@ export const getUserPreferences = async (): Promise<UserPreferences> => {
     id: data.id,
     userId: data.user_id,
     tipsFrequency: data.tips_frequency as 'daily' | 'weekly' | 'monthly' | 'off',
+    tipsCount: data.tips_count ? Number(data.tips_count) : 5,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
 };
 
 /**
- * Update user preferences
+ * Update user preferences (uses upsert to handle missing rows)
  */
 export const updateUserPreferences = async (
   tipsFrequency: 'daily' | 'weekly' | 'monthly' | 'off',
@@ -76,15 +87,24 @@ export const updateUserPreferences = async (
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const updateData: any = { tips_frequency: tipsFrequency };
+  const upsertData: any = { 
+    user_id: user.id,
+    tips_frequency: tipsFrequency 
+  };
+  
+  // Only include tips_count if provided (to handle cases where column might not exist yet)
   if (tipsCount !== undefined) {
-    updateData.tips_count = tipsCount;
+    upsertData.tips_count = tipsCount;
   }
 
+  // Use upsert with onConflict to handle both insert and update cases
+  // This ensures we only have one row per user
   const { error } = await supabase
     .from('user_preferences')
-    .update(updateData)
-    .eq('user_id', user.id);
+    .upsert(upsertData, { 
+      onConflict: 'user_id',
+      ignoreDuplicates: false 
+    });
 
   if (error) throw error;
 };
