@@ -127,7 +127,18 @@ function buildFinancialContext(analytics: ReturnType<typeof calculateTimeBasedAn
 }
 
 /**
+ * Capitalize the first letter of each word
+ */
+function capitalizeWords(str: string): string {
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+/**
  * Generate a short, descriptive name for a chat session based on the conversation content
+ * Returns a name with maximum 5 words, with first letter of each word capitalized
  */
 export const generateChatName = async (messages: ChatMessage[]): Promise<string> => {
   try {
@@ -137,10 +148,10 @@ export const generateChatName = async (messages: ChatMessage[]): Promise<string>
       .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join('\n');
 
-    const prompt = `Based on this conversation, generate a short, descriptive chat title (maximum 4-5 words). 
+    const prompt = `Based on this conversation, generate a short, descriptive chat title (EXACTLY 5 WORDS OR LESS). 
 Analyze the main topic and theme of the conversation to create an appropriate title.
-Make it concise and relevant to the topic. Examples: "Monthly Spending Review", "Budget Planning", "Dining Expenses Question", "Transaction Analysis".
-Just return the title, nothing else.
+Make it concise and relevant. Examples: "Monthly Spending Review", "Budget Planning Help", "Dining Expenses Analysis", "Transaction History Question".
+Return ONLY the title, nothing else. Maximum 5 words.
 
 Conversation:
 ${conversationText}`;
@@ -154,25 +165,32 @@ ${conversationText}`;
       }
     });
 
-    const name = (response.text || '').trim();
+    let name = (response.text || '').trim();
+    
+    // Remove any quotes that might wrap the response
+    name = name.replace(/^["']|["']$/g, '');
+    
+    // Split into words and take maximum 5
+    const words = name.split(/\s+/).filter(word => word.length > 0);
+    const truncatedName = words.slice(0, 5).join(' ');
+    
+    // Capitalize first letter of each word
+    const capitalizedName = capitalizeWords(truncatedName);
     
     // Fallback to first user message if name is empty or too short
-    if (!name || name.length < 3) {
+    if (!capitalizedName || capitalizedName.length < 3) {
       const firstUserMessage = messages.find(m => m.role === 'user')?.content || 'New Chat';
-      return firstUserMessage.length > 30 
-        ? firstUserMessage.substring(0, 27) + '...' 
-        : firstUserMessage;
+      const words = firstUserMessage.split(/\s+/).filter(word => word.length > 0).slice(0, 5);
+      return capitalizeWords(words.join(' ')) || 'New Chat';
     }
     
-    // Ensure name is not too long
-    return name.length > 50 ? name.substring(0, 47) + '...' : name;
+    return capitalizedName;
   } catch (error) {
     console.error('Error generating chat name:', error);
-    // Fallback to first user message
+    // Fallback to first user message with proper formatting
     const firstUserMessage = messages.find(m => m.role === 'user')?.content || 'New Chat';
-    return firstUserMessage.length > 30 
-      ? firstUserMessage.substring(0, 27) + '...' 
-      : firstUserMessage;
+    const words = firstUserMessage.split(/\s+/).filter(word => word.length > 0).slice(0, 5);
+    return capitalizeWords(words.join(' ')) || 'New Chat';
   }
 }
 
