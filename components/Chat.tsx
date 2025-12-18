@@ -368,7 +368,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div className={`${showChatList && window.innerWidth < 768 ? 'hidden' : 'flex'} md:flex flex-1 flex-col bg-[#0b141a] relative overflow-hidden`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className={`${showChatList && window.innerWidth < 768 ? 'hidden' : 'flex'} md:flex flex-1 flex-col bg-[#0b141a] relative overflow-hidden md:pb-0 pb-20`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
         {!currentSession ? (
           <div className="flex-1 flex items-center justify-center bg-[#0b141a] bg-pattern">
             <div className="text-center max-w-md px-4">
