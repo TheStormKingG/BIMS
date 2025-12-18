@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Account } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, DollarSign, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, DollarSign, Clock, Download } from 'lucide-react';
 import { SpentItem } from '../services/spentTableDatabase';
 import { calculateTimeBasedAnalytics } from '../services/analyticsService';
 import { Tips } from './Tips';
 import { useTips } from '../hooks/useTips';
 import { generateAndSaveTips } from '../services/tipGenerator';
+import { exportOverviewToPdf } from '../services/exportsService';
 
 interface DashboardProps {
   accounts: Account[];
@@ -312,8 +313,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
     };
   }, [spentItems, topItem]);
 
+  const handleExportPdf = async () => {
+    try {
+      await exportOverviewToPdf(accounts, spentItems, totalBalance);
+    } catch (err) {
+      console.error('Error exporting overview PDF:', err);
+      alert('Failed to generate PDF. Please try again.');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-20">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleExportPdf}
+          className="text-emerald-600 border border-emerald-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+          title="Export Overview as PDF"
+        >
+          <Download className="w-4 h-4" />
+          <span>Export PDF</span>
+        </button>
+      </div>
+
       {/* Tips Section */}
       {tips.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
