@@ -120,11 +120,18 @@ export const useChat = (spentItems: SpentItem[] = []) => {
       // Auto-generate name for session if it doesn't have one or is "New Chat"
       // Do this after getting the AI response so we have more context
       const finalMessages = [...updatedMessages, aiMessage];
-      const currentName = (sessionToUse.name || '').trim();
-      if (!currentName || currentName === '' || currentName.toLowerCase() === 'new chat') {
+      // Check both the session we're using and the latest from state
+      const sessionNameToCheck = sessionToUse.name || null;
+      const currentName = (sessionNameToCheck || '').trim().toLowerCase();
+      const shouldGenerateName = !sessionNameToCheck || currentName === '' || currentName === 'new chat';
+      
+      if (shouldGenerateName) {
         try {
+          console.log('Generating chat name for session:', sessionToUse.id, 'current name:', sessionNameToCheck);
           const generatedName = await generateChatName(finalMessages);
+          console.log('Generated name:', generatedName);
           await updateChatSessionName(sessionToUse.id, generatedName);
+          console.log('Updated session name in database');
         } catch (nameError) {
           console.error('Failed to generate chat name:', nameError);
           // Continue even if name generation fails
