@@ -2,6 +2,8 @@ import { getSupabase } from './supabaseClient';
 
 const supabase = getSupabase();
 
+import { ReceiptScanResult } from '../types';
+
 export interface Receipt {
   id: string;
   userId: string;
@@ -11,6 +13,7 @@ export interface Receipt {
   total: number | null;
   currency: string;
   scannedAt: string | null;
+  receiptData: ReceiptScanResult | null; // Full receipt scan result with all items
   createdAt: string;
   updatedAt: string;
 }
@@ -22,6 +25,7 @@ export interface CreateReceiptInput {
   total?: number;
   currency?: string;
   scannedAt?: string;
+  receiptData?: ReceiptScanResult; // Full receipt scan result with all items
 }
 
 /**
@@ -50,6 +54,7 @@ export const createReceipt = async (input: CreateReceiptInput): Promise<Receipt>
       total: input.total || null,
       currency: input.currency || 'GYD',
       scanned_at: input.scannedAt || new Date().toISOString(),
+      receipt_data: input.receiptData ? JSON.stringify(input.receiptData) : null,
     }])
     .select()
     .single();
@@ -62,6 +67,18 @@ export const createReceipt = async (input: CreateReceiptInput): Promise<Receipt>
   
   console.log('Receipt record created successfully:', data);
 
+  // Parse receipt_data JSON if it exists
+  let receiptData: ReceiptScanResult | null = null;
+  if (data.receipt_data) {
+    try {
+      receiptData = typeof data.receipt_data === 'string' 
+        ? JSON.parse(data.receipt_data) 
+        : data.receipt_data;
+    } catch (err) {
+      console.error('Error parsing receipt_data:', err);
+    }
+  }
+
   return {
     id: data.id,
     userId: data.user_id,
@@ -71,6 +88,7 @@ export const createReceipt = async (input: CreateReceiptInput): Promise<Receipt>
     total: data.total ? Number(data.total) : null,
     currency: data.currency,
     scannedAt: data.scanned_at,
+    receiptData,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -91,6 +109,18 @@ export const getReceipt = async (id: string): Promise<Receipt | null> => {
     throw error;
   }
 
+  // Parse receipt_data JSON if it exists
+  let receiptData: ReceiptScanResult | null = null;
+  if (data.receipt_data) {
+    try {
+      receiptData = typeof data.receipt_data === 'string' 
+        ? JSON.parse(data.receipt_data) 
+        : data.receipt_data;
+    } catch (err) {
+      console.error('Error parsing receipt_data:', err);
+    }
+  }
+
   return {
     id: data.id,
     userId: data.user_id,
@@ -100,6 +130,7 @@ export const getReceipt = async (id: string): Promise<Receipt | null> => {
     total: data.total ? Number(data.total) : null,
     currency: data.currency,
     scannedAt: data.scanned_at,
+    receiptData,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -127,6 +158,18 @@ export const getReceiptBySpentTableId = async (spentTableId: string): Promise<Re
 
   if (!data) return null;
 
+  // Parse receipt_data JSON if it exists
+  let receiptData: ReceiptScanResult | null = null;
+  if (data.receipt_data) {
+    try {
+      receiptData = typeof data.receipt_data === 'string' 
+        ? JSON.parse(data.receipt_data) 
+        : data.receipt_data;
+    } catch (err) {
+      console.error('Error parsing receipt_data:', err);
+    }
+  }
+
   return {
     id: data.id,
     userId: data.user_id,
@@ -136,6 +179,7 @@ export const getReceiptBySpentTableId = async (spentTableId: string): Promise<Re
     total: data.total ? Number(data.total) : null,
     currency: data.currency,
     scannedAt: data.scanned_at,
+    receiptData,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

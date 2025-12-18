@@ -103,55 +103,120 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
               <div>
                 <h4 className="text-lg font-semibold text-slate-900 mb-3">Digitized Receipt</h4>
                 <div className="border border-slate-200 rounded-lg p-6 bg-white">
-                  {/* Receipt Header */}
-                  <div className="text-center border-b border-slate-200 pb-4 mb-4">
-                    <div className="text-2xl font-bold text-slate-900 mb-1">
-                      {receipt.merchant || 'MERCHANT'}
-                    </div>
-                    <div className="text-sm text-slate-500">
-                      {formatDate(spentItem.transactionDateTime)}
-                    </div>
-                  </div>
-
-                  {/* Receipt Items */}
-                  <div className="space-y-3 mb-4">
-                    <div className="border-b border-slate-200 pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="font-medium text-slate-900">{spentItem.item}</div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            Category: {spentItem.category} • Qty: {spentItem.itemQty}
-                          </div>
+                  {receipt.receiptData ? (
+                    <>
+                      {/* Receipt Header */}
+                      <div className="text-center border-b border-slate-200 pb-4 mb-4">
+                        <div className="text-2xl font-bold text-slate-900 mb-1">
+                          {receipt.receiptData.merchant || receipt.merchant || 'MERCHANT'}
                         </div>
-                        <div className="text-right ml-4">
-                          <div className="font-semibold text-slate-900">
-                            {formatCurrency(spentItem.itemTotal)}
-                          </div>
-                          {spentItem.itemQty > 1 && (
-                            <div className="text-xs text-slate-500">
-                              {formatCurrency(spentItem.itemCost)} each
-                            </div>
-                          )}
+                        <div className="text-sm text-slate-500">
+                          {formatDate(receipt.receiptData.date || spentItem.transactionDateTime)}
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Receipt Footer */}
-                  <div className="border-t border-slate-200 pt-4 space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-600">Subtotal:</span>
-                      <span className="font-medium text-slate-900">
-                        {formatCurrency(spentItem.itemTotal)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-lg font-bold border-t border-slate-200 pt-2">
-                      <span className="text-slate-900">Total:</span>
-                      <span className="text-emerald-600">
-                        {formatCurrency(spentItem.itemTotal)}
-                      </span>
-                    </div>
-                  </div>
+                      {/* Receipt Items - Show all items from the stored receipt data */}
+                      <div className="space-y-3 mb-4 max-h-[300px] overflow-y-auto">
+                        {receipt.receiptData.items && receipt.receiptData.items.length > 0 ? (
+                          receipt.receiptData.items.map((item, index) => (
+                            <div key={index} className="border-b border-slate-200 pb-2">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="font-medium text-slate-900">{item.description}</div>
+                                  <div className="text-xs text-slate-500 mt-1">
+                                    Category: {item.category} • Qty: {item.quantity}
+                                  </div>
+                                </div>
+                                <div className="text-right ml-4">
+                                  <div className="font-semibold text-slate-900">
+                                    {formatCurrency(item.total)}
+                                  </div>
+                                  {item.quantity > 1 && (
+                                    <div className="text-xs text-slate-500">
+                                      {formatCurrency(item.unitPrice)} each
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-sm text-slate-500 text-center py-2">
+                            No items found in receipt data
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Receipt Footer */}
+                      <div className="border-t border-slate-200 pt-4 space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-slate-600">Subtotal:</span>
+                          <span className="font-medium text-slate-900">
+                            {formatCurrency(receipt.receiptData.total || receipt.total || 0)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg font-bold border-t border-slate-200 pt-2">
+                          <span className="text-slate-900">Total:</span>
+                          <span className="text-emerald-600">
+                            {formatCurrency(receipt.receiptData.total || receipt.total || 0)}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    // Fallback to showing single item if receipt data not stored
+                    <>
+                      {/* Receipt Header */}
+                      <div className="text-center border-b border-slate-200 pb-4 mb-4">
+                        <div className="text-2xl font-bold text-slate-900 mb-1">
+                          {receipt.merchant || 'MERCHANT'}
+                        </div>
+                        <div className="text-sm text-slate-500">
+                          {formatDate(spentItem.transactionDateTime)}
+                        </div>
+                      </div>
+
+                      {/* Receipt Items */}
+                      <div className="space-y-3 mb-4">
+                        <div className="border-b border-slate-200 pb-2">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-slate-900">{spentItem.item}</div>
+                              <div className="text-xs text-slate-500 mt-1">
+                                Category: {spentItem.category} • Qty: {spentItem.itemQty}
+                              </div>
+                            </div>
+                            <div className="text-right ml-4">
+                              <div className="font-semibold text-slate-900">
+                                {formatCurrency(spentItem.itemTotal)}
+                              </div>
+                              {spentItem.itemQty > 1 && (
+                                <div className="text-xs text-slate-500">
+                                  {formatCurrency(spentItem.itemCost)} each
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Receipt Footer */}
+                      <div className="border-t border-slate-200 pt-4 space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-slate-600">Subtotal:</span>
+                          <span className="font-medium text-slate-900">
+                            {formatCurrency(spentItem.itemTotal)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg font-bold border-t border-slate-200 pt-2">
+                          <span className="text-slate-900">Total:</span>
+                          <span className="text-emerald-600">
+                            {formatCurrency(spentItem.itemTotal)}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {/* Payment Info */}
                   <div className="mt-6 pt-4 border-t border-slate-200">

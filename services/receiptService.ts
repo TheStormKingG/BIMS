@@ -37,13 +37,14 @@ export const saveReceipt = async (
           merchant: receiptData.merchant || null,
           total: receiptData.total || null,
           scanned_at: receiptData.date ? new Date(receiptData.date).toISOString() : new Date().toISOString(),
+          receipt_data: JSON.stringify(receiptData), // Store full receipt data
         })
         .eq('id', existingReceipt.id);
       
       if (updateError) throw updateError;
       return existingReceipt.id;
     } else {
-      // Create new receipt record
+      // Create new receipt record with full receipt data
       const receipt = await createReceipt({
         spentTableId,
         storagePath,
@@ -51,6 +52,7 @@ export const saveReceipt = async (
         total: receiptData.total,
         currency: 'GYD',
         scannedAt: receiptData.date ? new Date(receiptData.date).toISOString() : new Date().toISOString(),
+        receiptData, // Store full receipt scan result with all items
       });
 
       return receipt.id;
