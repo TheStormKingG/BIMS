@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, FileText } from 'lucide-react';
+import { X, Loader2, FileText, Download, Image as ImageIcon } from 'lucide-react';
 import { getReceiptBySpentTableId } from '../services/receiptsDatabase';
-import { getReceiptImageUrl } from '../services/receiptsStorage';
+import { getReceiptImageUrl, downloadReceiptImage } from '../services/receiptsStorage';
+import { downloadReceiptPdf } from '../services/receiptPdfService';
 import { Receipt } from '../services/receiptsDatabase';
 import { SpentItem } from '../services/spentTableDatabase';
 
@@ -62,6 +63,45 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
     return `GYD ${amount.toLocaleString()}`;
   };
 
+  const handleDownloadImage = async () => {
+    if (!receipt || !receiptImageUrl) return;
+
+    try {
+      // Download the image blob
+      const blob = await downloadReceiptImage(receipt.storagePath);
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename from receipt
+      const merchantSlug = (receipt.merchant || 'receipt').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const dateSlug = new Date(receipt.scannedAt || receipt.createdAt).toISOString().split('T')[0];
+      const extension = receipt.storagePath.split('.').pop() || 'jpg';
+      link.download = `receipt_${merchantSlug}_${dateSlug}.${extension}`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading image:', err);
+      alert('Failed to download receipt image');
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!receipt) return;
+
+    try {
+      await downloadReceiptPdf(receipt, receipt.receiptData, spentItem);
+    } catch (err) {
+      console.error('Error downloading PDF:', err);
+      alert('Failed to generate PDF');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -89,7 +129,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Original Receipt Image */}
               <div>
-                <h4 className="text-lg font-semibold text-slate-900 mb-3">Original Receipt</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-slate-900">Original Receipt</h4>
+                  <button
+                    onClick={handleDownloadImage}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200"
+                    title="Download original receipt image"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    <span>Download Image</span>
+                  </button>
+                </div>
                 <div className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
                   <img
                     src={receiptImageUrl}
@@ -101,7 +151,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
 
               {/* Digitally Recreated Receipt */}
               <div>
-                <h4 className="text-lg font-semibold text-slate-900 mb-3">Digitized Receipt</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-slate-900">Digitized Receipt</h4>
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200"
+                    title="Download digitized receipt as PDF"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download PDF</span>
+                  </button>
+                </div>
                 <div className="border border-slate-200 rounded-lg p-6 bg-white">
                   {receipt.receiptData ? (
                     <>
