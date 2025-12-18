@@ -334,13 +334,13 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                     }`}
                   >
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-[#6a7175] flex items-center justify-center">
-                        <Bot className="w-6 h-6 text-white" />
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
+                        <img src="/stashway-logo.png" alt="StashGPT" className="w-12 h-12 object-cover" />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-white font-medium text-sm truncate">AI Assistant</span>
+                        <span className="text-white font-medium text-sm truncate">StashGPT</span>
                         <span className="text-[#8696a0] text-xs ml-2 flex-shrink-0">{lastMessage.time}</span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -375,7 +375,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
               <div className="w-24 h-24 rounded-full bg-[#2a3942] flex items-center justify-center mx-auto mb-6">
                 <MessageCircle className="w-12 h-12 text-[#8696a0]" />
               </div>
-              <h2 className="text-2xl font-light text-[#e9edef] mb-2">AI Finance Assistant</h2>
+              <h2 className="text-2xl font-light text-[#e9edef] mb-2">StashGPT</h2>
               <p className="text-[#8696a0] mb-6">
                 Ask me anything about your spending, finances, or get personalized insights!
               </p>
