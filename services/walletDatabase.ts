@@ -165,11 +165,16 @@ export const updateWalletBalance = async (newBalance: number): Promise<CashWalle
       updateQuery = updateQuery.is('user_id', null);
     }
     
-    const { data, error } = await updateQuery.select().single();
+    const { data, error } = await updateQuery.select().maybeSingle();
     
     if (error) {
       console.error('Error updating wallet balance:', error);
       throw error;
+    }
+    
+    if (!data) {
+      // No rows updated, wallet might have been deleted, create it
+      return await createWallet(newBalance);
     }
     
     return dbToWallet(data as DBWallet);
