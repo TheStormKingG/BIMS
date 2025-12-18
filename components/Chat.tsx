@@ -537,32 +537,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                   className="flex-1 bg-gray-100 md:bg-[#2a3942] text-gray-900 md:text-white placeholder-gray-500 md:placeholder-[#8696a0] px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-emerald-600 md:focus:ring-[#00a884]"
                   disabled={sending || !currentSession}
                 />
-                <button
-                  type="button"
-                  onClick={handleVoiceRecord}
-                  className={`p-2 rounded-full transition-colors ${
-                    isRecording
-                      ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                      : 'bg-gray-200 md:bg-[#2a3942] hover:bg-gray-300 md:hover:bg-[#3a4549]'
-                  }`}
-                  title={isRecording ? 'Stop recording' : 'Voice input'}
-                  disabled={sending || !currentSession}
-                >
-                  <svg
-                    className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-700 md:text-[#8696a0]'}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                    />
-                  </svg>
-                </button>
-                {inputValue.trim() && (
+                {inputValue.trim() ? (
                   <button
                     type="submit"
                     disabled={sending || !currentSession}
@@ -574,16 +549,20 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                       <Send className="w-5 h-5" />
                     )}
                   </button>
-                )}
-                {!inputValue.trim() && !isRecording && (
+                ) : (
                   <button
                     type="button"
+                    onClick={handleVoiceRecord}
+                    className={`p-2 rounded-full transition-colors ${
+                      isRecording
+                        ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                        : 'bg-gray-200 md:bg-[#2a3942] hover:bg-gray-300 md:hover:bg-[#3a4549]'
+                    }`}
+                    title={isRecording ? 'Stop recording' : 'Voice input'}
                     disabled={sending || !currentSession}
-                    className="bg-gray-200 md:bg-[#2a3942] hover:bg-gray-300 md:hover:bg-[#3a4549] p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                    title="Voice input"
                   >
                     <svg
-                      className="w-5 h-5 text-gray-700 md:text-[#8696a0]"
+                      className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-700 md:text-[#8696a0]'}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
