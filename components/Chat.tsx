@@ -391,7 +391,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200">
+            <div className="bg-white md:bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-gray-200 md:border-[#2a3942] sticky top-0 z-40">
               <div className="flex items-center gap-3 flex-1">
                 {window.innerWidth < 768 && (
                   <button
@@ -407,8 +407,8 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                   <img src="/stashway-logo.png" alt="Stashway" className="w-10 h-10 object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-black font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
-                  <p className="text-gray-500 text-xs">Always online</p>
+                  <h3 className="text-black md:text-white font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
+                  <p className="text-gray-500 md:text-[#8696a0] text-xs">Always online</p>
                 </div>
               </div>
             </div>
