@@ -29,7 +29,6 @@ export const useWallet = () => {
       
       // If no wallet exists, create one with zero balance
       if (!walletData) {
-        console.log('No wallet found, creating initial wallet...');
         try {
           walletData = await createWallet(0);
           walletBalance = 0;
