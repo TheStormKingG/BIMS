@@ -533,30 +533,71 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Type a message"
-                  className="flex-1 bg-[#2a3942] text-white placeholder-[#8696a0] px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                  disabled={sending}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-gray-100 md:bg-[#2a3942] text-gray-900 md:text-white placeholder-gray-500 md:placeholder-[#8696a0] px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-emerald-600 md:focus:ring-[#00a884]"
+                  disabled={sending || !currentSession}
                 />
-                {inputValue.trim() ? (
+                <button
+                  type="button"
+                  onClick={handleVoiceRecord}
+                  className={`p-2 rounded-full transition-colors ${
+                    isRecording
+                      ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                      : 'bg-gray-200 md:bg-[#2a3942] hover:bg-gray-300 md:hover:bg-[#3a4549]'
+                  }`}
+                  title={isRecording ? 'Stop recording' : 'Voice input'}
+                  disabled={sending || !currentSession}
+                >
+                  <svg
+                    className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-700 md:text-[#8696a0]'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    />
+                  </svg>
+                </button>
+                {inputValue.trim() && (
                   <button
                     type="submit"
-                    disabled={sending}
-                    className="p-2 bg-[#00a884] hover:bg-[#06cf9c] rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    disabled={sending || !currentSession}
+                    className="bg-emerald-600 hover:bg-emerald-700 md:bg-[#00a884] md:hover:bg-[#06cf9c] text-white p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   >
                     {sending ? (
-                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
-                      <Send className="w-5 h-5 text-white" />
+                      <Send className="w-5 h-5" />
                     )}
                   </button>
-                ) : (
+                )}
+                {!inputValue.trim() && !isRecording && (
                   <button
                     type="button"
-                    onClick={handleVoiceRecord}
                     disabled={sending || !currentSession}
-                    className={`p-2 rounded-full transition-colors flex-shrink-0 ${
-                      isRecording 
-                        ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+                    className="bg-gray-200 md:bg-[#2a3942] hover:bg-gray-300 md:hover:bg-[#3a4549] p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    title="Voice input"
+                  >
+                    <svg
+                      className="w-5 h-5 text-gray-700 md:text-[#8696a0]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </form> 
                         : 'hover:bg-[#2a3942]'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
