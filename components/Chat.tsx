@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Plus, Trash2, MessageCircle, Bot, User, Loader2, Search, MoreVertical } from 'lucide-react';
+import { Send, Plus, Trash2, MessageCircle, Bot, User, Loader2, Search, MoreVertical, Settings as SettingsIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useChat } from '../hooks/useChat';
 import { ChatSession, ChatMessage } from '../services/chatDatabase';
 import { getSupabase } from '../services/supabaseClient';
@@ -50,6 +51,7 @@ interface SpeechRecognitionErrorEvent {
 }
 
 export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
+  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showChatList, setShowChatList] = useState(true);
@@ -262,52 +264,71 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#0b141a] animate-fade-in overflow-hidden" style={{ maxWidth: '100vw', overflowX: 'hidden', width: '100%' }}>
+    <div className="flex h-full w-full bg-white md:bg-[#0b141a] animate-fade-in overflow-hidden" style={{ maxWidth: '100vw', overflowX: 'hidden', width: '100%' }}>
       {/* Chat List Sidebar */}
-      <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-[#2a3942] bg-[#111b21] overflow-hidden`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className={`${showChatList ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-1/3 border-r border-gray-200 md:border-[#2a3942] bg-white md:bg-[#111b21] overflow-hidden`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Header */}
-        <div className="bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-[#2a3942]">
+        <div className="bg-white md:bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-gray-200 md:border-[#2a3942]">
           <div className="flex items-center gap-3 flex-1">
+            <img src="/stashway-logo.png" alt="Stashway" className="w-8 h-8 md:hidden" />
             {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
               <img
                 src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover hidden md:block"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-[#6a7175] flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-full bg-gray-300 md:bg-[#6a7175] flex items-center justify-center hidden md:flex">
+                <User className="w-5 h-5 text-gray-700 md:text-white" />
               </div>
             )}
-            <span className="text-white font-semibold text-lg">Chats</span>
+            <span className="text-black md:text-white font-semibold text-lg">Chats</span>
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => navigate('/settings')}
+              className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors md:hidden"
+              title="Settings"
+            >
+              <SettingsIcon className="w-5 h-5 text-gray-700" />
+            </button>
+            {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+              <img
+                src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover md:hidden"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center md:hidden">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            )}
+            <button
               onClick={handleNewChat}
-              className="p-2 hover:bg-[#2a3942] rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors hidden md:block"
               title="New chat"
             >
-              <Plus className="w-5 h-5 text-[#aebac1]" />
+              <Plus className="w-5 h-5 text-gray-700 md:text-[#aebac1]" />
             </button>
             <button
-              className="p-2 hover:bg-[#2a3942] rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors hidden md:block"
               title="Menu"
             >
-              <MoreVertical className="w-5 h-5 text-[#aebac1]" />
+              <MoreVertical className="w-5 h-5 text-gray-700 md:text-[#aebac1]" />
             </button>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="px-3 py-2 bg-[#111b21] border-b border-[#2a3942]">
+        <div className="px-3 py-2 bg-white md:bg-[#111b21] border-b border-gray-200 md:border-[#2a3942]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#8696a0]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 md:text-[#8696a0]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search or start a new chat"
-              className="w-full bg-[#202c33] text-white placeholder-[#8696a0] pl-10 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+              className="w-full bg-gray-100 md:bg-[#202c33] text-gray-900 md:text-white placeholder-gray-500 md:placeholder-[#8696a0] pl-10 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-600 md:focus:ring-[#00a884]"
             />
           </div>
         </div>
@@ -316,15 +337,15 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
         <div className="flex-1 overflow-y-auto">
           {loading && sessions.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-6 h-6 animate-spin text-[#8696a0]" />
+              <Loader2 className="w-6 h-6 animate-spin text-gray-500 md:text-[#8696a0]" />
             </div>
           ) : filteredSessions.length === 0 ? (
-            <div className="text-center text-[#8696a0] text-sm py-8 px-4">
+            <div className="text-center text-gray-600 md:text-[#8696a0] text-sm py-8 px-4">
               {searchQuery ? 'No chats found' : 'No chat sessions yet'}
               <br />
               <button
                 onClick={handleNewChat}
-                className="text-[#00a884] hover:underline mt-2"
+                className="text-emerald-600 md:text-[#00a884] hover:underline mt-2"
               >
                 Start a new chat
               </button>
@@ -339,8 +360,8 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                   <button
                     key={session.id}
                     onClick={() => handleSessionSelect(session)}
-                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-[#202c33] transition-colors border-b border-[#2a3942] ${
-                      isSelected ? 'bg-[#2a3942]' : ''
+                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-100 md:hover:bg-[#202c33] transition-colors border-b border-gray-200 md:border-[#2a3942] ${
+                      isSelected ? 'bg-gray-100 md:bg-[#2a3942]' : 'bg-white md:bg-transparent'
                     }`}
                   >
                     <div className="flex-shrink-0">
@@ -350,21 +371,21 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-white font-medium text-sm truncate">Stashway<sup className="text-xs">™</sup></span>
-                        <span className="text-[#8696a0] text-xs ml-2 flex-shrink-0">{lastMessage.time}</span>
+                        <span className="text-gray-900 md:text-white font-medium text-sm truncate">Stashway<sup className="text-xs">™</sup></span>
+                        <span className="text-gray-500 md:text-[#8696a0] text-xs ml-2 flex-shrink-0">{lastMessage.time}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[#8696a0] text-sm truncate">{lastMessage.text}</p>
+                        <p className="text-gray-600 md:text-[#8696a0] text-sm truncate">{lastMessage.text}</p>
                         {isSelected && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteSession(session.id);
                             }}
-                            className="ml-2 p-1 hover:bg-[#3a4549] rounded transition-colors flex-shrink-0"
+                            className="ml-2 p-1 hover:bg-gray-200 md:hover:bg-[#3a4549] rounded transition-colors flex-shrink-0"
                             title="Delete chat"
                           >
-                            <Trash2 className="w-4 h-4 text-[#8696a0]" />
+                            <Trash2 className="w-4 h-4 text-gray-600 md:text-[#8696a0]" />
                           </button>
                         )}
                       </div>
@@ -378,20 +399,20 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div className={`${showChatList && window.innerWidth < 768 ? 'hidden' : 'flex'} md:flex flex-1 flex-col bg-[#0b141a] relative overflow-hidden md:pb-0 pb-20`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className={`${showChatList && window.innerWidth < 768 ? 'hidden' : 'flex'} md:flex flex-1 flex-col bg-white md:bg-[#0b141a] relative overflow-hidden md:pb-0 pb-20`} style={{ maxWidth: '100%', overflowX: 'hidden' }}>
         {!currentSession ? (
-          <div className="flex-1 flex items-center justify-center bg-[#0b141a] bg-pattern">
+          <div className="flex-1 flex items-center justify-center bg-white md:bg-[#0b141a] bg-pattern">
             <div className="text-center max-w-md px-4">
-              <div className="w-24 h-24 rounded-full bg-[#2a3942] flex items-center justify-center mx-auto mb-6">
-                <MessageCircle className="w-12 h-12 text-[#8696a0]" />
+              <div className="w-24 h-24 rounded-full bg-gray-200 md:bg-[#2a3942] flex items-center justify-center mx-auto mb-6">
+                <MessageCircle className="w-12 h-12 text-gray-600 md:text-[#8696a0]" />
               </div>
-              <h2 className="text-2xl font-light text-[#e9edef] mb-2">Stashway<sup className="text-xs">™</sup></h2>
-              <p className="text-[#8696a0] mb-6">
+              <h2 className="text-2xl font-light text-gray-900 md:text-[#e9edef] mb-2">Stashway<sup className="text-xs">™</sup></h2>
+              <p className="text-gray-600 md:text-[#8696a0] mb-6">
                 Ask me anything about your spending, finances, or get personalized insights!
               </p>
               <button
                 onClick={handleNewChat}
-                className="bg-[#00a884] hover:bg-[#06cf9c] text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 md:bg-[#00a884] md:hover:bg-[#06cf9c] text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Start New Chat
@@ -403,49 +424,82 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
             {/* Chat Header */}
             <div className="bg-white md:bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-gray-200 md:border-[#2a3942] sticky top-0 z-40">
               <div className="flex items-center gap-3 flex-1">
-                {window.innerWidth < 768 && (
+                {window.innerWidth < 768 ? (
+                  <>
+                    <button
+                      onClick={() => setShowChatList(true)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <img src="/stashway-logo.png" alt="Stashway" className="w-8 h-8" />
+                    <h3 className="text-black font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img src="/stashway-logo.png" alt="Stashway" className="w-10 h-10 object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
+                      <p className="text-[#8696a0] text-xs">Always online</p>
+                    </div>
+                  </>
+                )}
+              </div>
+              {window.innerWidth < 768 && (
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowChatList(true)}
+                    onClick={() => navigate('/settings')}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
-                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <SettingsIcon className="w-5 h-5 text-gray-700" />
                   </button>
-                )}
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img src="/stashway-logo.png" alt="Stashway" className="w-10 h-10 object-cover" />
+                  <button
+                    onClick={() => navigate('/settings')}
+                    className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
+                  >
+                    {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                      <img
+                        src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-emerald-600 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
+                      </div>
+                    )}
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-black md:text-white font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
-                  <p className="text-gray-500 md:text-[#8696a0] text-xs">Always online</p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-2 md:pb-4 mb-20 md:mb-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'%231f2937\' stroke-width=\'1\' opacity=\'0.3\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")' }}>
+            <div className="flex-1 overflow-y-auto px-4 py-2 md:pb-4 mb-20 md:mb-0 bg-white md:bg-[#0b141a]" style={window.innerWidth >= 768 ? { backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'grid\' width=\'100\' height=\'100\' patternUnits=\'userSpaceOnUse\'%3E%3Cpath d=\'M 100 0 L 0 0 0 100\' fill=\'none\' stroke=\'%231f2937\' stroke-width=\'1\' opacity=\'0.3\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'url(%23grid)\'/%3E%3C/svg%3E")' } : {}}>
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center max-w-md">
-                    <p className="text-[#8696a0] text-sm">Start the conversation</p>
+                    <p className="text-gray-500 md:text-[#8696a0] text-sm">Start the conversation</p>
                   </div>
                 </div>
               ) : (
                 messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex mb-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex mb-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-[65%] md:max-w-[70%] rounded-lg px-3 py-2 ${
                         message.role === 'user'
-                          ? 'bg-[#005c4b] text-[#e9edef]'
-                          : 'bg-[#202c33] text-[#e9edef]'
+                          ? 'bg-emerald-600 md:bg-[#005c4b] text-white'
+                          : 'bg-gray-100 md:bg-[#202c33] text-gray-900 md:text-[#e9edef]'
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                      <div className={`flex items-center justify-end gap-1 mt-1 ${message.role === 'user' ? 'text-[#667781]' : 'text-[#8696a0]'}`}>
+                      <div className={`flex items-center justify-end gap-1 mt-1 ${message.role === 'user' ? 'text-white/70 md:text-[#667781]' : 'text-gray-500 md:text-[#8696a0]'}`}>
                         <span className="text-[10px]">{formatMessageTime(message.createdAt)}</span>
                         {message.role === 'user' && (
                           <svg className="w-4 h-4" viewBox="0 0 16 15" width="16" height="15">
@@ -459,8 +513,8 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
               )}
               {sending && (
                 <div className="flex justify-start mb-4">
-                  <div className="bg-[#202c33] text-[#e9edef] rounded-lg px-2 py-1">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#8696a0]" />
+                  <div className="bg-gray-100 md:bg-[#202c33] text-gray-900 md:text-[#e9edef] rounded-lg px-2 py-1">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-500 md:text-[#8696a0]" />
                   </div>
                 </div>
               )}
@@ -468,9 +522,9 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
             </div>
 
             {/* Input Area */}
-            <div className="bg-[#202c33] px-4 py-2 border-t border-[#2a3942] md:relative fixed bottom-20 left-0 right-0 md:bottom-0 md:left-auto md:right-auto flex-shrink-0" style={{ zIndex: 45 }}>
+            <div className="bg-white md:bg-[#202c33] px-4 py-2 border-t border-gray-200 md:border-[#2a3942] md:relative fixed bottom-20 left-0 right-0 md:bottom-0 md:left-auto md:right-auto flex-shrink-0" style={{ zIndex: 45 }}>
               {error && (
-                <div className="mb-2 p-2 bg-red-900/30 border border-red-700/50 rounded-lg text-xs text-red-300">
+                <div className="mb-2 p-2 bg-red-100 md:bg-red-900/30 border border-red-300 md:border-red-700/50 rounded-lg text-xs text-red-700 md:text-red-300">
                   {error}
                 </div>
               )}
