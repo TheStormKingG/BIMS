@@ -310,13 +310,6 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
               )}
             </button>
             <button
-              onClick={handleNewChat}
-              className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors hidden md:block"
-              title="New chat"
-            >
-              <Plus className="w-5 h-5 text-gray-700 md:text-[#aebac1]" />
-            </button>
-            <button
               className="p-2 hover:bg-gray-100 md:hover:bg-[#2a3942] rounded-full transition-colors hidden md:block"
               title="Menu"
             >
