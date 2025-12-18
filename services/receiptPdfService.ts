@@ -209,9 +209,17 @@ export const downloadReceiptPdf = async (
         reader.readAsDataURL(logoBlob);
       });
 
-      // Add logo image (15mm height, centered)
+      // Add logo image (calculate dimensions to maintain aspect ratio)
+      // Load image to get natural dimensions
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = logoBase64;
+      });
+      
       const logoHeight = 15; // mm
-      const logoWidth = (logoHeight * 3); // Maintain aspect ratio (assuming logo is wider than tall)
+      const logoWidth = (logoHeight * img.width / img.height); // Maintain aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       doc.addImage(logoBase64, 'PNG', logoX, yPosition, logoWidth, logoHeight);
       yPosition += logoHeight + 5;
