@@ -80,7 +80,17 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only the messages container, not the entire page, to keep header visible
+    const messagesContainer = messagesEndRef.current?.closest('.overflow-y-auto');
+    if (messagesContainer) {
+      setTimeout(() => {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 100);
+    } else {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 100);
+    }
   }, [messages]);
 
   // On mobile, hide chat list when a session is selected
