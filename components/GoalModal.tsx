@@ -156,8 +156,8 @@ export const GoalModal: React.FC<GoalModalProps> = ({
               type="number"
               value={targetAmount}
               onChange={(e) => setTargetAmount(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
+              placeholder="0"
+              step="1"
               min="0"
               required
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"

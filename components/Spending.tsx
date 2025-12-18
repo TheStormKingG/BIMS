@@ -467,7 +467,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={formData.itemCost}
                     onChange={(e) => handleInputChange('itemCost', e.target.value)}
@@ -497,7 +497,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={formData.itemTotal}
                     onChange={(e) => handleInputChange('itemTotal', e.target.value)}
