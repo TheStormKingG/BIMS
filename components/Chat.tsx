@@ -340,7 +340,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-white font-medium text-sm truncate">StashGPT</span>
+                        <span className="text-white font-medium text-sm truncate">Stashway<sup className="text-xs">™</sup></span>
                         <span className="text-[#8696a0] text-xs ml-2 flex-shrink-0">{lastMessage.time}</span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -375,7 +375,7 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
               <div className="w-24 h-24 rounded-full bg-[#2a3942] flex items-center justify-center mx-auto mb-6">
                 <MessageCircle className="w-12 h-12 text-[#8696a0]" />
               </div>
-              <h2 className="text-2xl font-light text-[#e9edef] mb-2">StashGPT</h2>
+              <h2 className="text-2xl font-light text-[#e9edef] mb-2">Stashway<sup className="text-xs">™</sup></h2>
               <p className="text-[#8696a0] mb-6">
                 Ask me anything about your spending, finances, or get personalized insights!
               </p>
@@ -391,24 +391,24 @@ export const Chat: React.FC<ChatProps> = ({ spentItems }) => {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-[#2a3942]">
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200">
               <div className="flex items-center gap-3 flex-1">
                 {window.innerWidth < 768 && (
                   <button
                     onClick={() => setShowChatList(true)}
-                    className="p-2 hover:bg-[#2a3942] rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
-                    <svg className="w-5 h-5 text-[#aebac1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                 )}
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img src="/stashway-logo.png" alt="StashGPT" className="w-10 h-10 object-cover" />
+                  <img src="/stashway-logo.png" alt="Stashway" className="w-10 h-10 object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-medium text-base">StashGPT</h3>
-                  <p className="text-[#8696a0] text-xs">Always online</p>
+                  <h3 className="text-black font-medium text-base">Stashway<sup className="text-xs">™</sup></h3>
+                  <p className="text-gray-500 text-xs">Always online</p>
                 </div>
               </div>
             </div>
