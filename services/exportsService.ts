@@ -154,6 +154,27 @@ export const exportOverviewToPdf = async (
     // Calculate analytics
     const analytics = calculateTimeBasedAnalytics(spentItems);
 
+    // Calculate spending over time for line chart (last 30 days)
+    const now = new Date();
+    const spendingOverTimeData: Array<{ date: string; amount: number }> = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const daySpending = spentItems
+        .filter(item => {
+          const itemDate = new Date(item.transactionDateTime).toISOString().split('T')[0];
+          return itemDate === dateKey;
+        })
+        .reduce((sum, item) => sum + item.itemTotal, 0);
+      spendingOverTimeData.push({
+        date: `${month}/${day}`,
+        amount: daySpending
+      });
+    }
+
     // Header - Mobile style header (without settings icon)
     const headerHeight = 18;
     checkPageBreak(headerHeight + 10);
@@ -255,15 +276,16 @@ export const exportOverviewToPdf = async (
     // Reset text color
     doc.setTextColor(0, 0, 0);
     
-    yPosition = headerHeight + 15;
+    yPosition = headerHeight + 10;
 
+    // PAGE 1: Charts and Summary
     // Title
     doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
     doc.text('Financial Overview', margin, yPosition);
-    yPosition += 10;
+    yPosition += 8;
 
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
     const reportDate = new Date().toLocaleDateString(undefined, {
       year: 'numeric',
@@ -271,123 +293,240 @@ export const exportOverviewToPdf = async (
       day: 'numeric'
     });
     doc.text(`Generated: ${reportDate}`, margin, yPosition);
-    yPosition += 15;
-
-    // Total Net Worth
-    checkPageBreak(20);
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Total Net Worth', margin, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(18);
-    doc.text(formatCurrency(totalBalance), margin, yPosition);
-    yPosition += 10;
-
-    // Account breakdown - filter unique accounts and non-zero balances
-    if (accounts.length > 0) {
-      // Process accounts: combine Cash Wallets into one, filter zero balances
-      const processedAccounts: Array<{ name: string; balance: number }> = [];
-      let cashWalletBalance = 0;
-      let hasCashWallet = false;
-
-      accounts.forEach(acc => {
-        if (acc.type === 'CASH_WALLET') {
-          const bal = ((acc as any).denominations && Object.entries((acc as any).denominations).reduce((sum:number, [d, c]: any) => sum + Number(d)*c, 0)) || 0;
-          if (bal > 0) {
-            cashWalletBalance += bal;
-            hasCashWallet = true;
-          }
-        } else {
-          const bal = acc.balance || 0;
-          if (bal > 0) {
-            processedAccounts.push({ name: acc.name, balance: bal });
-          }
-        }
-      });
-
-      // Add combined Cash Wallet if it has balance
-      if (hasCashWallet && cashWalletBalance > 0) {
-        processedAccounts.push({ name: 'Cash Wallet', balance: cashWalletBalance });
-      }
-
-      // Only show if we have accounts to display
-      if (processedAccounts.length > 0) {
-        checkPageBreak(15);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text('Account Breakdown:', margin, yPosition);
-        yPosition += 6;
-
-        processedAccounts.forEach(acc => {
-          doc.text(`${acc.name}: ${formatCurrency(acc.balance)}`, margin + 5, yPosition);
-          yPosition += 6;
-        });
-        yPosition += 5;
-      }
-    }
-
-    // Spending Metrics Section
-    checkPageBreak(60);
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Spending Metrics', margin, yPosition);
     yPosition += 12;
 
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-
-    // Spending totals
-    const metrics = [
-      { label: 'Spent Last 24 Hours', value: analytics.spentLast24Hours },
-      { label: 'Spent Last 7 Days', value: analytics.spentLast7Days },
-      { label: 'Spent Last 30 Days', value: analytics.spentLast30Days },
-    ];
-
-    metrics.forEach(metric => {
-      checkPageBreak(8);
-      doc.text(`${metric.label}:`, margin, yPosition);
-      doc.setFont(undefined, 'bold');
-      doc.text(formatCurrency(metric.value), pageWidth - margin - 60, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    });
-
-    yPosition += 5;
-
-    // Averages
+    // Total Net Worth (compact)
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.text('Averages (Last 30 Days):', margin, yPosition);
-    yPosition += 8;
-    doc.setFont(undefined, 'normal');
+    doc.text('Total Net Worth:', margin, yPosition);
+    doc.setFontSize(16);
+    doc.text(formatCurrency(totalBalance), margin + 35, yPosition);
+    yPosition += 12;
 
-    const averages = [
-      { label: 'Average Daily', value: analytics.avgDaily },
-      { label: 'Average Weekly', value: analytics.avgWeekly },
-      { label: 'Average Monthly', value: analytics.avgMonthly },
+    // Helper function to draw a pie chart (simplified - uses filled segments)
+    const drawPieChart = (x: number, y: number, radius: number, data: Array<{ name: string; value: number }>, colors: string[]) => {
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      if (total === 0) return;
+
+      let currentAngle = -90; // Start at top (in degrees)
+      const centerX = x;
+      const centerY = y;
+      const innerRadius = radius * 0.6; // For donut chart
+
+      // Draw each slice by filling the area with lines
+      data.forEach((item, index) => {
+        const sliceAngle = (item.value / total) * 360;
+        const color = colors[index % colors.length];
+        
+        // Convert hex to RGB
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        
+        doc.setFillColor(r, g, b);
+        doc.setDrawColor(r, g, b);
+        
+        // Draw filled slice by drawing radial lines (simple approximation)
+        const step = Math.max(1, sliceAngle / 20); // Draw lines every few degrees
+        for (let angle = currentAngle; angle < currentAngle + sliceAngle; angle += step) {
+          const angleRad = (angle * Math.PI) / 180;
+          const outerX = centerX + radius * Math.cos(angleRad);
+          const outerY = centerY + radius * Math.sin(angleRad);
+          const innerX = centerX + innerRadius * Math.cos(angleRad);
+          const innerY = centerY + innerRadius * Math.sin(angleRad);
+          doc.setLineWidth(1);
+          doc.line(innerX, innerY, outerX, outerY);
+        }
+        
+        // Draw arc boundaries
+        const startAngleRad = (currentAngle * Math.PI) / 180;
+        const endAngleRad = ((currentAngle + sliceAngle) * Math.PI) / 180;
+        const startOuterX = centerX + radius * Math.cos(startAngleRad);
+        const startOuterY = centerY + radius * Math.sin(startAngleRad);
+        const endOuterX = centerX + radius * Math.cos(endAngleRad);
+        const endOuterY = centerY + radius * Math.sin(endAngleRad);
+        const startInnerX = centerX + innerRadius * Math.cos(startAngleRad);
+        const startInnerY = centerY + innerRadius * Math.sin(startAngleRad);
+        const endInnerX = centerX + innerRadius * Math.cos(endAngleRad);
+        const endInnerY = centerY + innerRadius * Math.sin(endAngleRad);
+        
+        doc.line(startInnerX, startInnerY, startOuterX, startOuterY);
+        doc.line(endInnerX, endInnerY, endOuterX, endOuterY);
+        
+        currentAngle += sliceAngle;
+      });
+    };
+
+    // Helper function to draw a line chart
+    const drawLineChart = (startX: number, startY: number, width: number, height: number, data: Array<{ date: string; amount: number }>) => {
+      if (data.length === 0) return;
+
+      const maxValue = Math.max(...data.map(d => d.amount), 1);
+      const padding = 5;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      const chartStartX = startX + padding;
+      const chartStartY = startY + padding;
+      const chartEndX = chartStartX + chartWidth;
+      const chartEndY = chartStartY + chartHeight;
+
+      // Draw axes
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.line(chartStartX, chartEndY, chartEndX, chartEndY); // X axis
+      doc.line(chartStartX, chartStartY, chartStartX, chartEndY); // Y axis
+
+      // Draw grid lines
+      doc.setDrawColor(240, 240, 240);
+      for (let i = 0; i <= 4; i++) {
+        const y = chartStartY + (chartHeight / 4) * i;
+        doc.line(chartStartX, y, chartEndX, y);
+      }
+
+      // Draw line
+      doc.setDrawColor(5, 150, 105); // emerald-600
+      doc.setLineWidth(1.5);
+      const pointSpacing = chartWidth / (data.length - 1 || 1);
+      
+      for (let i = 0; i < data.length - 1; i++) {
+        const x1 = chartStartX + pointSpacing * i;
+        const y1 = chartEndY - (data[i].amount / maxValue) * chartHeight;
+        const x2 = chartStartX + pointSpacing * (i + 1);
+        const y2 = chartEndY - (data[i + 1].amount / maxValue) * chartHeight;
+        
+        doc.line(x1, y1, x2, y2);
+        // Draw point
+        doc.setFillColor(5, 150, 105);
+        doc.circle(x1, y1, 1.5, 'F');
+      }
+      
+      // Draw last point
+      if (data.length > 0) {
+        const lastX = chartStartX + pointSpacing * (data.length - 1);
+        const lastY = chartEndY - (data[data.length - 1].amount / maxValue) * chartHeight;
+        doc.circle(lastX, lastY, 1.5, 'F');
+      }
+
+      // Draw labels for first, middle, and last dates
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont(undefined, 'normal');
+      if (data.length > 0) {
+        doc.text(data[0].date, chartStartX, chartEndY + 4);
+        if (data.length > 1) {
+          const midIndex = Math.floor(data.length / 2);
+          const midX = chartStartX + pointSpacing * midIndex;
+          doc.text(data[midIndex].date, midX - 5, chartEndY + 4);
+        }
+        if (data.length > 2) {
+          const lastX = chartStartX + pointSpacing * (data.length - 1);
+          doc.text(data[data.length - 1].date, lastX - 8, chartEndY + 4);
+        }
+      }
+      
+      // Draw max value on Y axis
+      doc.text(formatCurrency(maxValue), chartStartX - 25, chartStartY + 2);
+      doc.text('0', chartStartX - 8, chartEndY + 2);
+      doc.setTextColor(0, 0, 0);
+    };
+
+    const chartColors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b'];
+
+    // Pie Chart - Spending by Category (top left)
+    yPosition += 5;
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('Spending by Category', margin, yPosition);
+    yPosition += 8;
+
+    const pieChartSize = 45;
+    const pieChartX = margin + 10;
+    const pieChartY = yPosition + pieChartSize / 2;
+
+    if (analytics.spendingByCategory.length > 0) {
+      const pieData = analytics.spendingByCategory.slice(0, 8).map(cat => ({
+        name: cat.category,
+        value: cat.amount
+      }));
+      drawPieChart(pieChartX, pieChartY, pieChartSize / 2, pieData, chartColors);
+      
+      // Legend for pie chart
+      const legendStartX = pieChartX + pieChartSize + 10;
+      let legendY = yPosition;
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+      
+      analytics.spendingByCategory.slice(0, 8).forEach((cat, index) => {
+        if (legendY > yPosition + pieChartSize - 8) {
+          legendY = yPosition;
+          // Would need to wrap to next column, but keeping it simple for now
+        }
+        const color = chartColors[index % chartColors.length];
+        const [r, g, b] = [parseInt(color.slice(1, 3), 16), parseInt(color.slice(3, 5), 16), parseInt(color.slice(5, 7), 16)];
+        doc.setFillColor(r, g, b);
+        doc.rect(legendStartX, legendY - 2, 3, 3, 'F');
+        const label = cat.category.length > 15 ? cat.category.substring(0, 12) + '...' : cat.category;
+        doc.setTextColor(0, 0, 0);
+        doc.text(`${label} (${cat.percentage.toFixed(0)}%)`, legendStartX + 5, legendY);
+        legendY += 5;
+      });
+    } else {
+      doc.setFontSize(9);
+      doc.text('No category data', pieChartX, pieChartY);
+    }
+
+    yPosition += pieChartSize + 15;
+
+    // Line Chart - Spending Over Time (below pie chart)
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Spending Over Time (Last 30 Days)', margin, yPosition);
+    yPosition += 8;
+
+    const lineChartWidth = pageWidth - margin * 2;
+    const lineChartHeight = 50;
+    drawLineChart(margin, yPosition, lineChartWidth, lineChartHeight, spendingOverTimeData);
+    yPosition += lineChartHeight + 15;
+
+    // Summary metrics in compact grid
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Summary Metrics', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    const summaryMetrics = [
+      { label: 'Last 24h', value: analytics.spentLast24Hours },
+      { label: 'Last 7 days', value: analytics.spentLast7Days },
+      { label: 'Last 30 days', value: analytics.spentLast30Days },
+      { label: 'Avg daily', value: analytics.avgDaily },
+      { label: 'Avg weekly', value: analytics.avgWeekly },
+      { label: 'Avg monthly', value: analytics.avgMonthly },
     ];
 
-    averages.forEach(avg => {
-      checkPageBreak(8);
-      doc.text(`${avg.label}:`, margin + 5, yPosition);
+    const metricsPerRow = 3;
+    const metricBoxWidth = (pageWidth - margin * 2 - 10) / metricsPerRow;
+    summaryMetrics.forEach((metric, index) => {
+      const col = index % metricsPerRow;
+      const row = Math.floor(index / metricsPerRow);
+      const x = margin + col * (metricBoxWidth + 5);
+      const y = yPosition + row * 12;
+
+      doc.text(`${metric.label}:`, x, y);
       doc.setFont(undefined, 'bold');
-      doc.text(formatCurrency(avg.value), pageWidth - margin - 60, yPosition);
+      doc.text(formatCurrency(metric.value), x + 25, y);
       doc.setFont(undefined, 'normal');
-      yPosition += 8;
     });
 
-    yPosition += 10;
+    yPosition += Math.ceil(summaryMetrics.length / metricsPerRow) * 12 + 10;
 
-    // Spending by Category
-    checkPageBreak(40);
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
+    // PAGE 2: Tables
+    doc.addPage();
+    yPosition = margin;
 
+    // Spending by Category Table
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Spending by Category', margin, yPosition);
@@ -406,50 +545,16 @@ export const exportOverviewToPdf = async (
       doc.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += 6;
 
-      analytics.spendingByCategory.slice(0, 10).forEach(cat => {
-        checkPageBreak(8);
-        doc.text(cat.category.length > 25 ? cat.category.substring(0, 22) + '...' : cat.category, margin, yPosition);
+      analytics.spendingByCategory.slice(0, 15).forEach(cat => {
+        doc.text(cat.category.length > 30 ? cat.category.substring(0, 27) + '...' : cat.category, margin, yPosition);
         doc.text(formatCurrency(cat.amount), pageWidth - margin - 50, yPosition);
         doc.text(`${cat.percentage.toFixed(1)}%`, pageWidth - margin - 20, yPosition);
-        yPosition += 8;
+        yPosition += 7;
       });
     } else {
       doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
       doc.text('No category data available', margin, yPosition);
-      yPosition += 8;
-    }
-
-    yPosition += 10;
-
-    // Top Merchant/Category
-    checkPageBreak(30);
-    doc.setLineWidth(0.3);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Top Spending', margin, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-
-    if (analytics.topCategory) {
-      checkPageBreak(8);
-      doc.text('Top Category:', margin, yPosition);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${analytics.topCategory.name} - ${formatCurrency(analytics.topCategory.amount)}`, margin + 35, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    }
-
-    if (analytics.topMerchant) {
-      checkPageBreak(8);
-      doc.text('Top Merchant:', margin, yPosition);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${analytics.topMerchant.name} - ${formatCurrency(analytics.topMerchant.amount)}`, margin + 35, yPosition);
-      doc.setFont(undefined, 'normal');
       yPosition += 8;
     }
 
