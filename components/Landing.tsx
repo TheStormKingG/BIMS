@@ -143,18 +143,47 @@ export const Landing: React.FC = () => {
   }, [viewMode]);
 
   return (
-    <div 
-      className="min-h-screen overflow-hidden relative"
-      style={{
-        background: `
-          radial-gradient(ellipse at top left, rgba(255, 237, 213, 0.4) 0%, transparent 50%),
-          radial-gradient(ellipse at top right, rgba(254, 243, 199, 0.3) 0%, transparent 50%),
-          radial-gradient(ellipse at bottom left, rgba(255, 237, 213, 0.2) 0%, transparent 50%),
-          radial-gradient(ellipse at bottom right, rgba(254, 215, 170, 0.3) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #fefbf3 25%, #fef7ed 50%, #fffbf5 75%, #ffffff 100%)
-        `
-      }}
-    >
+    <div className="min-h-screen overflow-hidden relative bg-white">
+      {/* Animated Light Trails Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Main flowing light trail */}
+        <div className="absolute inset-0 animate-light-flow-1">
+          <div className="light-trail-1"></div>
+        </div>
+        <div className="absolute inset-0 animate-light-flow-2">
+          <div className="light-trail-2"></div>
+        </div>
+        <div className="absolute inset-0 animate-light-flow-3">
+          <div className="light-trail-3"></div>
+        </div>
+        
+        {/* Sparkles/particles */}
+        {[...Array(15)].map((_, i) => {
+          const delay = i * 0.4;
+          const duration = 4 + (i % 3);
+          return (
+            <div
+              key={i}
+              className="absolute inset-0"
+              style={{
+                animation: `sparkle ${duration}s ease-in-out infinite`,
+                animationDelay: `${delay}s`,
+              }}
+            >
+              <div
+                className="sparkle"
+                style={{
+                  left: `${10 + (i * 6) % 85}%`,
+                  top: `${10 + (i * 8) % 75}%`,
+                }}
+              ></div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Content Container */}
+      <div className="relative z-10">
       {/* Toggle Button - Top Right */}
       <div className="absolute top-4 right-4 z-50">
         <div className="flex flex-col items-center gap-2">
@@ -284,14 +313,14 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-200 rounded-full p-3 shadow-lg border border-white/20 text-white z-10"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/10 backdrop-blur-md hover:bg-black/20 transition-all duration-200 rounded-full p-3 shadow-lg border border-black/10 text-slate-700 z-10"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-200 rounded-full p-3 shadow-lg border border-white/20 text-white z-10"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/10 backdrop-blur-md hover:bg-black/20 transition-all duration-200 rounded-full p-3 shadow-lg border border-black/10 text-slate-700 z-10"
               aria-label="Next slide"
             >
               <ChevronRight className="w-6 h-6" />
@@ -314,6 +343,7 @@ export const Landing: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

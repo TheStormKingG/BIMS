@@ -39,4 +39,168 @@ body {
   }
 }
 
+/* Landing page animated light trails */
+@keyframes light-flow-1 {
+  0% {
+    transform: translateX(-20%) translateY(-10%) rotate(-5deg);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(120%) translateY(10%) rotate(5deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes light-flow-2 {
+  0% {
+    transform: translateX(-30%) translateY(5%) rotate(3deg);
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(110%) translateY(-5%) rotate(-3deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes light-flow-3 {
+  0% {
+    transform: translateX(-25%) translateY(-15%) rotate(-2deg);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(115%) translateY(15%) rotate(2deg);
+    opacity: 0.5;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) translateY(-20px);
+  }
+}
+
+.animate-light-flow-1 {
+  animation: light-flow-1 25s ease-in-out infinite;
+}
+
+.animate-light-flow-2 {
+  animation: light-flow-2 30s ease-in-out infinite;
+  animation-delay: -10s;
+}
+
+.animate-light-flow-3 {
+  animation: light-flow-3 35s ease-in-out infinite;
+  animation-delay: -15s;
+}
+
+.animate-sparkle-1 {
+  animation: sparkle 4s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.animate-sparkle-2 {
+  animation: sparkle 5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+
+.animate-sparkle-3 {
+  animation: sparkle 6s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+.light-trail-1 {
+  position: absolute;
+  width: 60%;
+  height: 200%;
+  left: -10%;
+  top: -50%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 193, 7, 0.15) 10%,
+    rgba(255, 152, 0, 0.35) 25%,
+    rgba(255, 193, 7, 0.5) 40%,
+    rgba(255, 152, 0, 0.4) 50%,
+    rgba(255, 193, 7, 0.3) 60%,
+    rgba(255, 152, 0, 0.2) 75%,
+    rgba(255, 193, 7, 0.1) 90%,
+    transparent 100%
+  );
+  filter: blur(60px);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+}
+
+.light-trail-2 {
+  position: absolute;
+  width: 50%;
+  height: 180%;
+  left: 5%;
+  top: -40%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 235, 59, 0.2) 15%,
+    rgba(255, 193, 7, 0.4) 30%,
+    rgba(255, 152, 0, 0.3) 45%,
+    rgba(255, 193, 7, 0.25) 60%,
+    rgba(255, 235, 59, 0.15) 80%,
+    transparent 100%
+  );
+  filter: blur(50px);
+  border-radius: 50%;
+  transform: rotate(10deg);
+}
+
+.light-trail-3 {
+  position: absolute;
+  width: 55%;
+  height: 190%;
+  left: -5%;
+  top: -45%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 152, 0, 0.2) 12%,
+    rgba(255, 193, 7, 0.35) 28%,
+    rgba(255, 152, 0, 0.45) 42%,
+    rgba(255, 193, 7, 0.35) 58%,
+    rgba(255, 152, 0, 0.25) 72%,
+    rgba(255, 193, 7, 0.1) 88%,
+    transparent 100%
+  );
+  filter: blur(55px);
+  border-radius: 50%;
+  transform: rotate(-8deg);
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 0 12px rgba(255, 193, 7, 0.6);
+}
+
+.sparkle-1,
+.sparkle-2,
+.sparkle-3 {
+  /* Positions are set inline via React */
+}
+
 
