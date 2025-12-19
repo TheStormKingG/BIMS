@@ -264,7 +264,7 @@ export const Landing: React.FC = () => {
                   <div
                     className={`relative ${
                       viewMode === 'mobile'
-                        ? 'w-[85vw] max-w-sm sm:w-80 md:w-96'
+                        ? 'w-[90vw] max-w-sm sm:w-96 md:w-[28rem]'
                         : 'w-full max-w-[80%]'
                     }`}
                     style={viewMode === 'desktop' ? { transform: 'scale(0.8)', transformOrigin: 'center' } : {}}
@@ -272,10 +272,13 @@ export const Landing: React.FC = () => {
                     {/* Mockup Frame */}
                     {viewMode === 'mobile' ? (
                       // Mobile Mockup Frame
-                      <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-700">
-                        <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner">
+                      <div 
+                        className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-700"
+                        style={{ aspectRatio: '9/20' }}
+                      >
+                        <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner h-full">
                           {failedImages.has(image) ? (
-                            <div className="w-full aspect-[9/16] bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
+                            <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
                               <div className="text-center">
                                 <div className="text-4xl mb-2">📱</div>
                                 <div className="text-sm">Mobile {index + 1}</div>
@@ -285,7 +288,7 @@ export const Landing: React.FC = () => {
                             <img
                               src={image}
                               alt={`Stashway ${viewMode} view ${index + 1}`}
-                              className="w-full h-auto object-cover"
+                              className="w-full h-full object-cover"
                               onError={() => {
                                 setFailedImages((prev) => new Set(prev).add(image));
                               }}
