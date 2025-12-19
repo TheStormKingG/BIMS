@@ -275,14 +275,14 @@ export const Landing: React.FC = () => {
             <div
               className="flex transition-transform duration-500 ease-out"
               style={{
-                transform: `translateX(-${currentIndex * 100}%)`,
+                transform: `translateX(-${currentIndex * (100 / images.length)}%)`,
                 width: `${images.length * 100}%`,
               }}
             >
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="w-full flex-shrink-0 flex items-center justify-center"
+                  className="flex-shrink-0 flex items-center justify-center"
                   style={{ width: `${100 / images.length}%` }}
                 >
                   <div
