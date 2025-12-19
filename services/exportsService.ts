@@ -642,6 +642,96 @@ export const exportOverviewToPdf = async (
 
     yPosition += 10;
 
+    // Most Money Spent On (Top Category)
+    checkPageBreak(30);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    if (analytics.topCategory) {
+      doc.setTextColor(0, 0, 0);
+      doc.text('Most Money Spent On: ', margin, yPosition);
+      const categoryNameWidth = doc.getTextWidth('Most Money Spent On: ');
+      doc.setTextColor(0, 166, 81); // Guyana green (#00A651)
+      doc.text(analytics.topCategory.name, margin + categoryNameWidth, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(formatCurrency(analytics.topCategory.amount), margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Total spent on ${analytics.topCategory.name} category.`, margin, yPosition);
+      yPosition += 10;
+    } else {
+      doc.setTextColor(0, 0, 0);
+      doc.text('Most Money Spent On', margin, yPosition);
+      yPosition += 8;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text('No category data available', margin, yPosition);
+      yPosition += 10;
+    }
+
+    // Top Spending Item
+    checkPageBreak(30);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Calculate top spending item
+    const itemTotals: Record<string, number> = {};
+    spentItems.forEach(item => {
+      const key = item.item.toLowerCase();
+      itemTotals[key] = (itemTotals[key] || 0) + item.itemTotal;
+    });
+    
+    const sortedItems = Object.entries(itemTotals)
+      .sort((a, b) => b[1] - a[1]);
+    
+    const topItem = sortedItems.length > 0 ? {
+      name: spentItems.find(item => item.item.toLowerCase() === sortedItems[0][0])?.item || sortedItems[0][0],
+      totalSpent: sortedItems[0][1]
+    } : null;
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(0, 0, 0);
+    
+    if (topItem) {
+      doc.text('Top Spending Item: ', margin, yPosition);
+      const itemLabelWidth = doc.getTextWidth('Top Spending Item: ');
+      const itemName = topItem.name.length > 40 ? topItem.name.substring(0, 37) + '...' : topItem.name;
+      doc.setTextColor(0, 166, 81); // Guyana green (#00A651)
+      doc.text(itemName, margin + itemLabelWidth, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(formatCurrency(topItem.totalSpent), margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Total spent on ${topItem.name}.`, margin, yPosition);
+      yPosition += 10;
+    } else {
+      doc.text('Top Spending Item', margin, yPosition);
+      yPosition += 8;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text('No spending data available', margin, yPosition);
+      yPosition += 10;
+    }
+
     // Footer with branding
     checkPageBreak(40);
     doc.setLineWidth(0.3);
