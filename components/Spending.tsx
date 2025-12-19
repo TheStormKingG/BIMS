@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { SpentItem } from '../services/spentTableDatabase';
-import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search, Trash2, Download } from 'lucide-react';
+import { ShoppingBag, Plus, X, Edit2, ChevronLeft, ChevronRight, Search, Trash2, Download, ChevronDown } from 'lucide-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
 import { ReceiptModal } from './ReceiptModal';
-import { exportSpendingToCSV, exportSpendingToExcel } from '../services/exportsService';
+import { exportSpendingToCSV, exportSpendingToExcel, exportSpendingToPdf } from '../services/exportsService';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -23,6 +23,8 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReceiptItem, setSelectedReceiptItem] = useState<SpentItem | null>(null);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -54,6 +56,46 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    if (showExportDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportDropdown]);
+
+  const handleExportCSV = () => {
+    exportSpendingToCSV(filteredItems);
+    setShowExportDropdown(false);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportSpendingToExcel(filteredItems);
+    } catch (err) {
+      alert('Failed to export to Excel: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+    setShowExportDropdown(false);
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      await exportSpendingToPdf(filteredItems, currentMonthName);
+    } catch (err) {
+      alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+    setShowExportDropdown(false);
   };
 
   const currentMonthName = selectedMonth.toLocaleString(undefined, { month: 'long', year: 'numeric' });
@@ -252,26 +294,46 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
           </button>
         </div>
         <div className="flex items-center gap-2">
-          {/* Export Buttons */}
+          {/* Export Dropdown Button */}
           {filteredItems.length > 0 && (
-            <>
+            <div className="relative" ref={exportDropdownRef}>
               <button
-                onClick={() => exportSpendingToCSV(filteredItems)}
+                onClick={() => setShowExportDropdown(!showExportDropdown)}
                 className="text-emerald-600 border border-emerald-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
-                title="Export as CSV"
+                title="Export spending data"
               >
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Export CSV</span>
+                <span className="hidden sm:inline">Export</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showExportDropdown ? 'rotate-180' : ''}`} />
               </button>
-              <button
-                onClick={() => exportSpendingToExcel(filteredItems)}
-                className="text-emerald-600 border border-emerald-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
-                title="Export as Excel"
-              >
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Export Excel</span>
-              </button>
-            </>
+              
+              {/* Dropdown Menu */}
+              {showExportDropdown && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                  <button
+                    onClick={handleExportCSV}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    CSV
+                  </button>
+                  <button
+                    onClick={handleExportExcel}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    XLS
+                  </button>
+                  <button
+                    onClick={handleExportPDF}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    PDF
+                  </button>
+                </div>
+              )}
+            </div>
           )}
           {onAddSpend && (
             <button

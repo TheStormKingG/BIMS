@@ -110,6 +110,136 @@ export const exportSpendingToExcel = async (spentItems: SpentItem[]): Promise<vo
 };
 
 /**
+ * Export spending data as PDF
+ */
+export const exportSpendingToPdf = async (
+  spentItems: SpentItem[],
+  monthLabel: string
+): Promise<void> => {
+  try {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const tableStartY = 40;
+    let yPosition = tableStartY;
+    const rowHeight = 8;
+    const colWidths = [35, 50, 25, 15, 25, 30, 30, 25];
+    const headers = ['Date', 'Item', 'Total', 'Qty', 'Cost', 'Category', 'Method', 'Source'];
+
+    // Helper to format currency
+    const formatCurrency = (amount: number) => {
+      return `$${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    };
+
+    // Helper to format date
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(16, 185, 129); // emerald-500
+    doc.text('Spending Report', margin, 20);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(71, 85, 105); // slate-600
+    doc.text(monthLabel, margin, 30);
+
+    // Helper to check page break
+    const checkPageBreak = (requiredHeight: number) => {
+      if (yPosition + requiredHeight > pageHeight - margin) {
+        doc.addPage();
+        yPosition = margin + 10;
+        // Redraw headers on new page
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont(undefined, 'bold');
+        let xPos = margin;
+        headers.forEach((header, i) => {
+          doc.text(header, xPos, yPosition);
+          xPos += colWidths[i];
+        });
+        doc.setFont(undefined, 'normal');
+        yPosition += rowHeight;
+      }
+    };
+
+    // Draw table headers
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont(undefined, 'bold');
+    let xPos = margin;
+    headers.forEach((header, i) => {
+      doc.text(header, xPos, yPosition);
+      xPos += colWidths[i];
+    });
+    doc.setFont(undefined, 'normal');
+    yPosition += rowHeight;
+
+    // Draw horizontal line under headers
+    doc.setDrawColor(226, 232, 240); // slate-200
+    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+
+    // Draw table rows
+    doc.setFontSize(9);
+    doc.setTextColor(30, 41, 59); // slate-800
+    
+    spentItems.forEach((item, index) => {
+      checkPageBreak(rowHeight + 2);
+
+      const row = [
+        formatDate(item.transactionDateTime),
+        item.item.length > 25 ? item.item.substring(0, 22) + '...' : item.item,
+        formatCurrency(item.itemTotal),
+        item.itemQty.toString(),
+        formatCurrency(item.itemCost),
+        item.category,
+        item.paymentMethod || 'N/A',
+        item.source
+      ];
+
+      xPos = margin;
+      row.forEach((cell, i) => {
+        doc.text(cell, xPos, yPosition);
+        xPos += colWidths[i];
+      });
+
+      yPosition += rowHeight;
+    });
+
+    // Footer with total
+    const total = spentItems.reduce((sum, item) => sum + item.itemTotal, 0);
+    checkPageBreak(rowHeight + 5);
+    yPosition += 5;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(16, 185, 129);
+    doc.text(`Total: ${formatCurrency(total)}`, margin, yPosition);
+
+    // Generate filename
+    const dateSlug = new Date().toISOString().split('T')[0];
+    const filename = `stashway_spending_${dateSlug}.pdf`;
+    
+    doc.save(filename);
+  } catch (err) {
+    console.error('Error exporting spending to PDF:', err);
+    throw new Error('Failed to export spending to PDF');
+  }
+};
+
+/**
  * Export Overview/Dashboard as PDF
  */
 export const exportOverviewToPdf = async (
