@@ -279,29 +279,68 @@ export const Landing: React.FC = () => {
                         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl"></div>
                       </div>
                     ) : (
-                      // Desktop Mockup Frame
-                      <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-4 shadow-2xl">
-                        <div className="bg-white rounded-xl overflow-hidden shadow-inner">
-                          <img
-                            src={image}
-                            alt={`Stashway ${viewMode} view ${index + 1}`}
-                            className="w-full h-auto object-cover"
-                            onError={(e) => {
-                              // Fallback if image doesn't exist
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              if (target.parentElement) {
-                                target.parentElement.innerHTML = `
-                                  <div class="w-full aspect-video bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
-                                    <div class="text-center">
-                                      <div class="text-4xl mb-2">💻</div>
-                                      <div class="text-sm">Desktop ${index + 1}</div>
+                      // Desktop Mockup Frame - Laptop Design
+                      <div className="relative">
+                        {/* Screen Section */}
+                        <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 rounded-t-2xl rounded-b-lg p-3 shadow-2xl">
+                          {/* Top Bezel with Webcam */}
+                          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-slate-900 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-1.5 bg-slate-700 rounded-sm"></div>
+                            <div className="absolute right-0.5 w-1 h-1 bg-red-500 rounded-full"></div>
+                          </div>
+                          
+                          {/* Screen */}
+                          <div className="bg-white rounded-lg overflow-hidden shadow-inner mt-4">
+                            <img
+                              src={image}
+                              alt={`Stashway ${viewMode} view ${index + 1}`}
+                              className="w-full h-auto object-cover"
+                              onError={(e) => {
+                                // Fallback if image doesn't exist
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                if (target.parentElement) {
+                                  target.parentElement.innerHTML = `
+                                    <div class="w-full aspect-video bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
+                                      <div class="text-center">
+                                        <div class="text-4xl mb-2">💻</div>
+                                        <div class="text-sm">Desktop ${index + 1}</div>
+                                      </div>
                                     </div>
-                                  </div>
-                                `;
-                              }
-                            }}
-                          />
+                                  `;
+                                }
+                              }}
+                            />
+                          </div>
+                          
+                          {/* Bottom Bezel */}
+                          <div className="h-3 bg-slate-900 mt-2 rounded-b-lg"></div>
+                        </div>
+                        
+                        {/* Keyboard Section */}
+                        <div className="bg-gradient-to-b from-slate-200 to-slate-300 rounded-b-2xl pt-2 pb-4 px-8 shadow-xl -mt-1">
+                          <div className="flex flex-col items-center gap-1">
+                            {/* Top Row Keys */}
+                            <div className="flex gap-1 w-full justify-center">
+                              {[...Array(12)].map((_, i) => (
+                                <div key={i} className="w-6 h-4 bg-slate-700 rounded-sm"></div>
+                              ))}
+                            </div>
+                            {/* Middle Row Keys */}
+                            <div className="flex gap-1 w-full justify-center">
+                              {[...Array(12)].map((_, i) => (
+                                <div key={i} className="w-6 h-4 bg-slate-700 rounded-sm"></div>
+                              ))}
+                            </div>
+                            {/* Bottom Row Keys */}
+                            <div className="flex gap-1 w-full justify-center">
+                              {[...Array(10)].map((_, i) => (
+                                <div key={i} className="w-6 h-4 bg-slate-700 rounded-sm"></div>
+                              ))}
+                            </div>
+                            {/* Touchpad Area */}
+                            <div className="w-24 h-12 bg-slate-600 rounded-lg mt-2"></div>
+                          </div>
                         </div>
                       </div>
                     )}
