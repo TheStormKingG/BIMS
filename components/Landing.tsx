@@ -100,11 +100,17 @@ export const Landing: React.FC = () => {
       const timeDiff = Date.now() - touchStartTime;
       
       // Only trigger if swipe is significant and fast enough
-      if (Math.abs(diff) > 50 && timeDiff < 300) {
+      if (Math.abs(diff) > 50 && timeDiff < 300 && images.length > 0) {
         if (diff > 0) {
-          setCurrentIndex((prev) => (prev + 1) % images.length);
+          setCurrentIndex((prev) => {
+            const next = prev + 1;
+            return next >= images.length ? 0 : next;
+          });
         } else {
-          setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+          setCurrentIndex((prev) => {
+            const prevIndex = prev - 1;
+            return prevIndex < 0 ? images.length - 1 : prevIndex;
+          });
         }
         isDraggingLocal = false;
         setIsDragging(false);
