@@ -375,11 +375,12 @@ export const exportOverviewToPdf = async (
 
       const maxValue = Math.max(...data.map(d => d.amount), 1);
       const padding = 5;
-      const chartWidth = width - padding * 2;
+      const yAxisLabelWidth = 30; // Space for Y-axis labels on the left
+      const chartWidth = width - padding * 2 - yAxisLabelWidth; // Reserve space for Y-axis labels
       const chartHeight = height - padding * 2;
-      const chartStartX = startX + padding;
+      const chartStartX = Math.max(startX + padding + yAxisLabelWidth, margin + yAxisLabelWidth); // Ensure chart respects margin
       const chartStartY = startY + padding;
-      const chartEndX = chartStartX + chartWidth;
+      const chartEndX = Math.min(chartStartX + chartWidth, pageWidth - margin - padding); // Ensure chart respects right margin
       const chartEndY = chartStartY + chartHeight;
 
       // Draw axes
@@ -419,26 +420,38 @@ export const exportOverviewToPdf = async (
         doc.circle(lastX, lastY, 1.5, 'F');
       }
 
-      // Draw labels for first, middle, and last dates
+      // Draw labels for first, middle, and last dates (ensure they don't violate margins)
       doc.setFontSize(7);
       doc.setTextColor(100, 116, 139);
       doc.setFont(undefined, 'normal');
       if (data.length > 0) {
-        doc.text(data[0].date, chartStartX, chartEndY + 4);
+        const labelY = chartEndY + 4;
+        // First date label
+        const firstDateWidth = doc.getTextWidth(data[0].date);
+        doc.text(data[0].date, Math.max(chartStartX - firstDateWidth / 2, margin), labelY);
+        
         if (data.length > 1) {
           const midIndex = Math.floor(data.length / 2);
           const midX = chartStartX + pointSpacing * midIndex;
-          doc.text(data[midIndex].date, midX - 5, chartEndY + 4);
+          const midDateWidth = doc.getTextWidth(data[midIndex].date);
+          doc.text(data[midIndex].date, Math.max(midX - midDateWidth / 2, margin), labelY);
         }
+        
         if (data.length > 2) {
           const lastX = chartStartX + pointSpacing * (data.length - 1);
-          doc.text(data[data.length - 1].date, lastX - 8, chartEndY + 4);
+          const lastDateWidth = doc.getTextWidth(data[data.length - 1].date);
+          const lastDateX = Math.min(lastX - lastDateWidth / 2, pageWidth - margin - lastDateWidth);
+          doc.text(data[data.length - 1].date, lastDateX, labelY);
         }
       }
       
-      // Draw max value on Y axis
-      doc.text(formatCurrency(maxValue), chartStartX - 25, chartStartY + 2);
-      doc.text('0', chartStartX - 8, chartEndY + 2);
+      // Draw max value on Y axis (positioned to the left of chart, respecting margin)
+      const yAxisLabelX = Math.max(margin, chartStartX - yAxisLabelWidth);
+      doc.setTextColor(100, 116, 139);
+      const maxValueText = formatCurrency(maxValue);
+      const maxValueWidth = doc.getTextWidth(maxValueText);
+      doc.text(maxValueText, Math.max(margin, yAxisLabelX - maxValueWidth), chartStartY + 2);
+      doc.text('0', Math.max(margin, yAxisLabelX - doc.getTextWidth('0')), chartEndY + 2);
       doc.setTextColor(0, 0, 0);
     };
 
@@ -455,7 +468,7 @@ export const exportOverviewToPdf = async (
     yPosition += 8;
 
     const pieChartSize = 45;
-    const pieChartX = margin + 15; // Better spacing from left edge
+    const pieChartX = margin + 20; // Better spacing from left edge (increased from 15)
     const pieChartY = yPosition + pieChartSize / 2;
 
     if (analytics.spendingByCategory.length > 0) {
@@ -465,8 +478,9 @@ export const exportOverviewToPdf = async (
       }));
       drawPieChart(pieChartX, pieChartY, pieChartSize / 2, pieData, chartColors);
       
-      // Legend for pie chart
-      const legendStartX = pieChartX + pieChartSize + 10;
+      // Legend for pie chart (ensure it doesn't violate right margin)
+      const maxLegendWidth = pageWidth - margin - (pieChartX + pieChartSize) - 15;
+      const legendStartX = Math.min(pieChartX + pieChartSize + 10, pageWidth - margin - 80);
       let legendY = yPosition;
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
@@ -481,8 +495,17 @@ export const exportOverviewToPdf = async (
         doc.setFillColor(r, g, b);
         doc.rect(legendStartX, legendY - 2, 3, 3, 'F');
         const label = cat.category.length > 15 ? cat.category.substring(0, 12) + '...' : cat.category;
-        doc.setTextColor(0, 0, 0);
-        doc.text(`${label} (${cat.percentage.toFixed(0)}%)`, legendStartX + 5, legendY);
+        const labelText = `${label} (${cat.percentage.toFixed(0)}%)`;
+        // Ensure label doesn't exceed right margin
+        const labelWidth = doc.getTextWidth(labelText);
+        if (legendStartX + 5 + labelWidth > pageWidth - margin) {
+          const maxLabelLength = Math.floor((pageWidth - margin - legendStartX - 5) / (doc.getTextWidth('W') / 10));
+          const truncatedLabel = label.length > maxLabelLength ? label.substring(0, maxLabelLength - 3) + '...' : label;
+          doc.text(`${truncatedLabel} (${cat.percentage.toFixed(0)}%)`, legendStartX + 5, legendY);
+        } else {
+          doc.setTextColor(0, 0, 0);
+          doc.text(labelText, legendStartX + 5, legendY);
+        }
         legendY += 5;
       });
     } else {
