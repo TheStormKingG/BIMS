@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BankAccount, CashWallet } from '../types';
-import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet, Archive, ArchiveRestore } from 'lucide-react';
+import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet, Archive, ArchiveRestore, Download, ChevronDown } from 'lucide-react';
+import { exportWalletTransactionsToCSV, exportWalletTransactionsToExcel, exportWalletTransactionsToPdf, exportBankTransactionsToCSV, exportBankTransactionsToExcel, exportBankTransactionsToPdf } from '../services/exportsService';
 
 interface BankTransaction {
   id: string; // This is the bank_id (destination)
@@ -90,6 +91,10 @@ export const Accounts: React.FC<AccountsProps> = ({
   // Detail view state
   const [viewingBank, setViewingBank] = useState<BankAccount | null>(null);
   const [viewingWallet, setViewingWallet] = useState(false);
+  const [showWalletExportDropdown, setShowWalletExportDropdown] = useState(false);
+  const [showBankExportDropdown, setShowBankExportDropdown] = useState(false);
+  const walletExportDropdownRef = useRef<HTMLDivElement>(null);
+  const bankExportDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -332,8 +337,64 @@ export const Accounts: React.FC<AccountsProps> = ({
 
         {/* Transaction History */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50">
+          <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Transaction History</h3>
+            {transactions.length > 0 && (
+              <div className="relative" ref={bankExportDropdownRef}>
+                <button
+                  onClick={() => setShowBankExportDropdown(!showBankExportDropdown)}
+                  className="text-emerald-600 border border-emerald-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                  title="Export transaction history"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showBankExportDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showBankExportDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                    <button
+                      onClick={() => {
+                        exportBankTransactionsToCSV(transactions, viewingBank.name);
+                        setShowBankExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await exportBankTransactionsToExcel(transactions, viewingBank.name);
+                        } catch (err) {
+                          alert('Failed to export to Excel: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                        }
+                        setShowBankExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      XLS
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await exportBankTransactionsToPdf(transactions, viewingBank.name);
+                        } catch (err) {
+                          alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                        }
+                        setShowBankExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      PDF
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {transactions.length === 0 ? (

@@ -240,6 +240,253 @@ export const exportSpendingToPdf = async (
 };
 
 /**
+ * Export wallet transaction history as CSV
+ */
+export const exportWalletTransactionsToCSV = (
+  transactions: Array<{ id: string; type: 'funds_added' | 'cash_spent'; amount: number; source: string; datetime: string }>
+): void => {
+  const headers = ['Date', 'Type', 'Source', 'Amount'];
+  const rows = transactions.map(txn => [
+    new Date(txn.datetime).toLocaleString(),
+    txn.type === 'funds_added' ? 'Funds Added' : 'Cash Spent',
+    txn.source,
+    txn.type === 'funds_added' ? `+${txn.amount.toFixed(2)}` : `-${txn.amount.toFixed(2)}`
+  ]);
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  const dateSlug = new Date().toISOString().split('T')[0];
+  link.setAttribute('download', `stashway_wallet_transactions_${dateSlug}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Export wallet transaction history as Excel
+ */
+export const exportWalletTransactionsToExcel = async (
+  transactions: Array<{ id: string; type: 'funds_added' | 'cash_spent'; amount: number; source: string; datetime: string }>
+): Promise<void> => {
+  try {
+    const XLSX = await import('xlsx');
+    const data = transactions.map(txn => ({
+      'Date': new Date(txn.datetime).toLocaleString(),
+      'Type': txn.type === 'funds_added' ? 'Funds Added' : 'Cash Spent',
+      'Source': txn.source,
+      'Amount': txn.type === 'funds_added' ? txn.amount : -txn.amount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    worksheet['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 30 }, { wch: 15 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Wallet Transactions');
+    const dateSlug = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `stashway_wallet_transactions_${dateSlug}.xlsx`);
+  } catch (err) {
+    console.error('Error exporting wallet transactions to Excel:', err);
+    throw new Error('Failed to export wallet transactions to Excel');
+  }
+};
+
+/**
+ * Export wallet transaction history as PDF
+ */
+export const exportWalletTransactionsToPdf = async (
+  transactions: Array<{ id: string; type: 'funds_added' | 'cash_spent'; amount: number; source: string; datetime: string }>,
+  accountName: string = 'Cash Wallet'
+): Promise<void> => {
+  try {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    let yPosition = 40;
+    const rowHeight = 8;
+    const colWidths = [60, 35, 50, 35];
+
+    doc.setFontSize(18);
+    doc.setTextColor(16, 185, 129);
+    doc.text(`${accountName} - Transaction History`, margin, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont(undefined, 'bold');
+    doc.text('Date', margin, yPosition);
+    doc.text('Type', margin + colWidths[0], yPosition);
+    doc.text('Source', margin + colWidths[0] + colWidths[1], yPosition);
+    doc.text('Amount', margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += rowHeight;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+
+    doc.setFontSize(9);
+    doc.setTextColor(30, 41, 59);
+    
+    transactions.forEach((txn) => {
+      if (yPosition + rowHeight > pageHeight - margin) {
+        doc.addPage();
+        yPosition = margin + 10;
+      }
+
+      const type = txn.type === 'funds_added' ? 'Funds Added' : 'Cash Spent';
+      const amount = txn.type === 'funds_added' ? `+$${txn.amount.toLocaleString()}` : `-$${txn.amount.toLocaleString()}`;
+      const date = new Date(txn.datetime).toLocaleString();
+
+      doc.text(date, margin, yPosition);
+      doc.text(type, margin + colWidths[0], yPosition);
+      doc.text(txn.source, margin + colWidths[0] + colWidths[1], yPosition);
+      doc.setTextColor(txn.type === 'funds_added' ? 16 : 220, txn.type === 'funds_added' ? 185 : 38, txn.type === 'funds_added' ? 129 : 38);
+      doc.text(amount, margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+      doc.setTextColor(30, 41, 59);
+      yPosition += rowHeight;
+    });
+
+    const dateSlug = new Date().toISOString().split('T')[0];
+    doc.save(`stashway_wallet_transactions_${dateSlug}.pdf`);
+  } catch (err) {
+    console.error('Error exporting wallet transactions to PDF:', err);
+    throw new Error('Failed to export wallet transactions to PDF');
+  }
+};
+
+/**
+ * Export bank account transaction history as CSV
+ */
+export const exportBankTransactionsToCSV = (
+  transactions: Array<{ id: string; type: 'deposit' | 'withdrawal'; amount: number; source: string; datetime: string; txnId?: string }>,
+  accountName: string
+): void => {
+  const headers = ['Date', 'Type', 'Source', 'Amount'];
+  const rows = transactions.map(txn => [
+    new Date(txn.datetime).toLocaleString(),
+    txn.type === 'deposit' ? 'Deposit' : 'Withdrawal',
+    txn.source,
+    txn.type === 'deposit' ? `+${txn.amount.toFixed(2)}` : `-${txn.amount.toFixed(2)}`
+  ]);
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  const dateSlug = new Date().toISOString().split('T')[0];
+  const safeName = accountName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  link.setAttribute('download', `stashway_${safeName}_transactions_${dateSlug}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Export bank account transaction history as Excel
+ */
+export const exportBankTransactionsToExcel = async (
+  transactions: Array<{ id: string; type: 'deposit' | 'withdrawal'; amount: number; source: string; datetime: string; txnId?: string }>,
+  accountName: string
+): Promise<void> => {
+  try {
+    const XLSX = await import('xlsx');
+    const data = transactions.map(txn => ({
+      'Date': new Date(txn.datetime).toLocaleString(),
+      'Type': txn.type === 'deposit' ? 'Deposit' : 'Withdrawal',
+      'Source': txn.source,
+      'Amount': txn.type === 'deposit' ? txn.amount : -txn.amount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    worksheet['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 30 }, { wch: 15 }];
+    const workbook = XLSX.utils.book_new();
+    const safeName = accountName.replace(/[^a-z0-9]/gi, '_').substring(0, 31);
+    XLSX.utils.book_append_sheet(workbook, worksheet, safeName);
+    const dateSlug = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `stashway_${safeName}_transactions_${dateSlug}.xlsx`);
+  } catch (err) {
+    console.error('Error exporting bank transactions to Excel:', err);
+    throw new Error('Failed to export bank transactions to Excel');
+  }
+};
+
+/**
+ * Export bank account transaction history as PDF
+ */
+export const exportBankTransactionsToPdf = async (
+  transactions: Array<{ id: string; type: 'deposit' | 'withdrawal'; amount: number; source: string; datetime: string; txnId?: string }>,
+  accountName: string
+): Promise<void> => {
+  try {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    let yPosition = 40;
+    const rowHeight = 8;
+    const colWidths = [60, 35, 50, 35];
+
+    doc.setFontSize(18);
+    doc.setTextColor(16, 185, 129);
+    doc.text(`${accountName} - Transaction History`, margin, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont(undefined, 'bold');
+    doc.text('Date', margin, yPosition);
+    doc.text('Type', margin + colWidths[0], yPosition);
+    doc.text('Source', margin + colWidths[0] + colWidths[1], yPosition);
+    doc.text('Amount', margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += rowHeight;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+
+    doc.setFontSize(9);
+    doc.setTextColor(30, 41, 59);
+    
+    transactions.forEach((txn) => {
+      if (yPosition + rowHeight > pageHeight - margin) {
+        doc.addPage();
+        yPosition = margin + 10;
+      }
+
+      const type = txn.type === 'deposit' ? 'Deposit' : 'Withdrawal';
+      const amount = txn.type === 'deposit' ? `+$${txn.amount.toLocaleString()}` : `-$${txn.amount.toLocaleString()}`;
+      const date = new Date(txn.datetime).toLocaleString();
+
+      doc.text(date, margin, yPosition);
+      doc.text(type, margin + colWidths[0], yPosition);
+      doc.text(txn.source, margin + colWidths[0] + colWidths[1], yPosition);
+      doc.setTextColor(txn.type === 'deposit' ? 16 : 220, txn.type === 'deposit' ? 185 : 38, txn.type === 'deposit' ? 129 : 38);
+      doc.text(amount, margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+      doc.setTextColor(30, 41, 59);
+      yPosition += rowHeight;
+    });
+
+    const dateSlug = new Date().toISOString().split('T')[0];
+    const safeName = accountName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    doc.save(`stashway_${safeName}_transactions_${dateSlug}.pdf`);
+  } catch (err) {
+    console.error('Error exporting bank transactions to PDF:', err);
+    throw new Error('Failed to export bank transactions to PDF');
+  }
+};
+
+/**
  * Export Overview/Dashboard as PDF
  */
 export const exportOverviewToPdf = async (
