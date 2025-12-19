@@ -24,6 +24,10 @@ const DESKTOP_IMAGES = [
   '/mockups/desktop-3.png',
   '/mockups/desktop-4.png',
   '/mockups/desktop-5.png',
+  '/mockups/desktop-6.png',
+  '/mockups/desktop-7.png',
+  '/mockups/desktop-8.png',
+  '/mockups/desktop-9.png',
 ];
 
 export const Landing: React.FC = () => {
@@ -259,12 +263,14 @@ export const Landing: React.FC = () => {
               className="flex transition-transform duration-500 ease-out"
               style={{
                 transform: `translateX(-${currentIndex * 100}%)`,
+                width: `${images.length * 100}%`,
               }}
             >
               {images.map((image, index) => (
                 <div
                   key={index}
                   className="w-full flex-shrink-0 flex items-center justify-center"
+                  style={{ width: `${100 / images.length}%` }}
                 >
                   <div
                     className={`relative ${
