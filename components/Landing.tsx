@@ -189,8 +189,8 @@ export const Landing: React.FC = () => {
         <div className="flex flex-col items-center gap-2">
           {/* Labels */}
           <div className="flex items-center gap-8 text-sm font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-            <span className={viewMode === 'desktop' ? 'text-slate-900' : 'text-slate-400'}>ON</span>
-            <span className={viewMode === 'mobile' ? 'text-slate-900' : 'text-slate-400'}>OFF</span>
+            <span className={viewMode === 'desktop' ? 'text-slate-900' : 'text-slate-400'}>DESKTOP</span>
+            <span className={viewMode === 'mobile' ? 'text-slate-900' : 'text-slate-400'}>MOBILE</span>
           </div>
           
           {/* Toggle Switch */}
