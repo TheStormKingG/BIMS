@@ -61,23 +61,26 @@ export const Landing: React.FC = () => {
     setCurrentIndex(0);
   }, [viewMode]);
 
+  // Total slides including login form
+  const totalSlides = images.length + 1;
+
   // Handle next slide
   const nextSlide = useCallback(() => {
-    if (images.length === 0) return;
+    if (totalSlides === 0) return;
     setCurrentIndex((prev) => {
       const next = prev + 1;
-      return next >= images.length ? 0 : next;
+      return next >= totalSlides ? 0 : next;
     });
-  }, [images.length]);
+  }, [totalSlides]);
 
   // Handle previous slide
   const prevSlide = useCallback(() => {
-    if (images.length === 0) return;
+    if (totalSlides === 0) return;
     setCurrentIndex((prev) => {
       const prevIndex = prev - 1;
-      return prevIndex < 0 ? images.length - 1 : prevIndex;
+      return prevIndex < 0 ? totalSlides - 1 : prevIndex;
     });
-  }, [images.length]);
+  }, [totalSlides]);
 
   // Touch events for swiping
   useEffect(() => {
