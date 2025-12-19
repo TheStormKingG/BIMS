@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Smartphone, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Login } from './Login';
 
 // Define the structure for mockup images
 // Users should add their screenshots to public/mockups/ folder
@@ -100,16 +101,17 @@ export const Landing: React.FC = () => {
       const timeDiff = Date.now() - touchStartTime;
       
       // Only trigger if swipe is significant and fast enough
-      if (Math.abs(diff) > 50 && timeDiff < 300 && images.length > 0) {
+      const totalSlides = images.length + 1;
+      if (Math.abs(diff) > 50 && timeDiff < 300 && totalSlides > 0) {
         if (diff > 0) {
           setCurrentIndex((prev) => {
             const next = prev + 1;
-            return next >= images.length ? 0 : next;
+            return next >= totalSlides ? 0 : next;
           });
         } else {
           setCurrentIndex((prev) => {
             const prevIndex = prev - 1;
-            return prevIndex < 0 ? images.length - 1 : prevIndex;
+            return prevIndex < 0 ? totalSlides - 1 : prevIndex;
           });
         }
         isDraggingLocal = false;
@@ -281,15 +283,15 @@ export const Landing: React.FC = () => {
             <div
               className="flex transition-transform duration-500 ease-out"
               style={{
-                transform: `translateX(-${currentIndex * (100 / images.length)}%)`,
-                width: `${images.length * 100}%`,
+                transform: `translateX(-${currentIndex * (100 / (images.length + 1))}%)`,
+                width: `${(images.length + 1) * 100}%`,
               }}
             >
               {images.map((image, index) => (
                 <div
                   key={index}
                   className="flex-shrink-0 flex items-center justify-center"
-                  style={{ width: `${100 / images.length}%` }}
+                  style={{ width: `${100 / (images.length + 1)}%` }}
                 >
                   <div
                     className={`relative ${
@@ -422,7 +424,7 @@ export const Landing: React.FC = () => {
 
             {/* Pagination Dots */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {images.map((_, index) => (
+              {[...images, null].map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
