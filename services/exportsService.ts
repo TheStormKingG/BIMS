@@ -123,7 +123,7 @@ export const exportOverviewToPdf = async (
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = 25; // Increased margin to prevent content from touching edges
     let yPosition = margin;
 
     // Helper function to add a new page if needed
@@ -303,19 +303,21 @@ export const exportOverviewToPdf = async (
     doc.text(formatCurrency(totalBalance), margin + 35, yPosition);
     yPosition += 12;
 
-    // Helper function to draw a pie chart (simplified - uses filled segments)
-    const drawPieChart = (x: number, y: number, radius: number, data: Array<{ name: string; value: number }>, colors: string[]) => {
+    // Helper function to draw a pie/donut chart with proper filled slices
+    // Matches Dashboard styling: innerRadius 60, outerRadius 80 (ratio = 0.75)
+    const drawPieChart = (x: number, y: number, outerRadius: number, data: Array<{ name: string; value: number }>, colors: string[]) => {
       const total = data.reduce((sum, item) => sum + item.value, 0);
       if (total === 0) return;
 
       let currentAngle = -90; // Start at top (in degrees)
       const centerX = x;
       const centerY = y;
-      const innerRadius = radius * 0.6; // For donut chart
+      const innerRadius = outerRadius * 0.75; // Match Dashboard ratio (60/80 = 0.75)
+      const paddingAngle = 2; // Degrees of padding between slices (matches Dashboard paddingAngle={5} scaled)
 
-      // Draw each slice by filling the area with lines
+      // Draw each slice as a filled donut segment
       data.forEach((item, index) => {
-        const sliceAngle = (item.value / total) * 360;
+        const sliceAngle = (item.value / total) * 360 - paddingAngle;
         const color = colors[index % colors.length];
         
         // Convert hex to RGB
@@ -324,36 +326,46 @@ export const exportOverviewToPdf = async (
         const b = parseInt(color.slice(5, 7), 16);
         
         doc.setFillColor(r, g, b);
-        doc.setDrawColor(r, g, b);
+        doc.setDrawColor(255, 255, 255); // White borders between slices
         
-        // Draw filled slice by drawing radial lines (simple approximation)
-        const step = Math.max(1, sliceAngle / 20); // Draw lines every few degrees
-        for (let angle = currentAngle; angle < currentAngle + sliceAngle; angle += step) {
+        // Draw filled slice using filled paths (approximated with many radial lines for fill effect)
+        const step = Math.max(0.5, sliceAngle / 40); // Fine step for smooth fill
+        for (let angle = currentAngle; angle <= currentAngle + sliceAngle; angle += step) {
           const angleRad = (angle * Math.PI) / 180;
-          const outerX = centerX + radius * Math.cos(angleRad);
-          const outerY = centerY + radius * Math.sin(angleRad);
+          const outerX = centerX + outerRadius * Math.cos(angleRad);
+          const outerY = centerY + outerRadius * Math.sin(angleRad);
           const innerX = centerX + innerRadius * Math.cos(angleRad);
           const innerY = centerY + innerRadius * Math.sin(angleRad);
-          doc.setLineWidth(1);
+          
+          // Draw line from inner to outer to create filled appearance
+          doc.setLineWidth(1.2);
+          doc.setDrawColor(r, g, b);
           doc.line(innerX, innerY, outerX, outerY);
         }
         
-        // Draw arc boundaries
+        // Draw slice boundaries (inner and outer arcs, and connecting lines)
         const startAngleRad = (currentAngle * Math.PI) / 180;
         const endAngleRad = ((currentAngle + sliceAngle) * Math.PI) / 180;
-        const startOuterX = centerX + radius * Math.cos(startAngleRad);
-        const startOuterY = centerY + radius * Math.sin(startAngleRad);
-        const endOuterX = centerX + radius * Math.cos(endAngleRad);
-        const endOuterY = centerY + radius * Math.sin(endAngleRad);
+        
+        // Outer arc endpoints
+        const startOuterX = centerX + outerRadius * Math.cos(startAngleRad);
+        const startOuterY = centerY + outerRadius * Math.sin(startAngleRad);
+        const endOuterX = centerX + outerRadius * Math.cos(endAngleRad);
+        const endOuterY = centerY + outerRadius * Math.sin(endAngleRad);
+        
+        // Inner arc endpoints
         const startInnerX = centerX + innerRadius * Math.cos(startAngleRad);
         const startInnerY = centerY + innerRadius * Math.sin(startAngleRad);
         const endInnerX = centerX + innerRadius * Math.cos(endAngleRad);
         const endInnerY = centerY + innerRadius * Math.sin(endAngleRad);
         
+        // Draw connecting lines
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(1);
         doc.line(startInnerX, startInnerY, startOuterX, startOuterY);
         doc.line(endInnerX, endInnerY, endOuterX, endOuterY);
         
-        currentAngle += sliceAngle;
+        currentAngle += sliceAngle + paddingAngle;
       });
     };
 
@@ -430,7 +442,9 @@ export const exportOverviewToPdf = async (
       doc.setTextColor(0, 0, 0);
     };
 
-    const chartColors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b'];
+    // Guyana flag colors: Green (#00A651), Yellow (#FCD116), Red (#CE1126), Black (#000000), White (#FFFFFF)
+    // Using flag colors in a visually appealing order for charts
+    const chartColors = ['#00A651', '#FCD116', '#CE1126', '#10b981', '#059669', '#FCDD09', '#E31837', '#000000'];
 
     // Pie Chart - Spending by Category (top left)
     yPosition += 5;
@@ -441,7 +455,7 @@ export const exportOverviewToPdf = async (
     yPosition += 8;
 
     const pieChartSize = 45;
-    const pieChartX = margin + 10;
+    const pieChartX = margin + 15; // Better spacing from left edge
     const pieChartY = yPosition + pieChartSize / 2;
 
     if (analytics.spendingByCategory.length > 0) {
@@ -507,7 +521,7 @@ export const exportOverviewToPdf = async (
     ];
 
     const metricsPerRow = 3;
-    const metricBoxWidth = (pageWidth - margin * 2 - 10) / metricsPerRow;
+    const metricBoxWidth = (pageWidth - margin * 2 - 15) / metricsPerRow; // Better spacing
     summaryMetrics.forEach((metric, index) => {
       const col = index % metricsPerRow;
       const row = Math.floor(index / metricsPerRow);
@@ -516,7 +530,7 @@ export const exportOverviewToPdf = async (
 
       doc.text(`${metric.label}:`, x, y);
       doc.setFont(undefined, 'bold');
-      doc.text(formatCurrency(metric.value), x + 25, y);
+      doc.text(formatCurrency(metric.value), x + 28, y); // Adjusted spacing
       doc.setFont(undefined, 'normal');
     });
 

@@ -15,7 +15,9 @@ interface DashboardProps {
   totalBalance: number;
 }
 
-const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#047857', '#065f46', '#064e3b'];
+// Guyana flag colors: Green (#00A651), Yellow (#FCD116), Red (#CE1126), Black (#000000), White (#FFFFFF)
+// Using flag colors in a visually appealing order for charts
+const COLORS = ['#00A651', '#FCD116', '#CE1126', '#10b981', '#059669', '#FCDD09', '#E31837', '#000000'];
 
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, totalBalance }) => {
   const [timePeriod, setTimePeriod] = React.useState<'7days' | '1month' | '90days' | '3months' | '6months' | '1year' | 'alltime'>('1month');
