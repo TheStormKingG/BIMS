@@ -9,6 +9,7 @@ import {
 } from '../services/goalsDatabase';
 import { updateAllGoalProgress, isGoalAchieved, getGoalProgressPercentage } from '../services/goalsTracker';
 import { SpentItem } from '../services/spentTableDatabase';
+import { getSupabase } from '../services/supabaseClient';
 
 export const useGoals = (spentItems?: SpentItem[], currentBalance?: number) => {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -16,7 +17,17 @@ export const useGoals = (spentItems?: SpentItem[], currentBalance?: number) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadGoals();
+    // Check if user is authenticated before loading goals
+    const checkAuthAndLoad = async () => {
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        loadGoals();
+      } else {
+        setLoading(false);
+      }
+    };
+    checkAuthAndLoad();
   }, []);
 
   // Update goal progress when spentItems or balance changes
