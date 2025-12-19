@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Stashway Logo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #059669;
+        }
+        .upload-area.dragover {
+            border-color: #059669;
+            background: #f0fdf4;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #047857;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        #preview img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .info {
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #059669;
+        }
+        .original-size, .cropped-size {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔲 Crop Stashway Logo</h1>
+        <p>This tool will automatically crop transparent padding from your logo image.</p>
+        
+        <div class="info">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Select or drag your logo PNG file</li>
+                <li>Preview the cropped result</li>
+                <li>Download the cropped image</li>
+                <li>Replace <code>public/stashway-logo.png</code> with the cropped version</li>
+            </ol>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Click here or drag and drop your logo PNG file</p>
+            <input type="file" id="fileInput" accept="image/png">
+        </div>
+
+        <div id="preview"></div>
+        <div id="info"></div>
+
+        <div style="text-align: center;">
+            <button id="cropBtn" disabled>Crop Logo</button>
+            <button id="downloadBtn" disabled>Download Cropped Logo</button>
+        </div>
+    </div>
+
+    <script>
+        let originalImage = null;
+        let croppedImageData = null;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let croppedWidth = 0;
+        let croppedHeight = 0;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const info = document.getElementById('info');
+        const cropBtn = document.getElementById('cropBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Handle drag and drop
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'image/png') {
+                loadImage(file);
+            } else {
+                alert('Please upload a PNG image file');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        });
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    
+                    preview.innerHTML = `
+                        <h3>Original Image</h3>
+                        <img src="${e.target.result}" alt="Original logo">
+                    `;
+                    info.innerHTML = `
+                        <div class="original-size">Original size: ${originalWidth} × ${originalHeight} pixels</div>
+                    `;
+                    cropBtn.disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        cropBtn.addEventListener('click', () => {
+            if (!originalImage) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = originalImage.width;
+            canvas.height = originalImage.height;
+            ctx.drawImage(originalImage, 0, 0);
+
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // Find bounding box of non-transparent pixels
+            let minX = canvas.width;
+            let minY = canvas.height;
+            let maxX = 0;
+            let maxY = 0;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const idx = (y * canvas.width + x) * 4;
+                    const alpha = data[idx + 3];
+                    
+                    if (alpha > 0) { // Non-transparent pixel
+                        minX = Math.min(minX, x);
+                        minY = Math.min(minY, y);
+                        maxX = Math.max(maxX, x);
+                        maxY = Math.max(maxY, y);
+                    }
+                }
+            }
+
+            // Add small padding (2px) to avoid cutting too close
+            const padding = 2;
+            minX = Math.max(0, minX - padding);
+            minY = Math.max(0, minY - padding);
+            maxX = Math.min(canvas.width, maxX + padding);
+            maxY = Math.min(canvas.height, maxY + padding);
+
+            croppedWidth = maxX - minX;
+            croppedHeight = maxY - minY;
+
+            // Create cropped canvas
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = croppedWidth;
+            croppedCanvas.height = croppedHeight;
+            const croppedCtx = croppedCanvas.getContext('2d');
+            
+            // Draw the cropped portion
+            croppedCtx.drawImage(
+                originalImage,
+                minX, minY, croppedWidth, croppedHeight,
+                0, 0, croppedWidth, croppedHeight
+            );
+
+            croppedImageData = croppedCanvas.toDataURL('image/png');
+
+            // Show preview
+            preview.innerHTML = `
+                <h3>Cropped Image</h3>
+                <img src="${croppedImageData}" alt="Cropped logo">
+            `;
+            
+            info.innerHTML = `
+                <div class="original-size">Original size: ${originalWidth} × ${originalHeight} pixels</div>
+                <div class="cropped-size" style="color: #059669;">Cropped size: ${croppedWidth} × ${croppedHeight} pixels</div>
+                <div style="margin-top: 10px; color: #666;">
+                    Removed ${originalWidth - croppedWidth}px width and ${originalHeight - croppedHeight}px height
+                </div>
+            `;
+
+            downloadBtn.disabled = false;
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!croppedImageData) return;
+
+            const link = document.createElement('a');
+            link.download = 'stashway-logo-cropped.png';
+            link.href = croppedImageData;
+            link.click();
+        });
+    </script>
+</body>
+</html>
