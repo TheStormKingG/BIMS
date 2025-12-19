@@ -218,7 +218,7 @@ export const downloadReceiptPdf = async (
         img.src = logoBase64;
       });
       
-      const logoHeight = 15; // mm
+      const logoHeight = 20; // mm - increased for better visibility (approximately 2x effective size)
       const logoWidth = (logoHeight * img.width / img.height); // Maintain aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       doc.addImage(logoBase64, 'PNG', logoX, yPosition, logoWidth, logoHeight);

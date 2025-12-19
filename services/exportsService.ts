@@ -184,7 +184,7 @@ export const exportOverviewToPdf = async (
     doc.rect(0, 0, pageWidth, headerHeight, 'F');
     
     // Logo and Stashway text on the left
-    const logoSize = 12; // PDF units (mm)
+    const logoSize = 14; // PDF units (mm) - increased from 12 for better visibility
     const logoX = margin;
     const logoY = headerHeight / 2;
     
@@ -200,6 +200,7 @@ export const exportOverviewToPdf = async (
           reader.onerror = reject;
           reader.readAsDataURL(logoBlob);
         });
+        // Use logoSize directly (already increased to 14)
         doc.addImage(logoBase64, 'PNG', logoX, logoY - logoSize / 2, logoSize, logoSize);
       } else {
         throw new Error('Logo not found');
@@ -209,16 +210,16 @@ export const exportOverviewToPdf = async (
       doc.setFillColor(16, 185, 129); // emerald-500
       doc.circle(logoX + logoSize / 2, logoY, logoSize / 2, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
-      doc.text('S', logoX + logoSize / 2 - 1.5, logoY + 1.5);
+      doc.text('S', logoX + logoSize / 2 - 1.8, logoY + 1.8);
     }
     
     // Stashway text
     doc.setTextColor(15, 23, 42); // slate-900
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.text('Stashway™', logoX + logoSize + 3, logoY + 3);
+    doc.text('Stashway™', logoX + logoSize + 4, logoY + 3);
     
     // User email and profile picture on the right
     const rightMargin = margin;
@@ -762,7 +763,9 @@ export const exportOverviewToPdf = async (
         img.src = logoBase64;
       });
 
-      const logoHeight = 12;
+      // Increased logo size - accounting for potential empty space that could be cropped
+      // If logo is cropped, this will make it appear larger
+      const logoHeight = 18; // Increased from 12 to 18 (1.5x, close to 2x when accounting for padding)
       const logoWidth = (logoHeight * img.width / img.height);
       const logoX = (pageWidth - logoWidth) / 2;
       doc.addImage(logoBase64, 'PNG', logoX, yPosition, logoWidth, logoHeight);
