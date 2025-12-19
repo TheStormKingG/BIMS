@@ -254,8 +254,64 @@ export const Accounts: React.FC<AccountsProps> = ({
 
         {/* Transaction History */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50">
+          <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Transaction History</h3>
+            {sortedTransactions.length > 0 && (
+              <div className="relative" ref={walletExportDropdownRef}>
+                <button
+                  onClick={() => setShowWalletExportDropdown(!showWalletExportDropdown)}
+                  className="text-emerald-600 border border-emerald-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                  title="Export transaction history"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showWalletExportDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showWalletExportDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                    <button
+                      onClick={() => {
+                        exportWalletTransactionsToCSV(sortedTransactions);
+                        setShowWalletExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await exportWalletTransactionsToExcel(sortedTransactions);
+                        } catch (err) {
+                          alert('Failed to export to Excel: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                        }
+                        setShowWalletExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      XLS
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await exportWalletTransactionsToPdf(sortedTransactions);
+                        } catch (err) {
+                          alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                        }
+                        setShowWalletExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      PDF
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {sortedTransactions.length === 0 ? (
