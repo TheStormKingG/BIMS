@@ -6,11 +6,16 @@ import { Smartphone, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 // Mobile: mobile-1.png, mobile-2.png, mobile-3.png, etc.
 // Desktop: desktop-1.png, desktop-2.png, desktop-3.png, etc.
 const MOBILE_IMAGES = [
-  '/mockups/mobile-1.png',
-  '/mockups/mobile-2.png',
-  '/mockups/mobile-3.png',
-  '/mockups/mobile-4.png',
-  '/mockups/mobile-5.png',
+  '/mockups/mobile-1.jpg',
+  '/mockups/mobile-2.jpg',
+  '/mockups/mobile-3.jpg',
+  '/mockups/mobile-4.jpg',
+  '/mockups/mobile-5.jpg',
+  '/mockups/mobile-6.jpg',
+  '/mockups/mobile-7.jpg',
+  '/mockups/mobile-8.jpg',
+  '/mockups/mobile-9.jpg',
+  '/mockups/mobile-10.jpg',
 ];
 
 const DESKTOP_IMAGES = [
