@@ -127,6 +127,24 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Public routes that don't require authentication (accessible to all users)
+  const publicRoutes = ['/', '/privacy', '/terms', '/about'];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+
+  // Handle public routes immediately - accessible to both authenticated and unauthenticated users
+  // This must be checked before authLoading to prevent infinite loading
+  if (location.pathname === '/about') {
+    return <Landing />;
+  }
+
+  if (location.pathname === '/privacy') {
+    return <PrivacyPolicy />;
+  }
+
+  if (location.pathname === '/terms') {
+    return <TermsAndConditions />;
+  }
+
   // Show login page if not authenticated
   if (authLoading) {
     return (
@@ -139,40 +157,27 @@ function App() {
     );
   }
 
-  // Public routes that don't require authentication
-  const publicRoutes = ['/', '/privacy', '/terms', '/about', '/landing'];
-  const isPublicRoute = publicRoutes.includes(location.pathname);
-
   // If not authenticated and not on a public route, show login
   if (!user && !isPublicRoute) {
     return <Navigate to="/" replace />;
   }
 
-  // Handle public routes - render without authentication and without navigation
-  if (!user && isPublicRoute) {
+  // Handle login page for unauthenticated users
+  if (!user && location.pathname === '/') {
     return (
-      <Routes>
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/about" element={<Landing />} />
-        <Route path="/landing" element={<Landing />} />
-        <Route path="/" element={
-          <Login onLoginSuccess={async () => {
-            try {
-              const { data: { session }, error } = await supabase.auth.getSession();
-              if (error) {
-                console.error('Error getting session after login:', error);
-              } else {
-                setUser(session?.user ?? null);
-                navigate('/overview', { replace: true });
-              }
-            } catch (err) {
-              console.error('Failed to get session after login:', err);
-            }
-          }} />
-        } />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Login onLoginSuccess={async () => {
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error) {
+            console.error('Error getting session after login:', error);
+          } else {
+            setUser(session?.user ?? null);
+            navigate('/overview', { replace: true });
+          }
+        } catch (err) {
+          console.error('Failed to get session after login:', err);
+        }
+      }} />
     );
   }
 
