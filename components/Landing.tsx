@@ -55,14 +55,27 @@ export const Landing: React.FC = () => {
 
   const images = viewMode === 'mobile' ? MOBILE_IMAGES : DESKTOP_IMAGES;
 
+  // Reset index when view mode changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [viewMode]);
+
   // Handle next slide
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    if (images.length === 0) return;
+    setCurrentIndex((prev) => {
+      const next = prev + 1;
+      return next >= images.length ? 0 : next;
+    });
   }, [images.length]);
 
   // Handle previous slide
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    if (images.length === 0) return;
+    setCurrentIndex((prev) => {
+      const prevIndex = prev - 1;
+      return prevIndex < 0 ? images.length - 1 : prevIndex;
+    });
   }, [images.length]);
 
   // Touch events for swiping
