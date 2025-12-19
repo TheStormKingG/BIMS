@@ -4,6 +4,181 @@ import { Account } from '../types';
 import { calculateTimeBasedAnalytics, TimeBasedAnalytics } from './analyticsService';
 
 /**
+ * Helper function to add header to PDF (logo, Stashway™ text, user email, avatar)
+ */
+const addPdfHeader = async (
+  doc: jsPDF,
+  pageWidth: number,
+  margin: number,
+  headerHeight: number,
+  userEmail?: string,
+  userAvatarUrl?: string | null
+): Promise<number> => {
+  // Header background
+  doc.setFillColor(248, 250, 252); // slate-50
+  doc.rect(0, 0, pageWidth, headerHeight, 'F');
+  
+  // Logo and Stashway text on the left
+  const logoSize = 14;
+  const logoX = margin;
+  const logoY = headerHeight / 2;
+  
+  // Try to load and add logo image
+  try {
+    const logoUrl = '/stashway-logo.png';
+    const logoResponse = await fetch(logoUrl);
+    if (logoResponse.ok) {
+      const logoBlob = await logoResponse.blob();
+      const logoBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(logoBlob);
+      });
+      doc.addImage(logoBase64, 'PNG', logoX, logoY - logoSize / 2, logoSize, logoSize);
+    } else {
+      throw new Error('Logo not found');
+    }
+  } catch (e) {
+    // Logo loading failed, use placeholder circle with S
+    doc.setFillColor(16, 185, 129); // emerald-500
+    doc.circle(logoX + logoSize / 2, logoY, logoSize / 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('S', logoX + logoSize / 2 - 1.8, logoY + 1.8);
+  }
+  
+  // Stashway text
+  doc.setTextColor(15, 23, 42); // slate-900
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Stashway™', logoX + logoSize + 4, logoY + 3);
+  
+  // User email and profile picture on the right
+  const rightMargin = margin;
+  let rightX = pageWidth - rightMargin;
+  
+  // Profile picture (small circle)
+  const avatarSize = 8;
+  const avatarX = rightX - avatarSize / 2;
+  const avatarY = logoY;
+  
+  // Try to load user avatar image if available
+  let avatarLoaded = false;
+  if (userAvatarUrl) {
+    try {
+      const avatarResponse = await fetch(userAvatarUrl);
+      if (avatarResponse.ok) {
+        const avatarBlob = await avatarResponse.blob();
+        const avatarBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(avatarBlob);
+        });
+        doc.setFillColor(255, 255, 255);
+        doc.circle(avatarX, avatarY, avatarSize / 2, 'F');
+        doc.addImage(avatarBase64, 'PNG', avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
+        avatarLoaded = true;
+      }
+    } catch (e) {
+      // Avatar loading failed, use placeholder
+    }
+  }
+  
+  // Draw avatar placeholder if image not loaded
+  if (!avatarLoaded) {
+    doc.setFillColor(226, 232, 240); // slate-300
+    doc.circle(avatarX, avatarY, avatarSize / 2, 'F');
+    doc.setTextColor(100, 116, 139); // slate-500
+    doc.setFontSize(6);
+    doc.setFont(undefined, 'normal');
+    doc.text('U', avatarX - 1.5, avatarY + 1.5);
+  }
+  
+  // User email to the left of avatar
+  if (userEmail) {
+    doc.setTextColor(51, 65, 85); // slate-700
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    const emailText = userEmail.length > 30 ? userEmail.substring(0, 27) + '...' : userEmail;
+    const emailWidth = doc.getTextWidth(emailText);
+    doc.text(emailText, avatarX - emailWidth - 5, avatarY + 3);
+  }
+  
+  // Reset text color
+  doc.setTextColor(0, 0, 0);
+  
+  return headerHeight + 10;
+};
+
+/**
+ * Helper function to add footer to PDF (logo and Stashway™ text)
+ */
+const addPdfFooter = async (
+  doc: jsPDF,
+  pageWidth: number,
+  pageHeight: number,
+  margin: number,
+  yPosition: number
+): Promise<void> => {
+  // Footer with branding
+  doc.setLineWidth(0.3);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  yPosition += 8;
+
+  // Load logo and add branding
+  try {
+    const logoUrl = '/stashway-logo.png';
+    const logoResponse = await fetch(logoUrl);
+    const logoBlob = await logoResponse.blob();
+    const logoBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(logoBlob);
+    });
+
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = reject;
+      img.src = logoBase64;
+    });
+
+    const logoHeight = 18;
+    const logoWidth = (logoHeight * img.width / img.height);
+    const logoX = (pageWidth - logoWidth) / 2;
+    doc.addImage(logoBase64, 'PNG', logoX, yPosition, logoWidth, logoHeight);
+    yPosition += logoHeight + 5;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    const stashwayText = 'Stashway';
+    const stashwayWidth = doc.getTextWidth(stashwayText);
+    const stashwayX = (pageWidth - stashwayWidth - 4) / 2;
+    doc.text(stashwayText, stashwayX, yPosition);
+    
+    doc.setFontSize(7);
+    doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
+  } catch (err) {
+    console.warn('Could not load logo, showing text only:', err);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    const stashwayText = 'Stashway';
+    const stashwayWidth = doc.getTextWidth(stashwayText);
+    const stashwayX = (pageWidth - stashwayWidth - 4) / 2;
+    doc.text(stashwayText, stashwayX, yPosition);
+    doc.setFontSize(6);
+    doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
+  }
+};
+
+/**
  * Export spending data as CSV
  */
 export const exportSpendingToCSV = (spentItems: SpentItem[]): void => {
@@ -114,15 +289,20 @@ export const exportSpendingToExcel = async (spentItems: SpentItem[]): Promise<vo
  */
 export const exportSpendingToPdf = async (
   spentItems: SpentItem[],
-  monthLabel: string
+  monthLabel: string,
+  userEmail?: string,
+  userAvatarUrl?: string | null
 ): Promise<void> => {
   try {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    const tableStartY = 40;
-    let yPosition = tableStartY;
+    const headerHeight = 18;
+    
+    // Add header
+    let yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+    
     const rowHeight = 8;
     const colWidths = [35, 50, 25, 15, 25, 30, 30, 25];
     const headers = ['Date', 'Item', 'Total', 'Qty', 'Cost', 'Category', 'Method', 'Source'];
@@ -147,18 +327,32 @@ export const exportSpendingToPdf = async (
     // Title
     doc.setFontSize(18);
     doc.setTextColor(16, 185, 129); // emerald-500
-    doc.text('Spending Report', margin, 20);
+    doc.text('Spending Report', margin, yPosition);
+    yPosition += 8;
     
     doc.setFontSize(12);
     doc.setTextColor(71, 85, 105); // slate-600
-    doc.text(monthLabel, margin, 30);
+    doc.text(monthLabel, margin, yPosition);
+    yPosition += 10;
 
-    // Helper to check page break
+    // Helper to check page break (accounting for footer space ~35mm)
     const checkPageBreak = (requiredHeight: number) => {
-      if (yPosition + requiredHeight > pageHeight - margin) {
+      const footerSpace = 35;
+      if (yPosition + requiredHeight > pageHeight - margin - footerSpace) {
+        // Add footer before new page
+        await addPdfFooter(doc, pageWidth, pageHeight, margin, pageHeight - margin - footerSpace);
         doc.addPage();
-        yPosition = margin + 10;
-        // Redraw headers on new page
+        yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+        // Redraw table headers on new page
+        yPosition += 5;
+        doc.setFontSize(18);
+        doc.setTextColor(16, 185, 129);
+        doc.text('Spending Report', margin, yPosition);
+        yPosition += 8;
+        doc.setFontSize(12);
+        doc.setTextColor(71, 85, 105);
+        doc.text(monthLabel, margin, yPosition);
+        yPosition += 10;
         doc.setFontSize(10);
         doc.setTextColor(71, 85, 105);
         doc.setFont(undefined, 'bold');
@@ -169,6 +363,8 @@ export const exportSpendingToPdf = async (
         });
         doc.setFont(undefined, 'normal');
         yPosition += rowHeight;
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
       }
     };
 
@@ -215,9 +411,9 @@ export const exportSpendingToPdf = async (
       yPosition += rowHeight;
     });
 
-    // Footer with total
+    // Total
     const total = spentItems.reduce((sum, item) => sum + item.itemTotal, 0);
-    checkPageBreak(rowHeight + 5);
+    checkPageBreak(rowHeight + 35);
     yPosition += 5;
     doc.setDrawColor(226, 232, 240);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
@@ -227,6 +423,10 @@ export const exportSpendingToPdf = async (
     doc.setFont(undefined, 'bold');
     doc.setTextColor(16, 185, 129);
     doc.text(`Total: ${formatCurrency(total)}`, margin, yPosition);
+    yPosition += 15;
+
+    // Add footer
+    await addPdfFooter(doc, pageWidth, pageHeight, margin, yPosition);
 
     // Generate filename
     const dateSlug = new Date().toISOString().split('T')[0];
@@ -303,20 +503,27 @@ export const exportWalletTransactionsToExcel = async (
  */
 export const exportWalletTransactionsToPdf = async (
   transactions: Array<{ id: string; type: 'funds_added' | 'cash_spent'; amount: number; source: string; datetime: string }>,
-  accountName: string = 'Cash Wallet'
+  accountName: string = 'Cash Wallet',
+  userEmail?: string,
+  userAvatarUrl?: string | null
 ): Promise<void> => {
   try {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    let yPosition = 40;
+    const headerHeight = 18;
+    
+    // Add header
+    let yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+    
     const rowHeight = 8;
     const colWidths = [60, 35, 50, 35];
 
     doc.setFontSize(18);
     doc.setTextColor(16, 185, 129);
-    doc.text(`${accountName} - Transaction History`, margin, 20);
+    doc.text(`${accountName} - Transaction History`, margin, yPosition);
+    yPosition += 10;
 
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105);
@@ -333,11 +540,33 @@ export const exportWalletTransactionsToPdf = async (
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
     
-    transactions.forEach((txn) => {
-      if (yPosition + rowHeight > pageHeight - margin) {
+    const checkPageBreakWallet = async (requiredHeight: number) => {
+      const footerSpace = 35;
+      if (yPosition + requiredHeight > pageHeight - margin - footerSpace) {
+        await addPdfFooter(doc, pageWidth, pageHeight, margin, pageHeight - margin - footerSpace);
         doc.addPage();
-        yPosition = margin + 10;
+        yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+        yPosition += 5;
+        doc.setFontSize(18);
+        doc.setTextColor(16, 185, 129);
+        doc.text(`${accountName} - Transaction History`, margin, yPosition);
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont(undefined, 'bold');
+        doc.text('Date', margin, yPosition);
+        doc.text('Type', margin + colWidths[0], yPosition);
+        doc.text('Source', margin + colWidths[0] + colWidths[1], yPosition);
+        doc.text('Amount', margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += rowHeight;
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
       }
+    };
+    
+    for (const txn of transactions) {
+      await checkPageBreakWallet(rowHeight);
 
       const type = txn.type === 'funds_added' ? 'Funds Added' : 'Cash Spent';
       const amount = txn.type === 'funds_added' ? `+$${txn.amount.toLocaleString()}` : `-$${txn.amount.toLocaleString()}`;
@@ -351,6 +580,9 @@ export const exportWalletTransactionsToPdf = async (
       doc.setTextColor(30, 41, 59);
       yPosition += rowHeight;
     });
+
+    // Add footer
+    await addPdfFooter(doc, pageWidth, pageHeight, margin, yPosition);
 
     const dateSlug = new Date().toISOString().split('T')[0];
     doc.save(`stashway_wallet_transactions_${dateSlug}.pdf`);
@@ -428,20 +660,27 @@ export const exportBankTransactionsToExcel = async (
  */
 export const exportBankTransactionsToPdf = async (
   transactions: Array<{ id: string; type: 'deposit' | 'withdrawal'; amount: number; source: string; datetime: string; txnId?: string }>,
-  accountName: string
+  accountName: string,
+  userEmail?: string,
+  userAvatarUrl?: string | null
 ): Promise<void> => {
   try {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    let yPosition = 40;
+    const headerHeight = 18;
+    
+    // Add header
+    let yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+    
     const rowHeight = 8;
     const colWidths = [60, 35, 50, 35];
 
     doc.setFontSize(18);
     doc.setTextColor(16, 185, 129);
-    doc.text(`${accountName} - Transaction History`, margin, 20);
+    doc.text(`${accountName} - Transaction History`, margin, yPosition);
+    yPosition += 10;
 
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105);
@@ -458,11 +697,33 @@ export const exportBankTransactionsToPdf = async (
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
     
-    transactions.forEach((txn) => {
-      if (yPosition + rowHeight > pageHeight - margin) {
+    const checkPageBreakBank = async (requiredHeight: number) => {
+      const footerSpace = 35;
+      if (yPosition + requiredHeight > pageHeight - margin - footerSpace) {
+        await addPdfFooter(doc, pageWidth, pageHeight, margin, pageHeight - margin - footerSpace);
         doc.addPage();
-        yPosition = margin + 10;
+        yPosition = await addPdfHeader(doc, pageWidth, margin, headerHeight, userEmail, userAvatarUrl);
+        yPosition += 5;
+        doc.setFontSize(18);
+        doc.setTextColor(16, 185, 129);
+        doc.text(`${accountName} - Transaction History`, margin, yPosition);
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont(undefined, 'bold');
+        doc.text('Date', margin, yPosition);
+        doc.text('Type', margin + colWidths[0], yPosition);
+        doc.text('Source', margin + colWidths[0] + colWidths[1], yPosition);
+        doc.text('Amount', margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += rowHeight;
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
       }
+    };
+    
+    for (const txn of transactions) {
+      await checkPageBreakBank(rowHeight);
 
       const type = txn.type === 'deposit' ? 'Deposit' : 'Withdrawal';
       const amount = txn.type === 'deposit' ? `+$${txn.amount.toLocaleString()}` : `-$${txn.amount.toLocaleString()}`;
@@ -476,6 +737,9 @@ export const exportBankTransactionsToPdf = async (
       doc.setTextColor(30, 41, 59);
       yPosition += rowHeight;
     });
+
+    // Add footer
+    await addPdfFooter(doc, pageWidth, pageHeight, margin, yPosition);
 
     const dateSlug = new Date().toISOString().split('T')[0];
     const safeName = accountName.replace(/[^a-z0-9]/gi, '_').toLowerCase();

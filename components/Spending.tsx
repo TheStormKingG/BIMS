@@ -5,6 +5,7 @@ import { DEFAULT_CATEGORIES } from '../constants';
 import { CashWallet, BankAccount } from '../types';
 import { ReceiptModal } from './ReceiptModal';
 import { exportSpendingToCSV, exportSpendingToExcel, exportSpendingToPdf } from '../services/exportsService';
+import { getSupabase } from '../services/supabaseClient';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -91,7 +92,11 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
   const handleExportPDF = async () => {
     try {
-      await exportSpendingToPdf(filteredItems, currentMonthName);
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      const userEmail = session?.user?.email || undefined;
+      const userAvatarUrl = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null;
+      await exportSpendingToPdf(filteredItems, currentMonthName, userEmail, userAvatarUrl);
     } catch (err) {
       alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }

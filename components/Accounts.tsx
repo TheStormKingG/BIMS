@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { BankAccount, CashWallet } from '../types';
 import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet, Archive, ArchiveRestore, Download, ChevronDown } from 'lucide-react';
 import { exportWalletTransactionsToCSV, exportWalletTransactionsToExcel, exportWalletTransactionsToPdf, exportBankTransactionsToCSV, exportBankTransactionsToExcel, exportBankTransactionsToPdf } from '../services/exportsService';
+import { getSupabase } from '../services/supabaseClient';
 
 interface BankTransaction {
   id: string; // This is the bank_id (destination)
@@ -297,7 +298,11 @@ export const Accounts: React.FC<AccountsProps> = ({
                     <button
                       onClick={async () => {
                         try {
-                          await exportWalletTransactionsToPdf(sortedTransactions);
+                          const supabase = getSupabase();
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const userEmail = session?.user?.email || undefined;
+                          const userAvatarUrl = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null;
+                          await exportWalletTransactionsToPdf(sortedTransactions, 'Cash Wallet', userEmail, userAvatarUrl);
                         } catch (err) {
                           alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
                         }
@@ -436,7 +441,11 @@ export const Accounts: React.FC<AccountsProps> = ({
                     <button
                       onClick={async () => {
                         try {
-                          await exportBankTransactionsToPdf(transactions, viewingBank.name);
+                          const supabase = getSupabase();
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const userEmail = session?.user?.email || undefined;
+                          const userAvatarUrl = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null;
+                          await exportBankTransactionsToPdf(transactions, viewingBank.name, userEmail, userAvatarUrl);
                         } catch (err) {
                           alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
                         }
