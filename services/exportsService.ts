@@ -579,7 +579,7 @@ export const exportWalletTransactionsToPdf = async (
       doc.text(amount, margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
       doc.setTextColor(30, 41, 59);
       yPosition += rowHeight;
-    });
+    }
 
     // Add footer
     await addPdfFooter(doc, pageWidth, pageHeight, margin, yPosition);
@@ -736,7 +736,7 @@ export const exportBankTransactionsToPdf = async (
       doc.text(amount, margin + colWidths[0] + colWidths[1] + colWidths[2], yPosition);
       doc.setTextColor(30, 41, 59);
       yPosition += rowHeight;
-    });
+    }
 
     // Add footer
     await addPdfFooter(doc, pageWidth, pageHeight, margin, yPosition);
