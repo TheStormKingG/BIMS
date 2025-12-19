@@ -26,6 +26,7 @@ export const Landing: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const images = viewMode === 'mobile' ? MOBILE_IMAGES : DESKTOP_IMAGES;
 
@@ -254,26 +255,23 @@ export const Landing: React.FC = () => {
                       // Mobile Mockup Frame
                       <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-700">
                         <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner">
-                          <img
-                            src={image}
-                            alt={`Stashway ${viewMode} view ${index + 1}`}
-                            className="w-full h-auto object-cover"
-                            onError={(e) => {
-                              // Fallback if image doesn't exist
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              if (target.parentElement) {
-                                target.parentElement.innerHTML = `
-                                  <div class="w-full aspect-[9/16] bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
-                                    <div class="text-center">
-                                      <div class="text-4xl mb-2">📱</div>
-                                      <div class="text-sm">Mobile ${index + 1}</div>
-                                    </div>
-                                  </div>
-                                `;
-                              }
-                            }}
-                          />
+                          {failedImages.has(image) ? (
+                            <div className="w-full aspect-[9/16] bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
+                              <div className="text-center">
+                                <div className="text-4xl mb-2">📱</div>
+                                <div className="text-sm">Mobile {index + 1}</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <img
+                              src={image}
+                              alt={`Stashway ${viewMode} view ${index + 1}`}
+                              className="w-full h-auto object-cover"
+                              onError={() => {
+                                setFailedImages((prev) => new Set(prev).add(image));
+                              }}
+                            />
+                          )}
                         </div>
                         {/* Notch */}
                         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl"></div>
@@ -291,26 +289,23 @@ export const Landing: React.FC = () => {
                           
                           {/* Screen */}
                           <div className="bg-white rounded-lg overflow-hidden shadow-inner mt-4">
+                          {failedImages.has(image) ? (
+                            <div className="w-full aspect-video bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
+                              <div className="text-center">
+                                <div className="text-4xl mb-2">💻</div>
+                                <div className="text-sm">Desktop {index + 1}</div>
+                              </div>
+                            </div>
+                          ) : (
                             <img
                               src={image}
                               alt={`Stashway ${viewMode} view ${index + 1}`}
                               className="w-full h-auto object-cover"
-                              onError={(e) => {
-                                // Fallback if image doesn't exist
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                if (target.parentElement) {
-                                  target.parentElement.innerHTML = `
-                                    <div class="w-full aspect-video bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center text-slate-400">
-                                      <div class="text-center">
-                                        <div class="text-4xl mb-2">💻</div>
-                                        <div class="text-sm">Desktop ${index + 1}</div>
-                                      </div>
-                                    </div>
-                                  `;
-                                }
+                              onError={() => {
+                                setFailedImages((prev) => new Set(prev).add(image));
                               }}
                             />
+                          )}
                           </div>
                           
                           {/* Bottom Bezel */}
