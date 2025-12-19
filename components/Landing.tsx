@@ -264,9 +264,10 @@ export const Landing: React.FC = () => {
                   <div
                     className={`relative ${
                       viewMode === 'mobile'
-                        ? 'w-72 sm:w-80 md:w-96'
-                        : 'w-full max-w-4xl'
+                        ? 'w-[85vw] max-w-sm sm:w-80 md:w-96'
+                        : 'w-full max-w-[80%]'
                     }`}
+                    style={viewMode === 'desktop' ? { transform: 'scale(0.8)', transformOrigin: 'center' } : {}}
                   >
                     {/* Mockup Frame */}
                     {viewMode === 'mobile' ? (
@@ -365,14 +366,22 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/10 backdrop-blur-md hover:bg-black/20 transition-all duration-200 rounded-full p-3 shadow-lg border border-black/10 text-slate-700 z-10"
+              className={`absolute left-4 top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+                viewMode === 'mobile'
+                  ? 'bg-black/5 hover:bg-black/10 border-black/5'
+                  : 'bg-black/10 hover:bg-black/20 border-black/10'
+              }`}
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/10 backdrop-blur-md hover:bg-black/20 transition-all duration-200 rounded-full p-3 shadow-lg border border-black/10 text-slate-700 z-10"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+                viewMode === 'mobile'
+                  ? 'bg-black/5 hover:bg-black/10 border-black/5'
+                  : 'bg-black/10 hover:bg-black/20 border-black/10'
+              }`}
               aria-label="Next slide"
             >
               <ChevronRight className="w-6 h-6" />
