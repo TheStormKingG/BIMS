@@ -632,7 +632,7 @@ export const exportOverviewToPdf = async (
         doc.text(itemName, margin + 45, yPosition);
         
         doc.text(formatCurrency(item.itemTotal), pageWidth - margin - 40, yPosition);
-        yPosition += 8;
+        yPosition += 7; // Reduced row spacing from 8 to 7
       });
     } else {
       doc.setFont(undefined, 'normal');
@@ -640,15 +640,15 @@ export const exportOverviewToPdf = async (
       yPosition += 8;
     }
 
-    yPosition += 10;
+    yPosition += 8;
 
-    // Most Money Spent On (Top Category)
-    checkPageBreak(30);
+    // Most Money Spent On (Top Category) - Compact version
+    checkPageBreak(25); // Reserve space for both sections and footer
     doc.setLineWidth(0.3);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
+    yPosition += 6;
 
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     if (analytics.topCategory) {
       doc.setTextColor(0, 0, 0);
@@ -656,34 +656,34 @@ export const exportOverviewToPdf = async (
       const categoryNameWidth = doc.getTextWidth('Most Money Spent On: ');
       doc.setTextColor(0, 166, 81); // Guyana green (#00A651)
       doc.text(analytics.topCategory.name, margin + categoryNameWidth, yPosition);
-      yPosition += 10;
+      yPosition += 7;
 
-      doc.setFontSize(16);
+      doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0, 0, 0);
       doc.text(formatCurrency(analytics.topCategory.amount), margin, yPosition);
-      yPosition += 8;
+      yPosition += 5;
 
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(128, 128, 128);
       doc.text(`Total spent on ${analytics.topCategory.name} category.`, margin, yPosition);
-      yPosition += 10;
+      yPosition += 8;
     } else {
       doc.setTextColor(0, 0, 0);
       doc.text('Most Money Spent On', margin, yPosition);
-      yPosition += 8;
-      doc.setFontSize(9);
+      yPosition += 6;
+      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       doc.text('No category data available', margin, yPosition);
-      yPosition += 10;
+      yPosition += 8;
     }
 
-    // Top Spending Item
-    checkPageBreak(30);
+    // Top Spending Item - Compact version
+    checkPageBreak(25); // Reserve space for section and footer
     doc.setLineWidth(0.3);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 10;
+    yPosition += 6;
 
     // Calculate top spending item
     const itemTotals: Record<string, number> = {};
@@ -700,36 +700,38 @@ export const exportOverviewToPdf = async (
       totalSpent: sortedItems[0][1]
     } : null;
 
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     doc.setTextColor(0, 0, 0);
     
     if (topItem) {
       doc.text('Top Spending Item: ', margin, yPosition);
       const itemLabelWidth = doc.getTextWidth('Top Spending Item: ');
-      const itemName = topItem.name.length > 40 ? topItem.name.substring(0, 37) + '...' : topItem.name;
+      const itemName = topItem.name.length > 45 ? topItem.name.substring(0, 42) + '...' : topItem.name;
       doc.setTextColor(0, 166, 81); // Guyana green (#00A651)
       doc.text(itemName, margin + itemLabelWidth, yPosition);
-      yPosition += 10;
+      yPosition += 7;
 
-      doc.setFontSize(16);
+      doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0, 0, 0);
       doc.text(formatCurrency(topItem.totalSpent), margin, yPosition);
-      yPosition += 8;
+      yPosition += 5;
 
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(128, 128, 128);
-      doc.text(`Total spent on ${topItem.name}.`, margin, yPosition);
-      yPosition += 10;
+      const descText = `Total spent on ${topItem.name}.`;
+      const descTextFinal = descText.length > 60 ? topItem.name.substring(0, 57) + '...' : descText;
+      doc.text(descTextFinal, margin, yPosition);
+      yPosition += 8;
     } else {
       doc.text('Top Spending Item', margin, yPosition);
-      yPosition += 8;
-      doc.setFontSize(9);
+      yPosition += 6;
+      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       doc.text('No spending data available', margin, yPosition);
-      yPosition += 10;
+      yPosition += 8;
     }
 
     // Footer with branding
@@ -777,13 +779,13 @@ export const exportOverviewToPdf = async (
       doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
     } catch (err) {
       console.warn('Could not load logo, showing text only:', err);
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       const stashwayText = 'Stashway';
       const stashwayWidth = doc.getTextWidth(stashwayText);
       const stashwayX = (pageWidth - stashwayWidth - 4) / 2;
       doc.text(stashwayText, stashwayX, yPosition);
-      doc.setFontSize(7);
+      doc.setFontSize(6);
       doc.text('™', stashwayX + stashwayWidth + 1, yPosition - 2);
     }
 
