@@ -336,7 +336,7 @@ export const exportSpendingToPdf = async (
     yPosition += 10;
 
     // Helper to check page break (accounting for footer space ~35mm)
-    const checkPageBreak = (requiredHeight: number) => {
+    const checkPageBreak = async (requiredHeight: number) => {
       const footerSpace = 35;
       if (yPosition + requiredHeight > pageHeight - margin - footerSpace) {
         // Add footer before new page
