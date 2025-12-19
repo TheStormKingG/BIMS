@@ -22,11 +22,27 @@ const DESKTOP_IMAGES = [
 ];
 
 export const Landing: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  // Detect mobile devices and set default view mode
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+      if (mobile) {
+        setViewMode('mobile'); // Force mobile view on mobile devices
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const images = viewMode === 'mobile' ? MOBILE_IMAGES : DESKTOP_IMAGES;
 
@@ -185,42 +201,44 @@ export const Landing: React.FC = () => {
       
       {/* Content Container */}
       <div className="relative z-10">
-      {/* Toggle Button - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
-        <div className="flex flex-col items-center gap-2">
-          {/* Labels */}
-          <div className="flex items-center gap-8 text-sm font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-            <span className={viewMode === 'desktop' ? 'text-slate-900' : 'text-slate-400'}>DESKTOP</span>
-            <span className={viewMode === 'mobile' ? 'text-slate-900' : 'text-slate-400'}>MOBILE</span>
-          </div>
-          
-          {/* Toggle Switch */}
-          <button
-            onClick={() => setViewMode(viewMode === 'mobile' ? 'desktop' : 'mobile')}
-            className="relative w-20 h-10 bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300"
-            aria-label={`Switch to ${viewMode === 'mobile' ? 'desktop' : 'mobile'} view`}
-          >
-            {/* Sliding Circle */}
-            <div
-              className={`absolute top-1 w-8 h-8 bg-white rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out shadow-sm ${
-                viewMode === 'desktop' ? 'translate-x-1' : 'translate-x-11'
-              }`}
-              style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
-            >
-              {/* Power Symbol - Circle with vertical line */}
-              <svg
-                className="w-3.5 h-3.5 text-black"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" fill="none" />
-                <line x1="12" y1="3" x2="12" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
+      {/* Toggle Button - Top Right (Hidden on mobile) */}
+      {!isMobile && (
+        <div className="absolute top-4 right-4 z-50">
+          <div className="flex flex-col items-center gap-2">
+            {/* Labels */}
+            <div className="flex items-center gap-6 text-xs font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+              <span className={viewMode === 'desktop' ? 'text-slate-900' : 'text-slate-400'}>DESKTOP</span>
+              <span className={viewMode === 'mobile' ? 'text-slate-900' : 'text-slate-400'}>MOBILE</span>
             </div>
-          </button>
+            
+            {/* Toggle Switch */}
+            <button
+              onClick={() => setViewMode(viewMode === 'mobile' ? 'desktop' : 'mobile')}
+              className="relative w-16 h-8 bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300"
+              aria-label={`Switch to ${viewMode === 'mobile' ? 'desktop' : 'mobile'} view`}
+            >
+              {/* Sliding Circle */}
+              <div
+                className={`absolute top-0.5 w-7 h-7 bg-white rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out shadow-sm ${
+                  viewMode === 'desktop' ? 'translate-x-0.5' : 'translate-x-9'
+                }`}
+                style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
+              >
+                {/* Power Symbol - Circle with vertical line */}
+                <svg
+                  className="w-3 h-3 text-black"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" fill="none" />
+                  <line x1="12" y1="3" x2="12" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </div>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Carousel Container */}
       <div className="flex items-center justify-center min-h-screen p-8">
@@ -247,7 +265,7 @@ export const Landing: React.FC = () => {
                     className={`relative ${
                       viewMode === 'mobile'
                         ? 'w-72 sm:w-80 md:w-96'
-                        : 'w-full max-w-5xl'
+                        : 'w-full max-w-4xl'
                     }`}
                   >
                     {/* Mockup Frame */}
