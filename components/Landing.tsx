@@ -143,26 +143,53 @@ export const Landing: React.FC = () => {
   }, [viewMode]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-purple-900 overflow-hidden relative">
+    <div 
+      className="min-h-screen overflow-hidden relative"
+      style={{
+        background: `
+          radial-gradient(ellipse at top left, rgba(255, 237, 213, 0.4) 0%, transparent 50%),
+          radial-gradient(ellipse at top right, rgba(254, 243, 199, 0.3) 0%, transparent 50%),
+          radial-gradient(ellipse at bottom left, rgba(255, 237, 213, 0.2) 0%, transparent 50%),
+          radial-gradient(ellipse at bottom right, rgba(254, 215, 170, 0.3) 0%, transparent 50%),
+          linear-gradient(135deg, #ffffff 0%, #fefbf3 25%, #fef7ed 50%, #fffbf5 75%, #ffffff 100%)
+        `
+      }}
+    >
       {/* Toggle Button - Top Right */}
       <div className="absolute top-4 right-4 z-50">
-        <button
-          onClick={() => setViewMode(viewMode === 'mobile' ? 'desktop' : 'mobile')}
-          className="bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-200 rounded-full p-3 shadow-lg border border-white/20 flex items-center gap-2 text-white"
-          aria-label={`Switch to ${viewMode === 'mobile' ? 'desktop' : 'mobile'} view`}
-        >
-          {viewMode === 'mobile' ? (
-            <>
-              <Monitor className="w-5 h-5" />
-              <span className="hidden sm:inline text-sm font-medium">Desktop</span>
-            </>
-          ) : (
-            <>
-              <Smartphone className="w-5 h-5" />
-              <span className="hidden sm:inline text-sm font-medium">Mobile</span>
-            </>
-          )}
-        </button>
+        <div className="flex flex-col items-center gap-2">
+          {/* Labels */}
+          <div className="flex items-center gap-8 text-sm font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+            <span className={viewMode === 'desktop' ? 'text-slate-900' : 'text-slate-400'}>ON</span>
+            <span className={viewMode === 'mobile' ? 'text-slate-900' : 'text-slate-400'}>OFF</span>
+          </div>
+          
+          {/* Toggle Switch */}
+          <button
+            onClick={() => setViewMode(viewMode === 'mobile' ? 'desktop' : 'mobile')}
+            className="relative w-20 h-10 bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300"
+            aria-label={`Switch to ${viewMode === 'mobile' ? 'desktop' : 'mobile'} view`}
+          >
+            {/* Sliding Circle */}
+            <div
+              className={`absolute top-1 w-8 h-8 bg-white rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out shadow-sm ${
+                viewMode === 'desktop' ? 'translate-x-1' : 'translate-x-11'
+              }`}
+              style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
+            >
+              {/* Power Symbol - Circle with vertical line */}
+              <svg
+                className="w-3.5 h-3.5 text-black"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" fill="none" />
+                <line x1="12" y1="3" x2="12" y2="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Main Carousel Container */}
