@@ -273,8 +273,8 @@ export const Landing: React.FC = () => {
                     {viewMode === 'mobile' ? (
                       // Mobile Mockup Frame
                       <div 
-                        className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-700"
-                        style={{ aspectRatio: '9/20' }}
+                        className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl border-[10px] border-slate-700"
+                        style={{ aspectRatio: '9/17' }}
                       >
                         <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner h-full">
                           {failedImages.has(image) ? (
