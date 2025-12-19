@@ -388,8 +388,8 @@ export const exportSpendingToPdf = async (
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59); // slate-800
     
-    spentItems.forEach((item, index) => {
-      checkPageBreak(rowHeight + 2);
+    for (const item of spentItems) {
+      await checkPageBreak(rowHeight + 2);
 
       const row = [
         formatDate(item.transactionDateTime),
@@ -409,7 +409,7 @@ export const exportSpendingToPdf = async (
       });
 
       yPosition += rowHeight;
-    });
+    }
 
     // Total
     const total = spentItems.reduce((sum, item) => sum + item.itemTotal, 0);
