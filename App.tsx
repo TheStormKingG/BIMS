@@ -16,6 +16,7 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
 import { SettingsTerms } from './components/SettingsTerms';
+import { Landing } from './components/Landing';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -139,7 +140,7 @@ function App() {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/privacy', '/terms'];
+  const publicRoutes = ['/', '/privacy', '/terms', '/about', '/landing'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
 
   // If not authenticated and not on a public route, show login
@@ -153,6 +154,8 @@ function App() {
       <Routes>
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/about" element={<Landing />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/" element={
           <Login onLoginSuccess={async () => {
             try {
