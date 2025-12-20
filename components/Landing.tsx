@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Smartphone, Monitor, ChevronLeft, ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
+import { Smartphone, Monitor, ChevronLeft, ChevronRight, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { getSupabase } from '../services/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 // Define the structure for mockup images
 // Users should add their screenshots to public/mockups/ folder
@@ -69,9 +70,89 @@ const getDesktopUSP = (imagePath: string): string | undefined => {
   return DESKTOP_USP_MAP[filename];
 };
 
-// Login Form Preview Component (without wrapper)
+// Login Form Preview Component (now functional)
 const LoginFormPreview: React.FC = () => {
-  const [isSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const supabase = getSupabase();
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    const redirectUrl = 'https://stashway.app/overview';
+
+    try {
+      if (isSignUp) {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
+        });
+
+        if (signUpError) throw signUpError;
+
+        if (data.user && !data.session) {
+          setMessage('Please check your email to confirm your account before signing in.');
+        } else {
+          navigate('/overview');
+        }
+      } else {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) throw signInError;
+
+        if (data.session) {
+          navigate('/overview');
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setLoading(true);
+    setError(null);
+
+    const redirectUrl = 'https://stashway.app/overview';
+
+    try {
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            redirect_to: redirectUrl,
+            prompt: 'consent',
+            access_type: 'offline',
+          },
+        },
+      });
+
+      if (oauthError) {
+        throw oauthError;
+      }
+    } catch (err: any) {
+      console.error('Google OAuth error:', err);
+      setError(err.message || 'An error occurred during Google authentication');
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -87,7 +168,21 @@ const LoginFormPreview: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm">{error}</span>
+        </div>
+      )}
+
+      {message && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <Mail className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm">{message}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleEmailAuth} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
             Email
@@ -97,8 +192,10 @@ const LoginFormPreview: React.FC = () => {
             <input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              disabled
+              required
               className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
             />
           </div>
@@ -113,20 +210,32 @@ const LoginFormPreview: React.FC = () => {
             <input
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              disabled
+              required
+              minLength={6}
               className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
             />
           </div>
         </div>
 
         <button
-          type="button"
-          disabled
-          className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-emerald-600 disabled:cursor-default flex items-center justify-center gap-2"
+          type="submit"
+          disabled={loading}
+          className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:bg-emerald-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <LogIn className="w-5 h-5" />
-          <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Processing...</span>
+            </>
+          ) : (
+            <>
+              <LogIn className="w-5 h-5" />
+              <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+            </>
+          )}
         </button>
       </form>
 
@@ -140,9 +249,9 @@ const LoginFormPreview: React.FC = () => {
       </div>
 
       <button
-        type="button"
-        disabled
-        className="w-full border border-slate-200 text-slate-700 py-3 rounded-lg font-semibold transition-colors disabled:bg-white disabled:cursor-default flex items-center justify-center gap-2"
+        onClick={handleGoogleAuth}
+        disabled={loading}
+        className="w-full border border-slate-200 text-slate-700 py-3 rounded-lg font-semibold hover:bg-slate-50 transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -167,9 +276,12 @@ const LoginFormPreview: React.FC = () => {
 
       <div className="text-center text-sm">
         <button
-          type="button"
-          disabled
-          className="text-emerald-600 font-medium cursor-default"
+          onClick={() => {
+            setIsSignUp(!isSignUp);
+            setError(null);
+            setMessage(null);
+          }}
+          className="text-emerald-600 hover:text-emerald-700 font-medium"
         >
           {isSignUp
             ? 'Already have an account? Sign in'
