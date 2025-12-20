@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Smartphone, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Login } from './Login';
+import { Smartphone, Monitor, ChevronLeft, ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
+import { getSupabase } from '../services/supabaseClient';
 
 // Define the structure for mockup images
 // Users should add their screenshots to public/mockups/ folder
@@ -404,8 +404,8 @@ export const Landing: React.FC = () => {
                 className="flex-shrink-0 flex items-center justify-center"
                 style={{ width: `${100 / (images.length + 1)}%`, background: 'transparent' }}
               >
-                <div className="w-full max-w-md">
-                  <Login onLoginSuccess={() => {}} />
+                <div className="w-full max-w-md space-y-6">
+                  <LoginFormPreview />
                 </div>
               </div>
             </div>
