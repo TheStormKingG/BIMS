@@ -1,27 +1,35 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getPendingCelebrations, markCelebrationShown, Celebration } from '../services/celebrationService';
 import confetti from 'canvas-confetti';
 
 export const useCelebrations = () => {
   const [pendingCelebration, setPendingCelebration] = useState<Celebration | null>(null);
   const [isShowingCelebration, setIsShowingCelebration] = useState(false);
+  const processedIdsRef = useRef<Set<number>>(new Set());
+  const checkingRef = useRef(false);
 
   // Check for pending celebrations
   const checkCelebrations = useCallback(async () => {
+    // Prevent concurrent checks
+    if (checkingRef.current || isShowingCelebration) return;
+    
+    checkingRef.current = true;
     try {
       const celebrations = await getPendingCelebrations();
-      if (celebrations.length > 0 && !isShowingCelebration) {
+      if (celebrations.length > 0) {
         const celebration = celebrations[0];
-        // Only set if we haven't already checked this celebration
-        if (!checkedCelebrationIds.has(celebration.id)) {
+        // Only set if we haven't already processed this celebration
+        if (!processedIdsRef.current.has(celebration.id)) {
+          processedIdsRef.current.add(celebration.id);
           setPendingCelebration(celebration);
-          setCheckedCelebrationIds(prev => new Set(prev).add(celebration.id));
         }
       }
     } catch (error) {
       console.error('Error checking celebrations:', error);
+    } finally {
+      checkingRef.current = false;
     }
-  }, [isShowingCelebration, checkedCelebrationIds]);
+  }, [isShowingCelebration]);
 
   // Show celebration with confetti
   const showCelebration = useCallback(async (celebration: Celebration) => {
@@ -74,7 +82,9 @@ export const useCelebrations = () => {
     checkCelebrations();
     
     // Check every 5 seconds for new celebrations
-    const interval = setInterval(checkCelebrations, 5000);
+    const interval = setInterval(() => {
+      checkCelebrations();
+    }, 5000);
     
     return () => clearInterval(interval);
   }, [checkCelebrations]);
@@ -82,7 +92,11 @@ export const useCelebrations = () => {
   // Auto-show celebration when one becomes available
   useEffect(() => {
     if (pendingCelebration && !isShowingCelebration) {
-      showCelebration(pendingCelebration);
+      // Small delay to ensure UI is ready
+      const timer = setTimeout(() => {
+        showCelebration(pendingCelebration);
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [pendingCelebration, isShowingCelebration, showCelebration]);
 
@@ -92,4 +106,3 @@ export const useCelebrations = () => {
     checkCelebrations,
   };
 };
-
