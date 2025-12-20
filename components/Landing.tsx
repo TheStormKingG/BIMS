@@ -40,7 +40,7 @@ const MOBILE_USPS = [
   'Set goals — Build a habit of tracking and knowing where your money goes.',
   'Create realistic Targets — Stay on track by having specific limits that work.',
   'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
-  'Chat with your Stash - Stashway analyses all your data with super intelligence.',
+  'Chat with your Stash — Stashway analyses all your data with super intelligence.',
   'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
   'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
 ];
