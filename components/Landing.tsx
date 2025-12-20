@@ -549,7 +549,7 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className={`absolute left-8 md:left-12 top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`absolute ${currentIndex === images.length ? 'left-4 md:left-8' : 'left-8 md:left-12'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
@@ -560,7 +560,7 @@ export const Landing: React.FC = () => {
             </button>
             <button
               onClick={nextSlide}
-              className={`absolute right-8 md:right-12 top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`absolute ${currentIndex === images.length ? 'right-4 md:right-8' : 'right-8 md:right-12'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
