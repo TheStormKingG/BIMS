@@ -7,11 +7,17 @@ export const useCelebrations = () => {
   const [isShowingCelebration, setIsShowingCelebration] = useState(false);
   const processedIdsRef = useRef<Set<number>>(new Set());
   const checkingRef = useRef(false);
+  const isShowingRef = useRef(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isShowingRef.current = isShowingCelebration;
+  }, [isShowingCelebration]);
 
   // Check for pending celebrations
   const checkCelebrations = useCallback(async () => {
     // Prevent concurrent checks
-    if (checkingRef.current || isShowingCelebration) return;
+    if (checkingRef.current || isShowingRef.current) return;
     
     checkingRef.current = true;
     try {
@@ -29,7 +35,7 @@ export const useCelebrations = () => {
     } finally {
       checkingRef.current = false;
     }
-  }, [isShowingCelebration]);
+  }, []);
 
   // Show celebration with confetti
   const showCelebration = useCallback(async (celebration: Celebration) => {
