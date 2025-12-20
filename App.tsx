@@ -206,6 +206,9 @@ function App() {
     }} />;
   }
 
+  // Celebration system
+  const { pendingCelebration, isShowingCelebration } = useCelebrations();
+
   const loading = walletLoading || banksLoading || spentItemsLoading;
   const error = walletError || banksError || spentItemsError;
 
