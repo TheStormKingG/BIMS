@@ -83,7 +83,7 @@ const LoginFormPreview: React.FC = () => {
           </h1>
         </div>
         <p className="text-slate-600">
-          {isSignUp ? 'Create your account' : 'Grow your stash'}
+          {isSignUp ? 'Create your account' : 'Financial Intelligence'}
         </p>
       </div>
 
