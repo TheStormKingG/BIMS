@@ -31,6 +31,20 @@ const DESKTOP_IMAGES = [
   '/mockups/desktop-9.png',
 ];
 
+// Mobile USPs mapped to mobile-1.jpg through mobile-10.jpg
+const MOBILE_USPS = [
+  'Scan receipts on the go — Take a photo of any receipt and instantly digitize your purchase with AI-powered OCR.',
+  'Track spending anywhere — Log purchases immediately from your phone, whether you\'re shopping or dining out.',
+  'Quick balance check — See all your account balances at a glance, anytime, anywhere.',
+  'Mobile-first design — Built for your phone with an intuitive interface that makes finance tracking effortless.',
+  'Set goals — Build a habit of tracking and knowing where your money goes.',
+  'Create realistic Targets — Stay on track by having specific limits that work.',
+  'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
+  'Chat with your Stash - Stashway analyses all your data with super intelligence.',
+  'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
+  'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
+];
+
 // Login Form Preview Component (without wrapper)
 const LoginFormPreview: React.FC = () => {
   const [isSignUp] = useState(false);
