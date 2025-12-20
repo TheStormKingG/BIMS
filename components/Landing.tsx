@@ -432,7 +432,7 @@ export const Landing: React.FC = () => {
           {/* Carousel */}
           <div
             ref={carouselRef}
-            className={`relative overflow-hidden ${viewMode === 'mobile' && !isMobile && currentIndex !== images.length ? 'order-2 md:w-1/2' : viewMode === 'mobile' && currentIndex !== images.length ? 'order-2 w-full' : 'w-full'} ${currentIndex === images.length ? 'rounded-none' : 'rounded-3xl'}`}
+            className={`relative overflow-hidden ${viewMode === 'mobile' && !isMobile && currentIndex !== images.length ? 'order-2 md:w-1/2' : viewMode === 'mobile' && currentIndex !== images.length ? `order-2 w-full ${isMobile ? 'pt-0 -mt-[6px]' : ''}` : 'w-full'} ${currentIndex === images.length ? 'rounded-none' : 'rounded-3xl'}`}
             style={{ cursor: isDragging ? 'grabbing' : 'grab', minHeight: currentIndex === images.length ? '100vh' : 'auto' }}
           >
             {/* Slides Container */}
