@@ -16,7 +16,7 @@ export const useCelebrations = () => {
 
   // Check for pending celebrations
   const checkCelebrations = useCallback(async () => {
-    // Prevent concurrent checks
+    // Prevent concurrent checks or if already showing a celebration
     if (checkingRef.current || isShowingRef.current) return;
     
     checkingRef.current = true;
