@@ -415,12 +415,12 @@ export const Landing: React.FC = () => {
           {/* Carousel */}
           <div
             ref={carouselRef}
-            className={`relative overflow-hidden rounded-3xl ${viewMode === 'mobile' && !isMobile ? 'order-2 md:w-1/2' : viewMode === 'mobile' ? 'order-2 w-full' : 'w-full'}`}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            className={`relative overflow-hidden ${viewMode === 'mobile' && !isMobile ? 'order-2 md:w-1/2' : viewMode === 'mobile' ? 'order-2 w-full' : 'w-full'} ${currentIndex === images.length ? 'rounded-none' : 'rounded-3xl'}`}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab', minHeight: '100vh' }}
           >
             {/* Slides Container */}
             <div
-              className="flex transition-transform duration-500 ease-out"
+              className="flex transition-transform duration-500 ease-out h-full"
               style={{
                 transform: `translateX(-${currentIndex * (100 / (images.length + 1))}%)`,
                 width: `${(images.length + 1) * 100}%`,
@@ -537,10 +537,10 @@ export const Landing: React.FC = () => {
               ))}
               {/* Login Form as Last Slide */}
               <div
-                className="flex-shrink-0 flex items-center justify-center"
+                className="flex-shrink-0 flex items-center justify-center h-screen"
                 style={{ width: `${100 / (images.length + 1)}%`, background: 'transparent' }}
               >
-                <div className="w-full max-w-md space-y-6">
+                <div className="w-full max-w-md px-4">
                   <LoginFormPreview />
                 </div>
               </div>
