@@ -405,9 +405,26 @@ export const Landing: React.FC = () => {
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
             <div className={`w-full ${isMobile ? 'order-1 mb-8' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
               <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
-                <p className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
-                  {MOBILE_USPS[currentIndex]}
-                </p>
+                {(() => {
+                  const usp = MOBILE_USPS[currentIndex];
+                  const dashIndex = usp.indexOf(' — ');
+                  if (dashIndex === -1) {
+                    // No dash found, show as is
+                    return (
+                      <p className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                        {usp}
+                      </p>
+                    );
+                  }
+                  const beforeDash = usp.substring(0, dashIndex);
+                  const afterDash = usp.substring(dashIndex + 3); // +3 to skip ' — '
+                  return (
+                    <div className="text-2xl md:text-3xl text-slate-900 leading-tight">
+                      <p className="font-bold mb-2">{beforeDash}</p>
+                      <p className="font-normal">{afterDash}</p>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
