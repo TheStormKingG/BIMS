@@ -399,6 +399,82 @@ export const Landing: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {/* Login Form as Last Slide */}
+              <div
+                className="flex-shrink-0 flex items-center justify-center"
+                style={{ width: `${100 / (images.length + 1)}%` }}
+              >
+                <div
+                  className={`relative ${
+                    viewMode === 'mobile'
+                      ? 'w-[90vw] max-w-sm sm:w-96 md:w-[28rem]'
+                      : 'w-full max-w-md'
+                  }`}
+                  style={viewMode === 'desktop' ? { transform: 'scale(0.8)', transformOrigin: 'center' } : {}}
+                >
+                  {viewMode === 'mobile' ? (
+                    // Mobile Mockup Frame for Login
+                    <div 
+                      className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl border-[10px] border-slate-700"
+                      style={{ aspectRatio: '9/17' }}
+                    >
+                      <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner h-full p-4">
+                        <div className="h-full overflow-y-auto">
+                          <Login onLoginSuccess={() => {}} />
+                        </div>
+                      </div>
+                      {/* Notch */}
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl"></div>
+                    </div>
+                  ) : (
+                    // Desktop Mockup Frame for Login - Laptop Design
+                    <div className="relative">
+                      {/* Screen Section */}
+                      <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 rounded-t-2xl rounded-b-lg p-3 shadow-2xl">
+                        {/* Top Bezel with Webcam */}
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-20 h-3 bg-slate-900 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-1.5 bg-slate-700 rounded-sm"></div>
+                          <div className="absolute right-0.5 w-1 h-1 bg-red-500 rounded-full"></div>
+                        </div>
+                        
+                        {/* Screen */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-inner mt-4">
+                          <Login onLoginSuccess={() => {}} />
+                        </div>
+                        
+                        {/* Bottom Bezel */}
+                        <div className="h-3 bg-slate-900 mt-2 rounded-b-lg"></div>
+                      </div>
+                      
+                      {/* Keyboard Section */}
+                      <div className="bg-gradient-to-b from-slate-200 to-slate-300 rounded-b-2xl pt-2 pb-4 px-8 shadow-xl -mt-1">
+                        <div className="flex flex-col items-center gap-1">
+                          {/* Top Row Keys */}
+                          <div className="flex gap-1 w-full justify-center">
+                            {[...Array(12)].map((_, i) => (
+                              <div key={i} className="w-6 h-4 bg-slate-700 rounded-sm"></div>
+                            ))}
+                          </div>
+                          {/* Middle Row Keys */}
+                          <div className="flex gap-1 w-full justify-center">
+                            {[...Array(10)].map((_, i) => (
+                              <div key={i} className="w-8 h-4 bg-slate-700 rounded-sm"></div>
+                            ))}
+                          </div>
+                          {/* Bottom Row Keys */}
+                          <div className="flex gap-1 w-full justify-center">
+                            {[...Array(8)].map((_, i) => (
+                              <div key={i} className="w-10 h-4 bg-slate-700 rounded-sm"></div>
+                            ))}
+                          </div>
+                          {/* Touchpad */}
+                          <div className="w-3/4 h-8 bg-slate-400 rounded-lg mt-2 border border-slate-500"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Navigation Arrows */}
