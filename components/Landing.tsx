@@ -33,16 +33,16 @@ const DESKTOP_IMAGES = [
 
 // Mobile USPs mapped explicitly to image filenames for better maintainability
 const MOBILE_USP_MAP: Record<string, string> = {
-  'mobile-1.jpg': 'Scan receipts on the go — Take a photo of any receipt and instantly digitize your purchase with AI-powered OCR.',
-  'mobile-2.jpg': 'Track spending anywhere — Log purchases immediately from your phone, whether you\'re shopping or dining out.',
-  'mobile-3.jpg': 'Quick balance check — See all your account balances at a glance, anytime, anywhere.',
-  'mobile-4.jpg': 'Mobile-first design — Built for your phone with an intuitive interface that makes finance tracking effortless.',
-  'mobile-5.jpg': 'Set goals — Build a habit of tracking and knowing where your money goes.',
-  'mobile-6.jpg': 'Create realistic Targets — Stay on track by having specific limits that work.',
-  'mobile-7.jpg': 'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
-  'mobile-8.jpg': 'Chat with your Stash — Stashway analyses all your data with super intelligence.',
-  'mobile-9.jpg': 'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
-  'mobile-10.jpg': 'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
+  'mobile-1.jpg': 'Mobile-first design — Built for your phone with an intuitive interface that makes finance tracking effortless.',
+  'mobile-2.jpg': 'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
+  'mobile-3.jpg': 'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
+  'mobile-4.jpg': 'Quick balance check — See all your account balances at a glance, anytime, anywhere.',
+  'mobile-5.jpg': 'Track spending anywhere — Log purchases immediately from your phone, whether you\'re shopping or dining out.',
+  'mobile-6.jpg': 'Scan receipts on the go — Take a photo of any receipt and instantly digitize your purchase with AI-powered OCR.',
+  'mobile-7.jpg': 'Set goals — Build a habit of tracking and knowing where your money goes.',
+  'mobile-8.jpg': 'Create realistic Targets — Stay on track by having specific limits that work.',
+  'mobile-9.jpg': 'Chat with your Stash — Stashway analyses all your data with super intelligence.',
+  'mobile-10.jpg': 'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
 };
 
 // Helper function to get USP for an image
