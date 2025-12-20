@@ -17,6 +17,7 @@ import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
 import { SettingsTerms } from './components/SettingsTerms';
 import { Landing } from './components/Landing';
+import { SystemGoals } from './components/SystemGoals';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
@@ -731,27 +732,32 @@ function App() {
                </ProtectedRoute>
              } />
 
-             <Route path="/goals" element={
-               <ProtectedRoute>
-                 <GoalsPageWrapper
-                   goals={goals}
-                   spentItems={spentItems}
-                   totalBalance={totalInBanks}
-                   onAddGoal={async (input) => {
-                     await addGoal(input);
-                   }}
-                   onEditGoal={async (goalId, updates) => {
-                     await editGoal(goalId, updates);
-                   }}
-                   onDeleteGoal={async (goalId) => {
-                     await removeGoal(goalId);
-                   }}
-                   onToggleActive={async (goalId) => {
-                     await toggleGoalActive(goalId);
-                   }}
-                 />
-               </ProtectedRoute>
-             } />
+            <Route path="/system-goals" element={
+              <ProtectedRoute>
+                <SystemGoals />
+              </ProtectedRoute>
+            } />
+            <Route path="/goals" element={
+              <ProtectedRoute>
+                <GoalsPageWrapper
+                  goals={goals}
+                  spentItems={spentItems}
+                  totalBalance={totalInBanks}
+                  onAddGoal={async (input) => {
+                    await addGoal(input);
+                  }}
+                  onEditGoal={async (goalId, updates) => {
+                    await editGoal(goalId, updates);
+                  }}
+                  onDeleteGoal={async (goalId) => {
+                    await removeGoal(goalId);
+                  }}
+                  onToggleActive={async (goalId) => {
+                    await toggleGoalActive(goalId);
+                  }}
+                />
+              </ProtectedRoute>
+            } />
              
             <Route path="/chat" element={
               <ProtectedRoute>

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Target, Plus, Edit2, Trash2, Check, X, TrendingDown, TrendingUp, Trophy, Clock, Calendar, DollarSign, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Target, Plus, Edit2, Trash2, Check, X, TrendingDown, TrendingUp, Trophy, Clock, Calendar, DollarSign, BarChart3, Award } from 'lucide-react';
 import { Goal, GoalType } from '../services/goalsDatabase';
 import { isGoalAchieved, getGoalProgressPercentage } from '../services/goalsTracker';
+import { useSystemGoals } from '../hooks/useSystemGoals';
 
 const GOAL_TYPE_LABELS: Record<GoalType, string> = {
   spent_last_24h: 'Spent Last 24h',
@@ -38,8 +40,15 @@ export const Goals: React.FC<GoalsProps> = ({
   onDeleteGoal,
   onToggleActive,
 }) => {
+  const navigate = useNavigate();
+  const { goals: systemGoals, progress: systemProgress, badges, phaseUnlocks, loading: systemGoalsLoading } = useSystemGoals();
   const activeGoals = goals.filter(g => g.active);
   const achievedGoals = goals.filter(g => isGoalAchieved(g));
+  
+  // Calculate system goals stats
+  const completedSystemGoals = systemProgress.filter(p => p.is_completed).length;
+  const totalSystemGoals = Object.values(systemGoals).reduce((sum, phaseGoals) => sum + phaseGoals.length, 0);
+  const systemProgressPercent = totalSystemGoals > 0 ? Math.round((completedSystemGoals / totalSystemGoals) * 100) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
@@ -60,6 +69,90 @@ export const Goals: React.FC<GoalsProps> = ({
           New Goal
         </button>
       </div>
+
+      {/* System Goals Progress Section */}
+      {!systemGoalsLoading && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Award className="w-5 h-5 text-emerald-600" />
+                Achievement Goals
+              </h3>
+              <p className="text-sm text-slate-600 mt-1">
+                {completedSystemGoals} of {totalSystemGoals} goals completed ({systemProgressPercent}%)
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/system-goals')}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+            >
+              View All
+              <Target className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Badge Progress Visual */}
+          <div className="flex items-center justify-center gap-4 py-4">
+            {/* Show first 5 phases as badges */}
+            {[1, 2, 3, 4, 5].map(phase => {
+              const phaseGoals = systemGoals[phase] || [];
+              const phaseCompleted = systemProgress.filter(
+                p => phaseGoals.some(g => g.id === p.goal_id) && p.is_completed
+              ).length;
+              const phaseUnlocked = phaseUnlocks[phase] ?? false;
+              const phaseProgress = phaseGoals.length > 0 
+                ? Math.round((phaseCompleted / phaseGoals.length) * 100)
+                : 0;
+              const isFullyComplete = phaseProgress === 100 && phaseUnlocked;
+
+              return (
+                <div key={phase} className="flex flex-col items-center gap-2">
+                  {/* Badge Icon - Gem-like shape */}
+                  <div
+                    className={`w-16 h-16 rounded-lg flex items-center justify-center transition-all ${
+                      !phaseUnlocked
+                        ? 'bg-slate-300 border-2 border-slate-400'
+                        : isFullyComplete
+                        ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-emerald-700 shadow-lg'
+                        : 'bg-gradient-to-br from-slate-200 to-slate-300 border-2 border-slate-400'
+                    }`}
+                    style={{
+                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                    }}
+                  >
+                    {!phaseUnlocked ? (
+                      <div className="w-4 h-4 bg-slate-600 rounded-full" style={{
+                        clipPath: 'polygon(40% 0%, 60% 0%, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0% 60%, 0% 40%, 40% 40%)'
+                      }} />
+                    ) : isFullyComplete ? (
+                      <Trophy className="w-8 h-8 text-white" />
+                    ) : (
+                      <span className="text-slate-600 font-bold text-lg">{phase}</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-center">
+                    <div className="font-semibold text-slate-900">Phase {phase}</div>
+                    {phaseUnlocked && (
+                      <div className="text-slate-600">{phaseProgress}%</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mt-4">
+            <div className="w-full bg-slate-200 rounded-full h-3">
+              <div
+                className="bg-emerald-500 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${systemProgressPercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Goals List */}
       {goals.length === 0 ? (
