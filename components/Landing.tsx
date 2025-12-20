@@ -45,10 +45,28 @@ const MOBILE_USP_MAP: Record<string, string> = {
   'mobile-10.jpg': 'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
 };
 
+// Desktop USPs mapped explicitly to image filenames
+const DESKTOP_USP_MAP: Record<string, string> = {
+  'desktop-1.png': 'Comprehensive financial dashboard — View your complete financial picture with beautiful charts and analytics.',
+  'desktop-2.png': 'Advanced spending analytics — Deep insights into your spending patterns with detailed visualizations.',
+  'desktop-3.png': 'Professional financial reports — Generate polished PDF reports with charts, tables, and branding.',
+  'desktop-4.png': 'Multi-account management — Manage all your bank accounts and cash wallet from one unified interface.',
+  'desktop-5.png': 'Export your data — Download transaction history in PDF, CSV, or Excel formats for your records.',
+  'desktop-6.png': 'Detailed transaction history — Search, filter, and analyze every transaction with powerful tools.',
+  'desktop-7.png': 'Goal tracking and progress — Set financial goals and track progress with detailed analytics and visualizations.',
+  'desktop-8.png': 'Spending trends over time — See how your spending changes with interactive charts and graphs.',
+  'desktop-9.png': 'Full-screen analytics — Experience comprehensive financial insights on a larger screen with rich data visualizations.',
+};
+
 // Helper function to get USP for an image
 const getMobileUSP = (imagePath: string): string | undefined => {
   const filename = imagePath.split('/').pop() || '';
   return MOBILE_USP_MAP[filename];
+};
+
+const getDesktopUSP = (imagePath: string): string | undefined => {
+  const filename = imagePath.split('/').pop() || '';
+  return DESKTOP_USP_MAP[filename];
 };
 
 // Login Form Preview Component (without wrapper)
