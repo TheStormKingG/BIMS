@@ -108,29 +108,16 @@ export const Goals: React.FC<GoalsProps> = ({
 
               return (
                 <div key={phase} className="flex flex-col items-center gap-2">
-                  {/* Badge Icon - Gem-like shape with Gold Coin */}
-                  <div
-                    className={`w-16 h-16 rounded-lg flex items-center justify-center transition-all ${
-                      !phaseUnlocked
-                        ? 'bg-slate-300 border-2 border-slate-400'
-                        : isFullyComplete
-                        ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-emerald-700 shadow-lg'
-                        : 'bg-gradient-to-br from-slate-200 to-slate-300 border-2 border-slate-400'
+                  {/* Gold Coin Icon */}
+                  <img
+                    src="/Gold_coin_icon.png"
+                    alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
+                    className={`w-16 h-16 object-contain transition-all ${
+                      isFullyComplete
+                        ? 'brightness-110 drop-shadow-md'
+                        : 'grayscale opacity-60'
                     }`}
-                    style={{
-                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-                    }}
-                  >
-                    <img
-                      src="/Gold_coin_icon.png"
-                      alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
-                      className={`w-10 h-10 object-contain transition-all ${
-                        isFullyComplete
-                          ? 'brightness-110 drop-shadow-md'
-                          : 'grayscale opacity-60'
-                      }`}
-                    />
-                  </div>
+                  />
                   <div className="text-xs text-center">
                     <div className="font-semibold text-slate-900">Phase {phase}</div>
                     {phaseUnlocked && (
