@@ -399,8 +399,8 @@ export const Landing: React.FC = () => {
       )}
 
       {/* Main Carousel Container */}
-      <div className="flex items-center justify-center min-h-screen p-8">
-        <div className={`relative w-full max-w-7xl ${viewMode === 'mobile' ? 'flex flex-col md:flex-row items-center gap-8' : ''}`}>
+      <div className={`flex items-center justify-center min-h-screen ${currentIndex === images.length ? 'p-0' : 'p-8'}`}>
+        <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? 'flex flex-col md:flex-row items-center gap-8' : ''}`}>
           {/* USP Display for Mobile Mockups */}
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
             <div className={`w-full ${isMobile ? 'order-1 mb-8' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
@@ -415,8 +415,8 @@ export const Landing: React.FC = () => {
           {/* Carousel */}
           <div
             ref={carouselRef}
-            className={`relative overflow-hidden ${viewMode === 'mobile' && !isMobile ? 'order-2 md:w-1/2' : viewMode === 'mobile' ? 'order-2 w-full' : 'w-full'} ${currentIndex === images.length ? 'rounded-none' : 'rounded-3xl'}`}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab', minHeight: '100vh' }}
+            className={`relative overflow-hidden ${viewMode === 'mobile' && !isMobile && currentIndex !== images.length ? 'order-2 md:w-1/2' : viewMode === 'mobile' && currentIndex !== images.length ? 'order-2 w-full' : 'w-full'} ${currentIndex === images.length ? 'rounded-none' : 'rounded-3xl'}`}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab', minHeight: currentIndex === images.length ? '100vh' : 'auto' }}
           >
             {/* Slides Container */}
             <div
