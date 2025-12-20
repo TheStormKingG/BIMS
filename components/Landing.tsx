@@ -400,11 +400,22 @@ export const Landing: React.FC = () => {
 
       {/* Main Carousel Container */}
       <div className="flex items-center justify-center min-h-screen p-8">
-        <div className="relative w-full max-w-7xl">
+        <div className={`relative w-full max-w-7xl ${viewMode === 'mobile' ? 'flex flex-col md:flex-row items-center gap-8' : ''}`}>
+          {/* USP Display for Mobile Mockups */}
+          {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
+            <div className={`w-full ${isMobile ? 'order-2 mb-8' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+              <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
+                <p className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                  {MOBILE_USPS[currentIndex]}
+                </p>
+              </div>
+            </div>
+          )}
+          
           {/* Carousel */}
           <div
             ref={carouselRef}
-            className="relative overflow-hidden rounded-3xl"
+            className={`relative overflow-hidden rounded-3xl ${viewMode === 'mobile' && !isMobile ? 'order-2 md:w-1/2' : viewMode === 'mobile' ? 'order-1 w-full' : 'w-full'}`}
             style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           >
             {/* Slides Container */}
