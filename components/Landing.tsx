@@ -424,14 +424,14 @@ export const Landing: React.FC = () => {
 
       {/* Main Carousel Container */}
       <div className={`flex items-center justify-center min-h-screen ${currentIndex === images.length ? 'p-0' : 'p-8'}`}>
-        <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? `flex flex-col md:flex-row items-center ${isMobile ? 'gap-0' : 'gap-8'}` : ''}`}>
-          {/* USP Display for Mobile Mockups */}
-          {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
-            <div className={`w-full ${isMobile ? 'order-1 -mb-[6px] pb-0' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
-              <div className={`text-center ${isMobile ? 'px-4 pb-0' : 'text-left px-8'}`}>
+        <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${currentIndex !== images.length ? `flex flex-col md:flex-row items-center ${isMobile && viewMode === 'mobile' ? 'gap-0' : 'gap-8'}` : ''}`}>
+          {/* USP Display for Mobile and Desktop Mockups */}
+          {currentIndex < images.length && (
+            <div className={`w-full ${isMobile && viewMode === 'mobile' ? 'order-1 -mb-[6px] pb-0' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+              <div className={`text-center ${isMobile && viewMode === 'mobile' ? 'px-4 pb-0' : 'text-left px-8'}`}>
                 {(() => {
-                  const currentImage = MOBILE_IMAGES[currentIndex];
-                  const usp = getMobileUSP(currentImage);
+                  const currentImage = images[currentIndex];
+                  const usp = viewMode === 'mobile' ? getMobileUSP(currentImage) : getDesktopUSP(currentImage);
                   if (!usp) {
                     return null; // No USP found for this image
                   }
@@ -439,7 +439,7 @@ export const Landing: React.FC = () => {
                   if (dashIndex === -1) {
                     // No dash found, show as is
                     return (
-                      <p className={`text-2xl md:text-3xl font-bold text-slate-900 leading-tight ${isMobile ? 'mb-0' : ''}`}>
+                      <p className={`text-2xl md:text-3xl font-bold text-slate-900 leading-tight ${isMobile && viewMode === 'mobile' ? 'mb-0' : ''}`}>
                         {usp}
                       </p>
                     );
@@ -447,8 +447,8 @@ export const Landing: React.FC = () => {
                   const beforeDash = usp.substring(0, dashIndex);
                   const afterDash = usp.substring(dashIndex + 3); // +3 to skip ' — '
                   return (
-                    <div className={`text-2xl md:text-3xl text-slate-900 leading-tight ${isMobile ? 'mb-0' : ''}`}>
-                      <p className={`font-bold ${isMobile ? 'mb-1' : 'mb-2'}`}>{beforeDash}</p>
+                    <div className={`text-2xl md:text-3xl text-slate-900 leading-tight ${isMobile && viewMode === 'mobile' ? 'mb-0' : ''}`}>
+                      <p className={`font-bold ${isMobile && viewMode === 'mobile' ? 'mb-1' : 'mb-2'}`}>{beforeDash}</p>
                       <p className="font-normal mb-0">{afterDash}</p>
                     </div>
                   );
