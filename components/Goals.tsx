@@ -122,9 +122,17 @@ export const Goals: React.FC<GoalsProps> = ({
                     }}
                   >
                     {isFullyComplete ? (
-                      <Trophy className="w-8 h-8" style={{ color: '#FCD34D', fill: '#FBBF24' }} />
+                      <Trophy 
+                        className="w-8 h-8" 
+                        style={{ 
+                          color: '#F59E0B',
+                          filter: 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3))'
+                        }} 
+                        strokeWidth={2}
+                        fill="#FCD34D"
+                      />
                     ) : (
-                      <Trophy className="w-8 h-8 text-slate-500" />
+                      <Trophy className="w-8 h-8 text-slate-500" strokeWidth={2} />
                     )}
                   </div>
                   <div className="text-xs text-center">
