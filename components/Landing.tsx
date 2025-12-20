@@ -400,10 +400,10 @@ export const Landing: React.FC = () => {
 
       {/* Main Carousel Container */}
       <div className={`flex items-center justify-center min-h-screen ${currentIndex === images.length ? 'p-0' : 'p-8'}`}>
-        <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? `flex flex-col md:flex-row items-center ${isMobile ? 'gap-0.5' : 'gap-8'}` : ''}`}>
+        <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? `flex flex-col md:flex-row items-center ${isMobile ? 'gap-0' : 'gap-8'}` : ''}`}>
           {/* USP Display for Mobile Mockups */}
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
-            <div className={`w-full ${isMobile ? 'order-1 mb-3' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+            <div className={`w-full ${isMobile ? 'order-1 -mb-[6px]' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
               <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
                 {(() => {
                   const usp = MOBILE_USPS[currentIndex];
