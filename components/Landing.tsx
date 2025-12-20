@@ -403,15 +403,15 @@ export const Landing: React.FC = () => {
         <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? `flex flex-col md:flex-row items-center ${isMobile ? 'gap-0' : 'gap-8'}` : ''}`}>
           {/* USP Display for Mobile Mockups */}
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
-            <div className={`w-full ${isMobile ? 'order-1 -mb-[6px]' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
-              <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
+            <div className={`w-full ${isMobile ? 'order-1 -mb-[6px] pb-0' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+              <div className={`text-center ${isMobile ? 'px-4 pb-0' : 'text-left px-8'}`}>
                 {(() => {
                   const usp = MOBILE_USPS[currentIndex];
                   const dashIndex = usp.indexOf(' — ');
                   if (dashIndex === -1) {
                     // No dash found, show as is
                     return (
-                      <p className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                      <p className={`text-2xl md:text-3xl font-bold text-slate-900 leading-tight ${isMobile ? 'mb-0' : ''}`}>
                         {usp}
                       </p>
                     );
@@ -419,9 +419,9 @@ export const Landing: React.FC = () => {
                   const beforeDash = usp.substring(0, dashIndex);
                   const afterDash = usp.substring(dashIndex + 3); // +3 to skip ' — '
                   return (
-                    <div className="text-2xl md:text-3xl text-slate-900 leading-tight">
-                      <p className="font-bold mb-2">{beforeDash}</p>
-                      <p className="font-normal">{afterDash}</p>
+                    <div className={`text-2xl md:text-3xl text-slate-900 leading-tight ${isMobile ? 'mb-0' : ''}`}>
+                      <p className={`font-bold ${isMobile ? 'mb-1' : 'mb-2'}`}>{beforeDash}</p>
+                      <p className="font-normal mb-0">{afterDash}</p>
                     </div>
                   );
                 })()}
