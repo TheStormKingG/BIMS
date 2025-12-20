@@ -89,6 +89,9 @@ function App() {
     toggleGoalActive,
   } = useGoals(spentItems, totalInBanks);
 
+  // Celebration system (must be before any conditional returns)
+  const { pendingCelebration, isShowingCelebration } = useCelebrations();
+
   // Check auth state on mount and listen for changes
   useEffect(() => {
     // Get initial session
@@ -205,9 +208,6 @@ function App() {
       }
     }} />;
   }
-
-  // Celebration system
-  const { pendingCelebration, isShowingCelebration } = useCelebrations();
 
   const loading = walletLoading || banksLoading || spentItemsLoading;
   const error = walletError || banksError || spentItemsError;
