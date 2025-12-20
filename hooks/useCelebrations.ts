@@ -5,20 +5,23 @@ import confetti from 'canvas-confetti';
 export const useCelebrations = () => {
   const [pendingCelebration, setPendingCelebration] = useState<Celebration | null>(null);
   const [isShowingCelebration, setIsShowingCelebration] = useState(false);
-  const [hasShownCurrent, setHasShownCurrent] = useState(false);
 
   // Check for pending celebrations
   const checkCelebrations = useCallback(async () => {
     try {
       const celebrations = await getPendingCelebrations();
-      if (celebrations.length > 0 && !isShowingCelebration && !hasShownCurrent) {
-        setPendingCelebration(celebrations[0]);
-        setHasShownCurrent(true);
+      if (celebrations.length > 0 && !isShowingCelebration) {
+        const celebration = celebrations[0];
+        // Only set if we haven't already checked this celebration
+        if (!checkedCelebrationIds.has(celebration.id)) {
+          setPendingCelebration(celebration);
+          setCheckedCelebrationIds(prev => new Set(prev).add(celebration.id));
+        }
       }
     } catch (error) {
       console.error('Error checking celebrations:', error);
     }
-  }, [isShowingCelebration, hasShownCurrent]);
+  }, [isShowingCelebration, checkedCelebrationIds]);
 
   // Show celebration with confetti
   const showCelebration = useCallback(async (celebration: Celebration) => {
@@ -59,11 +62,9 @@ export const useCelebrations = () => {
         await markCelebrationShown(celebration.id);
         setPendingCelebration(null);
         setIsShowingCelebration(false);
-        setHasShownCurrent(false);
       } catch (error) {
         console.error('Error marking celebration as shown:', error);
         setIsShowingCelebration(false);
-        setHasShownCurrent(false);
       }
     }, duration);
   }, []);
