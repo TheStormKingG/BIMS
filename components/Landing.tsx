@@ -403,7 +403,7 @@ export const Landing: React.FC = () => {
         <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? 'flex flex-col md:flex-row items-center gap-8' : ''}`}>
           {/* USP Display for Mobile Mockups */}
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
-            <div className={`w-full ${isMobile ? 'order-1 mb-8' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+            <div className={`w-full ${isMobile ? 'order-1 mb-3' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
               <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
                 {(() => {
                   const usp = MOBILE_USPS[currentIndex];
