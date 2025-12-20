@@ -549,13 +549,13 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className={`absolute top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
               }`}
               style={currentIndex === images.length 
-                ? { left: 'calc(50% - 250px)' } // Position relative to center, push left
+                ? { left: 'clamp(1rem, 10vw, 4rem)' } // Use viewport units for wider spacing on login slide
                 : { left: '2rem' }
               }
               aria-label="Previous slide"
@@ -564,13 +564,13 @@ export const Landing: React.FC = () => {
             </button>
             <button
               onClick={nextSlide}
-              className={`absolute top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
               }`}
               style={currentIndex === images.length 
-                ? { right: 'calc(50% - 250px)' } // Position relative to center, push right
+                ? { right: 'clamp(1rem, 10vw, 4rem)' } // Use viewport units for wider spacing on login slide
                 : { right: '2rem' }
               }
               aria-label="Next slide"
