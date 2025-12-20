@@ -403,7 +403,7 @@ export const Landing: React.FC = () => {
         <div className={`relative w-full ${currentIndex === images.length ? 'max-w-md' : 'max-w-7xl'} ${viewMode === 'mobile' && currentIndex !== images.length ? 'flex flex-col md:flex-row items-center gap-8' : ''}`}>
           {/* USP Display for Mobile Mockups */}
           {viewMode === 'mobile' && currentIndex < MOBILE_IMAGES.length && (
-            <div className={`w-full ${isMobile ? 'order-1 mb-8' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
+            <div className={`w-full ${isMobile ? 'order-1 mb-[0.72rem]' : 'order-1 md:w-1/2 mb-8'} flex items-center justify-center`}>
               <div className={`text-center ${isMobile ? 'px-4' : 'text-left px-8'}`}>
                 {(() => {
                   const usp = MOBILE_USPS[currentIndex];
@@ -411,7 +411,7 @@ export const Landing: React.FC = () => {
                   if (dashIndex === -1) {
                     // No dash found, show as is
                     return (
-                      <p className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                      <p className="text-[2.2rem] md:text-[3.3rem] font-bold text-slate-900 leading-tight">
                         {usp}
                       </p>
                     );
@@ -420,8 +420,8 @@ export const Landing: React.FC = () => {
                   const afterDash = usp.substring(dashIndex + 3); // +3 to skip ' — '
                   return (
                     <div className="text-2xl md:text-3xl text-slate-900 leading-tight">
-                      <p className="font-bold mb-2">{beforeDash}</p>
-                      <p className="font-normal">{afterDash}</p>
+                      <p className="text-[2.2rem] md:text-[3.3rem] font-bold mb-2">{beforeDash}</p>
+                      <p className="text-[1.8rem] md:text-[2.7rem] font-normal italic">{afterDash}</p>
                     </div>
                   );
                 })()}
@@ -566,7 +566,7 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} ${viewMode === 'mobile' && isMobile && currentIndex < MOBILE_IMAGES.length ? 'top-[16.67%]' : 'top-1/2'} -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
@@ -581,7 +581,7 @@ export const Landing: React.FC = () => {
             </button>
             <button
               onClick={nextSlide}
-              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`${currentIndex === images.length ? 'fixed' : 'absolute'} ${viewMode === 'mobile' && isMobile && currentIndex < MOBILE_IMAGES.length ? 'top-[16.67%]' : 'top-1/2'} -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
