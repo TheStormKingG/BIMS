@@ -537,10 +537,10 @@ export const Landing: React.FC = () => {
               ))}
               {/* Login Form as Last Slide */}
               <div
-                className="flex-shrink-0 flex items-center justify-center"
+                className="flex-shrink-0 flex items-center justify-center min-h-screen"
                 style={{ width: `${100 / (images.length + 1)}%`, background: 'transparent' }}
               >
-                <div className="w-full max-w-md space-y-6">
+                <div className="w-full max-w-md flex items-center justify-center">
                   <LoginFormPreview />
                 </div>
               </div>
