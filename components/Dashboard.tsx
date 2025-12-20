@@ -24,6 +24,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
   const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
   const { tips, markAsRead, removeTip, refresh: refreshTips } = useTips();
 
+  // Emit event when dashboard is viewed
+  React.useEffect(() => {
+    emitEvent('VIEW_OVERVIEW').catch(err => console.error('Error emitting VIEW_OVERVIEW event:', err));
+  }, []);
+
   // Generate tips on mount and when spentItems change (if needed)
   React.useEffect(() => {
     if (spentItems.length > 0) {

@@ -18,6 +18,8 @@ import { SettingsPrivacy } from './components/SettingsPrivacy';
 import { SettingsTerms } from './components/SettingsTerms';
 import { Landing } from './components/Landing';
 import { SystemGoals } from './components/SystemGoals';
+import { CelebrationModal } from './components/CelebrationModal';
+import { useCelebrations } from './hooks/useCelebrations';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
