@@ -31,19 +31,25 @@ const DESKTOP_IMAGES = [
   '/mockups/desktop-9.png',
 ];
 
-// Mobile USPs mapped to mobile-1.jpg through mobile-10.jpg
-const MOBILE_USPS = [
-  'Scan receipts on the go — Take a photo of any receipt and instantly digitize your purchase with AI-powered OCR.',
-  'Track spending anywhere — Log purchases immediately from your phone, whether you\'re shopping or dining out.',
-  'Quick balance check — See all your account balances at a glance, anytime, anywhere.',
-  'Mobile-first design — Built for your phone with an intuitive interface that makes finance tracking effortless.',
-  'Set goals — Build a habit of tracking and knowing where your money goes.',
-  'Create realistic Targets — Stay on track by having specific limits that work.',
-  'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
-  'Chat with your Stash — Stashway analyses all your data with super intelligence.',
-  'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
-  'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
-];
+// Mobile USPs mapped explicitly to image filenames for better maintainability
+const MOBILE_USP_MAP: Record<string, string> = {
+  'mobile-1.jpg': 'Scan receipts on the go — Take a photo of any receipt and instantly digitize your purchase with AI-powered OCR.',
+  'mobile-2.jpg': 'Track spending anywhere — Log purchases immediately from your phone, whether you\'re shopping or dining out.',
+  'mobile-3.jpg': 'Quick balance check — See all your account balances at a glance, anytime, anywhere.',
+  'mobile-4.jpg': 'Mobile-first design — Built for your phone with an intuitive interface that makes finance tracking effortless.',
+  'mobile-5.jpg': 'Set goals — Build a habit of tracking and knowing where your money goes.',
+  'mobile-6.jpg': 'Create realistic Targets — Stay on track by having specific limits that work.',
+  'mobile-7.jpg': 'Mobile wallet tracking — Manage your physical cash wallet with denomination tracking right from your phone.',
+  'mobile-8.jpg': 'Chat with your Stash — Stashway analyses all your data with super intelligence.',
+  'mobile-9.jpg': 'Smart Chat Suggestions — Get instant updates on your spending and goal progress.',
+  'mobile-10.jpg': 'Touch-optimized interface — Swipe, tap, and navigate your finances with ease on any mobile device.',
+};
+
+// Helper function to get USP for an image
+const getMobileUSP = (imagePath: string): string | undefined => {
+  const filename = imagePath.split('/').pop() || '';
+  return MOBILE_USP_MAP[filename];
+};
 
 // Login Form Preview Component (without wrapper)
 const LoginFormPreview: React.FC = () => {
@@ -406,7 +412,11 @@ export const Landing: React.FC = () => {
             <div className={`w-full ${isMobile ? 'order-1 -mb-[6px] pb-0' : 'order-1 md:w-1/2'} flex items-center justify-center`}>
               <div className={`text-center ${isMobile ? 'px-4 pb-0' : 'text-left px-8'}`}>
                 {(() => {
-                  const usp = MOBILE_USPS[currentIndex];
+                  const currentImage = MOBILE_IMAGES[currentIndex];
+                  const usp = getMobileUSP(currentImage);
+                  if (!usp) {
+                    return null; // No USP found for this image
+                  }
                   const dashIndex = usp.indexOf(' — ');
                   if (dashIndex === -1) {
                     // No dash found, show as is
