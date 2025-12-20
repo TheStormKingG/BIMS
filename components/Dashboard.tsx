@@ -8,6 +8,7 @@ import { Tips } from './Tips';
 import { useTips } from '../hooks/useTips';
 import { generateAndSaveTips } from '../services/tipGenerator';
 import { exportOverviewToPdf } from '../services/exportsService';
+import { emitEvent } from '../services/eventService';
 
 interface DashboardProps {
   accounts: Account[];
