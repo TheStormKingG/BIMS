@@ -549,22 +549,30 @@ export const Landing: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className={`absolute ${currentIndex === images.length ? 'left-12 md:left-16' : 'left-8 md:left-12'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`absolute top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
               }`}
+              style={currentIndex === images.length 
+                ? { left: 'calc(50% - 250px)' } // Position relative to center, push left
+                : { left: '2rem' }
+              }
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={nextSlide}
-              className={`absolute ${currentIndex === images.length ? 'right-12 md:right-16' : 'right-8 md:right-12'} top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
+              className={`absolute top-1/2 -translate-y-1/2 backdrop-blur-md transition-all duration-200 rounded-full p-3 shadow-lg border text-slate-700 z-10 ${
                 viewMode === 'mobile'
                   ? 'bg-black/5 hover:bg-black/10 border-black/5'
                   : 'bg-black/10 hover:bg-black/20 border-black/10'
               }`}
+              style={currentIndex === images.length 
+                ? { right: 'calc(50% - 250px)' } // Position relative to center, push right
+                : { right: '2rem' }
+              }
               aria-label="Next slide"
             >
               <ChevronRight className="w-6 h-6" />
