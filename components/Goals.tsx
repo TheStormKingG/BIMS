@@ -108,7 +108,7 @@ export const Goals: React.FC<GoalsProps> = ({
 
               return (
                 <div key={phase} className="flex flex-col items-center gap-2">
-                  {/* Badge Icon - Gem-like shape */}
+                  {/* Badge Icon - Gem-like shape with Trophy */}
                   <div
                     className={`w-16 h-16 rounded-lg flex items-center justify-center transition-all ${
                       !phaseUnlocked
@@ -121,14 +121,10 @@ export const Goals: React.FC<GoalsProps> = ({
                       clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
                     }}
                   >
-                    {!phaseUnlocked ? (
-                      <div className="w-4 h-4 bg-slate-600 rounded-full" style={{
-                        clipPath: 'polygon(40% 0%, 60% 0%, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0% 60%, 0% 40%, 40% 40%)'
-                      }} />
-                    ) : isFullyComplete ? (
-                      <Trophy className="w-8 h-8 text-white" />
+                    {isFullyComplete ? (
+                      <Trophy className="w-8 h-8" style={{ color: '#FCD34D', fill: '#FBBF24' }} />
                     ) : (
-                      <span className="text-slate-600 font-bold text-lg">{phase}</span>
+                      <Trophy className="w-8 h-8 text-slate-500" />
                     )}
                   </div>
                   <div className="text-xs text-center">
