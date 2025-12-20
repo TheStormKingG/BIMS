@@ -26,21 +26,40 @@ export const getBadgesWithGoals = async (): Promise<Badge[]> => {
  */
 export const getUserBadgesWithGoals = async (userId: string): Promise<Array<UserBadge & { goal_id: number }>> => {
   try {
-    const { data, error } = await supabaseClient
+    // First get user badges
+    const { data: userBadges, error: userBadgesError } = await supabaseClient
       .from('user_badges')
-      .select(`
-        *,
-        badges!inner(goal_id)
-      `)
+      .select('*')
       .eq('user_id', userId)
       .order('earned_at', { ascending: false });
 
-    if (error) throw error;
+    if (userBadgesError) throw userBadgesError;
 
-    // Transform the data to flatten the structure
-    return (data || []).map(item => ({
-      ...item,
-      goal_id: (item.badges as any).goal_id,
+    if (!userBadges || userBadges.length === 0) {
+      return [];
+    }
+
+    // Get badge IDs
+    const badgeIds = userBadges.map(ub => ub.badge_id);
+
+    // Get badges with goal_id
+    const { data: badges, error: badgesError } = await supabaseClient
+      .from('badges')
+      .select('badge_id, goal_id')
+      .in('badge_id', badgeIds);
+
+    if (badgesError) throw badgesError;
+
+    // Create a map of badge_id to goal_id
+    const badgeToGoalMap = new Map<number, number>();
+    (badges || []).forEach(b => {
+      badgeToGoalMap.set(b.badge_id, b.goal_id);
+    });
+
+    // Combine user badges with goal IDs
+    return userBadges.map(ub => ({
+      ...ub,
+      goal_id: badgeToGoalMap.get(ub.badge_id) || 0,
     }));
   } catch (error) {
     console.error('Error fetching user badges with goals:', error);
