@@ -61,13 +61,16 @@ export const emitEvent = async (
       return;
     }
 
+    // Map EventType enum to stored format (criteria event_type format)
+    const storedEventType = mapEventTypeToStoredFormat(eventType);
+
     const { error } = await supabase
       .from('user_events')
       .insert({
         user_id: user.id,
-        event_type: eventType,
+        event_type: storedEventType,
         occurred_at: new Date().toISOString(),
-        metadata: metadata,
+        metadata: { ...metadata, originalEventType: eventType },
       });
 
     if (error) {
