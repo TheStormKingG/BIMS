@@ -138,7 +138,7 @@ BEGIN
     new_credential_number := 'STW-' || year_prefix || '-' || random_part;
     
     -- Ensure uniqueness (retry if collision)
-    WHILE EXISTS (SELECT 1 FROM badge_credentials WHERE credential_number = new_credential_number) LOOP
+    WHILE EXISTS (SELECT 1 FROM badge_credentials bc WHERE bc.credential_number = new_credential_number) LOOP
       random_part := '';
       FOR i IN 1..6 LOOP
         random_part := random_part || substr(chars, floor(random() * length(chars) + 1)::int, 1);
