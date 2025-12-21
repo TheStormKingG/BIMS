@@ -228,6 +228,23 @@ export const SystemGoals: React.FC = () => {
                               )}
                             </div>
                           </div>
+                          
+                          {/* Badge on extreme right (only for completed goals with badges) */}
+                          {isCompleted && hasBadge ? (
+                            <div className="flex flex-col items-center flex-shrink-0">
+                              <span className="text-xs font-semibold text-emerald-600 mb-1 text-center">
+                                ✓ Badge Earned:
+                              </span>
+                              <img
+                                src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
+                                alt={`${goal.badge_name} badge`}
+                                className="w-16 h-16 object-contain"
+                              />
+                              <span className="text-xs font-semibold text-emerald-600 mt-1 text-center max-w-[80px]">
+                                {goal.badge_name}
+                              </span>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     );
