@@ -77,27 +77,81 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
         format: 'a4'
       });
 
-      // Convert HTML to canvas first for better quality
+      // Get the badge card element and its parent container
+      const badgeCardElement = badgeCardRef.current;
+      const parentContainer = badgeCardElement.parentElement;
+      const originalParentTransform = parentContainer?.style.transform || '';
+      const originalParentDisplay = parentContainer?.style.display || '';
+      const originalDisplay = badgeCardElement.style.display || '';
+      
+      // Temporarily show at full size for capture (remove scale transform)
+      if (parentContainer) {
+        parentContainer.style.transform = 'scale(1)';
+        parentContainer.style.transformOrigin = 'top left';
+      }
+      badgeCardElement.style.display = 'block';
+      badgeCardElement.style.position = 'absolute';
+      badgeCardElement.style.left = '-9999px';
+      badgeCardElement.style.top = '0';
+      badgeCardElement.style.zIndex = '-1';
+
+      // Convert HTML to canvas - capture at exact A4 dimensions
+      // A4 landscape at 300 DPI: 3508px x 2480px
+      // At 144 DPI (for web): 1684px x 1191px
+      // Using higher scale for better quality in PDF
       const canvas = await html2canvas(badgeCardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher quality
+        scale: 2.5, // Higher scale for better PDF quality
         logging: false,
         useCORS: true,
         width: 1684,
         height: 1191,
         windowWidth: 1684,
         windowHeight: 1191,
+        allowTaint: false,
       });
 
-      // Convert canvas to image data
-      const imgData = canvas.toDataURL('image/png');
+      // Restore original styling
+      if (parentContainer) {
+        parentContainer.style.transform = originalParentTransform;
+        parentContainer.style.display = originalParentDisplay;
+      }
+      badgeCardElement.style.display = originalDisplay;
+      badgeCardElement.style.position = '';
+      badgeCardElement.style.left = '';
+      badgeCardElement.style.top = '';
+      badgeCardElement.style.zIndex = '';
 
-      // Calculate dimensions to fit A4 landscape (297mm x 210mm)
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // Convert canvas to image data
+      const imgData = canvas.toDataURL('image/png', 1.0);
+
+      // Get exact A4 landscape dimensions in mm
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 297mm
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
       
-      // Add image to PDF, fitting the full page
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      // Calculate aspect ratio to ensure image fills entire page
+      const canvasAspect = canvas.width / canvas.height;
+      const pdfAspect = pdfWidth / pdfHeight;
+      
+      let imgWidth = pdfWidth;
+      let imgHeight = pdfHeight;
+      let xOffset = 0;
+      let yOffset = 0;
+      
+      // If canvas is wider than PDF aspect, fit to width
+      if (canvasAspect > pdfAspect) {
+        imgWidth = pdfWidth;
+        imgHeight = pdfWidth / canvasAspect;
+        yOffset = (pdfHeight - imgHeight) / 2;
+      } else {
+        // If canvas is taller, fit to height
+        imgHeight = pdfHeight;
+        imgWidth = pdfHeight * canvasAspect;
+        xOffset = (pdfWidth - imgWidth) / 2;
+      }
+      
+      // Add image to PDF, filling the entire page (centered if needed)
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight, undefined, 'FAST');
 
       // Download PDF
       pdf.save(`stashway-badge-${credential.credential_number}.pdf`);
