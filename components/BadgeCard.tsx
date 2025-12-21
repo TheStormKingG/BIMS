@@ -63,11 +63,11 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-12 py-10">
+      {/* Main Content - Flex to fill available space */}
+      <div className="px-12 py-8 flex-1 flex flex-col justify-center min-h-0 overflow-y-auto">
         {/* Badge Display */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-4">
             <img
               src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
               alt="Badge"
@@ -78,43 +78,46 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
             {credential.badge_name}
           </h2>
           {credential.badge_level && (
-            <p className="text-xl text-emerald-700 font-semibold mb-4">
+            <p className="text-xl text-emerald-700 font-semibold mb-3">
               {credential.badge_level}
             </p>
           )}
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-6">
             {credential.badge_description}
           </p>
         </div>
 
         {/* Awarded To Section */}
-        <div className="text-center mb-8">
-          <p className="text-lg text-slate-600 mb-2">Awarded to</p>
-          <p className="text-3xl font-bold text-slate-900 mb-6">
+        <div className="text-center mb-6">
+          <p className="text-base text-slate-600 mb-2">Awarded to</p>
+          <p className="text-3xl font-bold text-slate-900">
             {credential.recipient_display_name}
           </p>
         </div>
 
+        {/* Horizontal Divider */}
+        <div className="border-t border-emerald-200 my-6"></div>
+
         {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="bg-slate-50 rounded-lg p-4">
             <p className="text-sm font-semibold text-slate-700 mb-1">Achievement</p>
-            <p className="text-lg text-slate-900">{credential.goal_title}</p>
+            <p className="text-base text-slate-900">{credential.goal_title}</p>
           </div>
           <div className="bg-slate-50 rounded-lg p-4">
             <p className="text-sm font-semibold text-slate-700 mb-1">Issued</p>
-            <p className="text-lg text-slate-900">{formatDate(credential.issued_at)}</p>
+            <p className="text-base text-slate-900">{formatDate(credential.issued_at)}</p>
           </div>
         </div>
 
         {/* Criteria */}
-        <div className="bg-emerald-50 rounded-lg p-6 mb-8 border border-emerald-200">
-          <p className="text-sm font-semibold text-emerald-900 mb-2">Criteria</p>
-          <p className="text-emerald-800 leading-relaxed">{credential.criteria_summary}</p>
+        <div className="bg-emerald-50 rounded-lg p-4 mb-6 border border-emerald-200">
+          <p className="text-sm font-semibold text-emerald-900 mb-1">Criteria</p>
+          <p className="text-base text-emerald-800 leading-relaxed">{credential.criteria_summary}</p>
         </div>
 
         {/* Credential Number */}
-        <div className="bg-slate-50 rounded-lg p-4 mb-6">
+        <div className="bg-slate-50 rounded-lg p-4">
           <p className="text-sm font-semibold text-slate-700 mb-1">Credential ID</p>
           <p className="text-xl font-mono text-slate-900">{credential.credential_number}</p>
         </div>
