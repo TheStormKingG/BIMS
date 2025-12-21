@@ -60,7 +60,7 @@ export const Goals: React.FC<GoalsProps> = ({
             <div>
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Award className="w-5 h-5 text-emerald-600" />
-                Achievement Goals
+                Achievements
               </h3>
               <p className="text-sm text-slate-600 mt-1">
                 {completedSystemGoals} of {totalSystemGoals} goals completed ({systemProgressPercent}%)
@@ -229,7 +229,7 @@ export const Goals: React.FC<GoalsProps> = ({
       {/* Goals Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Goals</h2>
+          <h2 className="text-lg font-bold text-slate-900">Goals</h2>
           <p className="text-slate-500 text-sm mt-1">
             {activeGoals.length} active goal{activeGoals.length !== 1 ? 's' : ''}
             {achievedGoals.length > 0 && ` • ${achievedGoals.length} achieved`}
