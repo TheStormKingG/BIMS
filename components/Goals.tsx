@@ -79,11 +79,11 @@ export const Goals: React.FC<GoalsProps> = ({
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 
           {/* Badge Progress Visual - Winding Road */}
-          <div className="relative py-8 px-4 overflow-hidden" style={{
+          <div className="relative py-4 md:py-8 px-2 md:px-4 overflow-hidden" style={{
             background: 'linear-gradient(to bottom, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(255, 255, 255, 0) 100%)'
           }}>
             {/* Winding Road SVG */}
-            <svg className="absolute inset-0 w-full h-full" style={{ height: '200px' }} preserveAspectRatio="none" viewBox="0 0 1200 200">
+            <svg className="absolute inset-0 w-full h-full h-[160px] md:h-[200px]" preserveAspectRatio="none" viewBox="0 0 1200 200" style={{ height: '160px' }}>
               <defs>
                 <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#1f2937" />
@@ -110,8 +110,8 @@ export const Goals: React.FC<GoalsProps> = ({
               />
             </svg>
 
-            {/* Trees - scattered along the road */}
-            <div className="absolute inset-0 pointer-events-none">
+            {/* Trees - scattered along the road - hidden on mobile */}
+            <div className="absolute inset-0 pointer-events-none hidden md:block">
               {[80, 250, 420, 580, 750, 920, 1080].map((left, idx) => {
                 const topVariation = idx % 2 === 0 ? 20 : 160;
                 return (
@@ -134,7 +134,7 @@ export const Goals: React.FC<GoalsProps> = ({
             </div>
 
             {/* Phase coins positioned along the road */}
-            <div className="relative flex items-start justify-between px-8" style={{ height: '200px' }}>
+            <div className="relative flex items-start justify-between px-2 md:px-8" style={{ height: '160px', minHeight: '160px' }}>
               {[1, 2, 3, 4, 5].map((phase, index) => {
                 const phaseGoals = systemGoals[phase] || [];
                 const phaseCompleted = systemProgress.filter(
@@ -155,42 +155,42 @@ export const Goals: React.FC<GoalsProps> = ({
                   5: 'Financial Mastery'
                 };
 
-                // Position coins along the winding road (adjust Y positions to follow the curve)
+                // Position coins along the winding road - adjusted for mobile
                 const positions = [
-                  { left: '8%', top: '65%' },   // Phase 1
-                  { left: '28%', top: '55%' },  // Phase 2
-                  { left: '48%', top: '50%' },  // Phase 3
-                  { left: '68%', top: '60%' },  // Phase 4
-                  { left: '88%', top: '55%' },  // Phase 5
+                  { left: '6%', top: '65%' },   // Phase 1
+                  { left: '26%', top: '55%' },  // Phase 2
+                  { left: '46%', top: '50%' },  // Phase 3
+                  { left: '66%', top: '60%' },  // Phase 4
+                  { left: '86%', top: '55%' },  // Phase 5
                 ];
 
                 return (
                   <div
                     key={phase}
-                    className="absolute flex flex-col items-center gap-2"
+                    className="absolute flex flex-col items-center gap-1 md:gap-2"
                     style={{
                       left: positions[index].left,
                       top: positions[index].top,
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    {/* Gold Coin Icon */}
+                    {/* Gold Coin Icon - smaller on mobile */}
                     <img
                       src="/Gold_coin_icon.png"
                       alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
-                      className={`w-16 h-16 object-contain transition-all z-10 ${
+                      className={`w-10 h-10 md:w-16 md:h-16 object-contain transition-all z-10 ${
                         isFullyComplete
                           ? 'brightness-110 drop-shadow-md'
                           : 'grayscale opacity-60'
                       }`}
                     />
-                    <div className="text-xs text-center bg-white/90 px-2 py-1 rounded backdrop-blur-sm">
-                      <div className="font-semibold text-slate-900">Phase {phase}</div>
-                      <div className="text-slate-600 text-[10px] leading-tight mt-0.5 max-w-[100px]">
+                    <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
+                      <div className="font-semibold text-slate-900 text-[9px] md:text-xs">Phase {phase}</div>
+                      <div className="text-slate-600 text-[8px] md:text-[10px] leading-tight mt-0.5 max-w-[60px] md:max-w-[100px]">
                         {phaseNames[phase]}
                       </div>
                       {phaseUnlocked && (
-                        <div className="text-slate-600 mt-1">{phaseProgress}%</div>
+                        <div className="text-slate-600 mt-0.5 md:mt-1 text-[8px] md:text-xs">{phaseProgress}%</div>
                       )}
                     </div>
                   </div>
