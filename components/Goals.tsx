@@ -164,16 +164,35 @@ export const Goals: React.FC<GoalsProps> = ({
                   { left: '86%', top: '55%' },  // Phase 5
                 ];
 
+                // Alternate text position on mobile (above/below)
+                const isTextAbove = index % 2 === 0; // Even indices (0,2,4) = above, odd (1,3) = below
+                const textLabel = (
+                  <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
+                    <div className="font-semibold text-slate-900 text-[9px] md:text-xs">Phase {phase}</div>
+                    <div className="text-slate-600 text-[8px] md:text-[10px] leading-tight mt-0.5 max-w-[60px] md:max-w-[100px]">
+                      {phaseNames[phase]}
+                    </div>
+                    {phaseUnlocked && (
+                      <div className="text-slate-600 mt-0.5 md:mt-1 text-[8px] md:text-xs">{phaseProgress}%</div>
+                    )}
+                  </div>
+                );
+
                 return (
                   <div
                     key={phase}
-                    className="absolute flex flex-col items-center gap-1 md:gap-2"
+                    className={`absolute flex items-center gap-1 md:gap-2 ${
+                      isTextAbove ? 'flex-col md:flex-col' : 'flex-col-reverse md:flex-col'
+                    }`}
                     style={{
                       left: positions[index].left,
                       top: positions[index].top,
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
+                    {/* Text above on mobile for even indices, below for odd */}
+                    {isTextAbove && <div className="md:hidden">{textLabel}</div>}
+                    
                     {/* Gold Coin Icon - smaller on mobile */}
                     <img
                       src="/Gold_coin_icon.png"
@@ -184,15 +203,10 @@ export const Goals: React.FC<GoalsProps> = ({
                           : 'grayscale opacity-60'
                       }`}
                     />
-                    <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
-                      <div className="font-semibold text-slate-900 text-[9px] md:text-xs">Phase {phase}</div>
-                      <div className="text-slate-600 text-[8px] md:text-[10px] leading-tight mt-0.5 max-w-[60px] md:max-w-[100px]">
-                        {phaseNames[phase]}
-                      </div>
-                      {phaseUnlocked && (
-                        <div className="text-slate-600 mt-0.5 md:mt-1 text-[8px] md:text-xs">{phaseProgress}%</div>
-                      )}
-                    </div>
+                    
+                    {/* Text below coin on desktop, or below on mobile for odd indices */}
+                    {!isTextAbove && <div className="md:hidden">{textLabel}</div>}
+                    <div className="hidden md:block">{textLabel}</div>
                   </div>
                 );
               })}
