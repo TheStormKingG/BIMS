@@ -164,7 +164,7 @@ export const Goals: React.FC<GoalsProps> = ({
                   { left: '86%', top: '55%' },  // Phase 5
                 ];
 
-                // Alternate text position on mobile (above/below)
+                // Alternate text position (above/below) on both mobile and desktop
                 const isTextAbove = index % 2 === 0; // Even indices (0,2,4) = above, odd (1,3) = below
                 const textLabel = (
                   <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
@@ -182,7 +182,7 @@ export const Goals: React.FC<GoalsProps> = ({
                   <div
                     key={phase}
                     className={`absolute flex items-center gap-1 md:gap-2 ${
-                      isTextAbove ? 'flex-col md:flex-col' : 'flex-col-reverse md:flex-col'
+                      isTextAbove ? 'flex-col' : 'flex-col-reverse'
                     }`}
                     style={{
                       left: positions[index].left,
@@ -190,8 +190,8 @@ export const Goals: React.FC<GoalsProps> = ({
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    {/* Text above on mobile for even indices, below for odd */}
-                    {isTextAbove && <div className="md:hidden">{textLabel}</div>}
+                    {/* Text above for even indices, below for odd (on both mobile and desktop) */}
+                    {isTextAbove && textLabel}
                     
                     {/* Gold Coin Icon - smaller on mobile */}
                     <img
@@ -204,9 +204,8 @@ export const Goals: React.FC<GoalsProps> = ({
                       }`}
                     />
                     
-                    {/* Text below coin on desktop, or below on mobile for odd indices */}
-                    {!isTextAbove && <div className="md:hidden">{textLabel}</div>}
-                    <div className="hidden md:block">{textLabel}</div>
+                    {/* Text below for odd indices */}
+                    {!isTextAbove && textLabel}
                   </div>
                 );
               })}
