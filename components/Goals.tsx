@@ -93,7 +93,7 @@ export const Goals: React.FC<GoalsProps> = ({
           </div>
 
           {/* Badge Progress Visual */}
-          <div className="flex items-center justify-center gap-4 py-4">
+          <div className="flex items-start justify-center gap-4 py-4">
             {/* Show first 5 phases as badges */}
             {[1, 2, 3, 4, 5].map(phase => {
               const phaseGoals = systemGoals[phase] || [];
@@ -105,6 +105,15 @@ export const Goals: React.FC<GoalsProps> = ({
                 ? Math.round((phaseCompleted / phaseGoals.length) * 100)
                 : 0;
               const isFullyComplete = phaseProgress === 100 && phaseUnlocked;
+              
+              // Phase names
+              const phaseNames: Record<number, string> = {
+                1: 'The Quick-Start Sprint',
+                2: 'Basic Engagement',
+                3: 'Intermediate Tracking',
+                4: 'Advanced Budgeting',
+                5: 'Financial Mastery'
+              };
 
               return (
                 <div key={phase} className="flex flex-col items-center gap-2">
@@ -120,8 +129,11 @@ export const Goals: React.FC<GoalsProps> = ({
                   />
                   <div className="text-xs text-center">
                     <div className="font-semibold text-slate-900">Phase {phase}</div>
+                    <div className="text-slate-600 text-[10px] leading-tight mt-0.5 max-w-[100px]">
+                      {phaseNames[phase]}
+                    </div>
                     {phaseUnlocked && (
-                      <div className="text-slate-600">{phaseProgress}%</div>
+                      <div className="text-slate-600 mt-1">{phaseProgress}%</div>
                     )}
                   </div>
                 </div>
