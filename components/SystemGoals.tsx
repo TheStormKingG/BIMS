@@ -1,32 +1,47 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Check, Trophy } from 'lucide-react';
+import { ArrowLeft, Lock, Check, Trophy, Share2 } from 'lucide-react';
 import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
+import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
+import { ShareBadgeModal } from './ShareBadgeModal';
 
 export const SystemGoals: React.FC = () => {
   const navigate = useNavigate();
   const { goals, progress, badges, phaseUnlocks, loading } = useSystemGoals();
   const [badgesWithGoals, setBadgesWithGoals] = useState<Array<{ goal_id: number }>>([]);
+  const [credentials, setCredentials] = useState<Map<number, BadgeCredential>>(new Map());
+  const [selectedCredential, setSelectedCredential] = useState<BadgeCredential | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
   const supabase = getSupabase();
 
-  // Fetch badges with goal IDs
+  // Fetch badges with goal IDs and credentials
   useEffect(() => {
-    const fetchBadges = async () => {
+    const fetchBadgesAndCredentials = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         const userBadgesWithGoals = await getUserBadgesWithGoals(user.id);
         setBadgesWithGoals(userBadgesWithGoals);
+
+        // Fetch credentials for all completed goals
+        const credentialsMap = new Map<number, BadgeCredential>();
+        for (const badge of userBadgesWithGoals) {
+          const credential = await getCredentialByUserAndGoal(user.id, badge.goal_id);
+          if (credential) {
+            credentialsMap.set(badge.goal_id, credential);
+          }
+        }
+        setCredentials(credentialsMap);
       } catch (error) {
         console.error('Error fetching badges with goals:', error);
       }
     };
 
     if (!loading) {
-      fetchBadges();
+      fetchBadgesAndCredentials();
     }
   }, [loading, supabase]);
 
@@ -225,18 +240,37 @@ export const SystemGoals: React.FC = () => {
                           
                           {/* Badge on extreme right (only for completed goals with badges) */}
                           {isCompleted && hasBadge ? (
-                            <div className="flex flex-col items-center flex-shrink-0">
-                              <span className="text-xs font-semibold text-emerald-600 mb-1 text-center">
-                                ✓ Badge Earned:
-                              </span>
-                              <img
-                                src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
-                                alt={`${goal.badge_name} badge`}
-                                className="w-16 h-16 object-contain"
-                              />
-                              <span className="text-xs font-semibold text-emerald-600 mt-1 text-center max-w-[80px]">
-                                {goal.badge_name}
-                              </span>
+                            <div className="flex flex-col items-center flex-shrink-0 gap-2">
+                              <div className="flex flex-col items-center">
+                                <span className="text-xs font-semibold text-emerald-600 mb-1 text-center">
+                                  ✓ Badge Earned:
+                                </span>
+                                <img
+                                  src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
+                                  alt={`${goal.badge_name} badge`}
+                                  className="w-16 h-16 object-contain"
+                                />
+                                <span className="text-xs font-semibold text-emerald-600 mt-1 text-center max-w-[80px]">
+                                  {goal.badge_name}
+                                </span>
+                              </div>
+                              {/* Share Badge Button */}
+                              {credentials.has(goal.id) && (
+                                <button
+                                  onClick={() => {
+                                    const cred = credentials.get(goal.id);
+                                    if (cred) {
+                                      setSelectedCredential(cred);
+                                      setShowShareModal(true);
+                                    }
+                                  }}
+                                  className="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
+                                  title="Share this badge"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                  <span>Share</span>
+                                </button>
+                              )}
                             </div>
                           ) : null}
                         </div>
@@ -260,6 +294,18 @@ export const SystemGoals: React.FC = () => {
           </div>
         );
       })}
+
+      {/* Share Badge Modal */}
+      {showShareModal && selectedCredential && (
+        <ShareBadgeModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedCredential(null);
+          }}
+          credential={selectedCredential}
+        />
+      )}
     </div>
   );
 };
