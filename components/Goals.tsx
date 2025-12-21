@@ -54,8 +54,9 @@ export const Goals: React.FC<GoalsProps> = ({
     <div className="space-y-6 animate-fade-in pb-20">
       {/* Achievement Goals Section */}
       {!systemGoalsLoading && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <>
+          {/* Achievement Goals Header - Outside the card */}
+          <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Award className="w-5 h-5 text-emerald-600" />
@@ -73,6 +74,9 @@ export const Goals: React.FC<GoalsProps> = ({
               <Target className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Achievement Goals Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 
           {/* Badge Progress Visual - Winding Road */}
           <div className="relative py-8 px-4 overflow-hidden" style={{
@@ -204,7 +208,8 @@ export const Goals: React.FC<GoalsProps> = ({
               />
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Goals Header */}
