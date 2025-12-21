@@ -181,16 +181,14 @@ export const Goals: React.FC<GoalsProps> = ({
                 return (
                   <div
                     key={phase}
-                    className={`absolute flex items-center gap-1 md:gap-2 ${
-                      isTextAbove ? 'flex-col' : 'flex-col-reverse'
-                    }`}
+                    className="absolute flex flex-col items-center gap-1 md:gap-2"
                     style={{
                       left: positions[index].left,
                       top: positions[index].top,
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    {/* Text above for even indices, below for odd (on both mobile and desktop) */}
+                    {/* Text above for even indices (0,2,4), below for odd (1,3) */}
                     {isTextAbove && textLabel}
                     
                     {/* Gold Coin Icon - smaller on mobile */}
