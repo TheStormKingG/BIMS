@@ -225,7 +225,7 @@ export const SystemGoals: React.FC = () => {
                               <p className="text-sm text-slate-600 mb-2">
                                 {goal.description}
                               </p>
-                              {!isCompleted || !hasBadge ? (
+                              {(!isCompleted || !hasBadge) && (
                                 <div className="space-y-1">
                                   <div className="w-full bg-slate-200 rounded-full h-2">
                                     <div
