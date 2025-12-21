@@ -1,6 +1,7 @@
 import { getSupabase } from './supabaseClient';
 import { EventType } from './eventService';
 import { SystemGoal, UserGoalProgress, CompletionCriteria } from './goalsService';
+import { issueCredential } from './credentialService';
 
 const supabase = getSupabase();
 
@@ -218,12 +219,49 @@ export class GoalEngine {
         .single();
 
       if (!existingCelebration) {
-        // Get goal details for message
-        const { data: goalData } = await supabase
+        // Get goal and badge details for message and credential
+        const { data: goalData, error: goalDataError } = await supabase
           .from('system_goals')
-          .select('title')
+          .select('title, description')
           .eq('id', goalId)
           .single();
+
+        if (goalDataError) throw goalDataError;
+
+        // Get badge description
+        const { data: badgeData, error: badgeDataError } = await supabase
+          .from('badges')
+          .select('badge_description')
+          .eq('badge_id', badge.badge_id)
+          .single();
+
+        if (badgeDataError) throw badgeDataError;
+
+        // Get user profile for recipient display name
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+
+        const recipientDisplayName = user.user_metadata?.full_name 
+          || user.user_metadata?.display_name 
+          || user.email?.split('@')[0] 
+          || 'User';
+
+        // Issue credential (creates shareable/verifiable certificate)
+        try {
+          await issueCredential(
+            userId,
+            goalId,
+            badgeName,
+            badgeData.badge_description || badgeName,
+            goalData.title,
+            goalData.description || goalData.title,
+            recipientDisplayName
+          );
+        } catch (credentialError) {
+          // Log error but don't block celebration
+          console.error('Error issuing credential:', credentialError);
+          // Continue with celebration creation even if credential issuance fails
+        }
 
         // Create celebration
         const { error: celebrationError } = await supabase

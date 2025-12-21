@@ -19,6 +19,8 @@ import { SettingsTerms } from './components/SettingsTerms';
 import { Landing } from './components/Landing';
 import { SystemGoals } from './components/SystemGoals';
 import { CelebrationModal } from './components/CelebrationModal';
+import { VerifyCredential } from './components/VerifyCredential';
+import { VerifySearch } from './components/VerifySearch';
 import { useCelebrations } from './hooks/useCelebrations';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
@@ -134,8 +136,8 @@ function App() {
   }, []);
 
   // Public routes that don't require authentication (accessible to all users)
-  const publicRoutes = ['/', '/privacy', '/terms', '/about'];
-  const isPublicRoute = publicRoutes.includes(location.pathname);
+  const publicRoutes = ['/', '/privacy', '/terms', '/about', '/verify'];
+  const isPublicRoute = publicRoutes.includes(location.pathname) || location.pathname.startsWith('/verify/');
 
   // Handle public routes immediately - accessible to both authenticated and unauthenticated users
   // This must be checked before authLoading to prevent infinite loading
@@ -145,6 +147,10 @@ function App() {
 
   if (location.pathname === '/privacy') {
     return <PrivacyPolicy />;
+  }
+
+  if (location.pathname.startsWith('/verify')) {
+    // Verification routes are handled in Routes below
   }
 
   if (location.pathname === '/terms') {
@@ -627,6 +633,10 @@ function App() {
       {/* Main Content Area */}
       <main className={`${isChatRoute ? 'p-0 max-w-none w-full h-full m-0' : 'p-4 md:p-8 max-w-6xl'} ${isChatRoute ? '' : 'mx-auto'} w-full ${isChatRoute ? 'h-screen md:h-screen' : ''}`}>
          <Routes>
+           {/* Public verification routes */}
+           <Route path="/verify" element={<VerifySearch />} />
+           <Route path="/verify/:credential_number" element={<VerifyCredential />} />
+           
            {/* Protected routes */}
            <Route path="/overview" element={
              <ProtectedRoute>

@@ -48,6 +48,13 @@ CREATE INDEX IF NOT EXISTS idx_user_celebrations_pending ON user_celebrations(us
 ALTER TABLE user_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_celebrations ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Users can view their own events" ON user_events;
+DROP POLICY IF EXISTS "System can insert user events" ON user_events;
+DROP POLICY IF EXISTS "Users can view their own celebrations" ON user_celebrations;
+DROP POLICY IF EXISTS "System can insert user celebrations" ON user_celebrations;
+DROP POLICY IF EXISTS "Users can update their own celebrations" ON user_celebrations;
+
 -- RLS Policies for user_events - users can only see their own events
 CREATE POLICY "Users can view their own events" ON user_events
   FOR SELECT USING (auth.uid() = user_id);
