@@ -50,7 +50,7 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
       }}
     >
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-16 py-6 border-b-2 border-emerald-200 flex-shrink-0">
+      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-12 py-5 border-b-2 border-emerald-200 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <img
