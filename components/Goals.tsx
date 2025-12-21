@@ -155,25 +155,28 @@ export const Goals: React.FC<GoalsProps> = ({
                   5: 'Financial Mastery'
                 };
 
-                // Position coins along the winding road - adjusted for mobile
+                // Position coins along the winding road - positioned to sit ON the road
+                // Road path: M 0 150 Q 150 100, 300 120 T 600 110 T 900 130 T 1200 120
+                // Y positions adjusted to align with the road curve (road center is around 120-150 in viewBox)
                 const positions = [
-                  { left: '6%', top: '65%' },   // Phase 1
-                  { left: '26%', top: '55%' },  // Phase 2
-                  { left: '46%', top: '50%' },  // Phase 3
-                  { left: '66%', top: '60%' },  // Phase 4
-                  { left: '86%', top: '55%' },  // Phase 5
+                  { left: '6%', top: '72%' },   // Phase 1 - on road
+                  { left: '26%', top: '62%' },  // Phase 2 - on road
+                  { left: '46%', top: '57%' },  // Phase 3 - on road (lowest point)
+                  { left: '66%', top: '67%' },  // Phase 4 - on road
+                  { left: '86%', top: '62%' },  // Phase 5 - on road
                 ];
 
                 // Alternate text position (above/below) on both mobile and desktop
                 const isTextAbove = index % 2 === 0; // Even indices (0,2,4) = above, odd (1,3) = below
                 const textLabel = (
                   <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
-                    <div className="font-semibold text-slate-900 text-[9px] md:text-xs">Phase {phase}</div>
-                    <div className="text-slate-600 text-[8px] md:text-[10px] leading-tight mt-0.5 max-w-[60px] md:max-w-[100px]">
+                    {/* Mobile text reduced by 9%: 9px -> 8.19px ≈ 8px, 8px -> 7.28px ≈ 7px */}
+                    <div className="font-semibold text-slate-900 text-[8px] md:text-xs">Phase {phase}</div>
+                    <div className="text-slate-600 text-[7px] md:text-[10px] leading-tight mt-0.5 max-w-[55px] md:max-w-[100px]">
                       {phaseNames[phase]}
                     </div>
                     {phaseUnlocked && (
-                      <div className="text-slate-600 mt-0.5 md:mt-1 text-[8px] md:text-xs">{phaseProgress}%</div>
+                      <div className="text-slate-600 mt-0.5 md:mt-1 text-[7px] md:text-xs">{phaseProgress}%</div>
                     )}
                   </div>
                 );
@@ -191,11 +194,11 @@ export const Goals: React.FC<GoalsProps> = ({
                     {/* Text above for even indices (0,2,4), below for odd (1,3) */}
                     {isTextAbove && textLabel}
                     
-                    {/* Gold Coin Icon - smaller on mobile */}
+                    {/* Gold Coin Icon - smaller on mobile (9% reduction: 40px -> 36.4px ≈ 36px) */}
                     <img
                       src="/Gold_coin_icon.png"
                       alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
-                      className={`w-10 h-10 md:w-16 md:h-16 object-contain transition-all z-10 ${
+                      className={`w-9 h-9 md:w-16 md:h-16 object-contain transition-all z-10 ${
                         isFullyComplete
                           ? 'brightness-110 drop-shadow-md'
                           : 'grayscale opacity-60'
