@@ -183,24 +183,7 @@ export const SystemGoals: React.FC = () => {
                             : 'border-slate-200 hover:border-emerald-300'
                         }`}
                       >
-                        <div className="flex items-start gap-4">
-                          {/* Badge on extreme left (only for completed goals with badges) */}
-                          {isCompleted && hasBadge ? (
-                            <div className="flex flex-col items-center flex-shrink-0">
-                              <span className="text-xs font-semibold text-emerald-600 mb-1 text-center">
-                                ✓ Badge Earned:
-                              </span>
-                              <img
-                                src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
-                                alt={`${goal.badge_name} badge`}
-                                className="w-16 h-16 object-contain"
-                              />
-                              <span className="text-xs font-semibold text-emerald-600 mt-1 text-center max-w-[80px]">
-                                {goal.badge_name}
-                              </span>
-                            </div>
-                          ) : null}
-                          
+                        <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3 flex-1">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                               isCompleted
