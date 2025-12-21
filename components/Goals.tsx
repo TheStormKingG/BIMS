@@ -74,53 +74,125 @@ export const Goals: React.FC<GoalsProps> = ({
             </button>
           </div>
 
-          {/* Badge Progress Visual */}
-          <div className="flex items-start justify-center gap-4 py-4">
-            {/* Show first 5 phases as badges */}
-            {[1, 2, 3, 4, 5].map(phase => {
-              const phaseGoals = systemGoals[phase] || [];
-              const phaseCompleted = systemProgress.filter(
-                p => phaseGoals.some(g => g.id === p.goal_id) && p.is_completed
-              ).length;
-              const phaseUnlocked = phaseUnlocks[phase] ?? false;
-              const phaseProgress = phaseGoals.length > 0 
-                ? Math.round((phaseCompleted / phaseGoals.length) * 100)
-                : 0;
-              const isFullyComplete = phaseProgress === 100 && phaseUnlocked;
-              
-              // Phase names
-              const phaseNames: Record<number, string> = {
-                1: 'The Quick-Start Sprint',
-                2: 'Basic Engagement',
-                3: 'Intermediate Tracking',
-                4: 'Advanced Budgeting',
-                5: 'Financial Mastery'
-              };
+          {/* Badge Progress Visual - Winding Road */}
+          <div className="relative py-8 px-4 overflow-hidden" style={{
+            background: 'linear-gradient(to bottom, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(255, 255, 255, 0) 100%)'
+          }}>
+            {/* Winding Road SVG */}
+            <svg className="absolute inset-0 w-full h-full" style={{ height: '200px' }} preserveAspectRatio="none" viewBox="0 0 1200 200">
+              <defs>
+                <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#1f2937" />
+                  <stop offset="100%" stopColor="#111827" />
+                </linearGradient>
+              </defs>
+              {/* Road path - winding */}
+              <path
+                d="M 0 150 Q 150 100, 300 120 T 600 110 T 900 130 T 1200 120"
+                stroke="url(#roadGradient)"
+                strokeWidth="40"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Road center line */}
+              <path
+                d="M 0 150 Q 150 100, 300 120 T 600 110 T 900 130 T 1200 120"
+                stroke="#ffffff"
+                strokeWidth="4"
+                strokeDasharray="20,15"
+                fill="none"
+                strokeLinecap="round"
+              />
+            </svg>
 
-              return (
-                <div key={phase} className="flex flex-col items-center gap-2">
-                  {/* Gold Coin Icon */}
-                  <img
-                    src="/Gold_coin_icon.png"
-                    alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
-                    className={`w-16 h-16 object-contain transition-all ${
-                      isFullyComplete
-                        ? 'brightness-110 drop-shadow-md'
-                        : 'grayscale opacity-60'
-                    }`}
-                  />
-                  <div className="text-xs text-center">
-                    <div className="font-semibold text-slate-900">Phase {phase}</div>
-                    <div className="text-slate-600 text-[10px] leading-tight mt-0.5 max-w-[100px]">
-                      {phaseNames[phase]}
+            {/* Trees - scattered along the road */}
+            <div className="absolute inset-0 pointer-events-none">
+              {[80, 250, 420, 580, 750, 920, 1080].map((left, idx) => {
+                const topVariation = idx % 2 === 0 ? 20 : 160;
+                return (
+                  <svg
+                    key={idx}
+                    className="absolute text-emerald-700 opacity-40"
+                    style={{
+                      left: `${left}px`,
+                      top: `${topVariation}px`,
+                      width: '32px',
+                      height: '32px',
+                    }}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2L8 8h8L12 2zm0 6l-4 8h8l-4-8zm0 8l-2 4h4l-2-4z" />
+                  </svg>
+                );
+              })}
+            </div>
+
+            {/* Phase coins positioned along the road */}
+            <div className="relative flex items-start justify-between px-8" style={{ height: '200px' }}>
+              {[1, 2, 3, 4, 5].map((phase, index) => {
+                const phaseGoals = systemGoals[phase] || [];
+                const phaseCompleted = systemProgress.filter(
+                  p => phaseGoals.some(g => g.id === p.goal_id) && p.is_completed
+                ).length;
+                const phaseUnlocked = phaseUnlocks[phase] ?? false;
+                const phaseProgress = phaseGoals.length > 0 
+                  ? Math.round((phaseCompleted / phaseGoals.length) * 100)
+                  : 0;
+                const isFullyComplete = phaseProgress === 100 && phaseUnlocked;
+                
+                // Phase names
+                const phaseNames: Record<number, string> = {
+                  1: 'The Quick-Start Sprint',
+                  2: 'Basic Engagement',
+                  3: 'Intermediate Tracking',
+                  4: 'Advanced Budgeting',
+                  5: 'Financial Mastery'
+                };
+
+                // Position coins along the winding road (adjust Y positions to follow the curve)
+                const positions = [
+                  { left: '8%', top: '65%' },   // Phase 1
+                  { left: '28%', top: '55%' },  // Phase 2
+                  { left: '48%', top: '50%' },  // Phase 3
+                  { left: '68%', top: '60%' },  // Phase 4
+                  { left: '88%', top: '55%' },  // Phase 5
+                ];
+
+                return (
+                  <div
+                    key={phase}
+                    className="absolute flex flex-col items-center gap-2"
+                    style={{
+                      left: positions[index].left,
+                      top: positions[index].top,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    {/* Gold Coin Icon */}
+                    <img
+                      src="/Gold_coin_icon.png"
+                      alt={`Phase ${phase} ${isFullyComplete ? 'completed' : 'in progress'}`}
+                      className={`w-16 h-16 object-contain transition-all z-10 ${
+                        isFullyComplete
+                          ? 'brightness-110 drop-shadow-md'
+                          : 'grayscale opacity-60'
+                      }`}
+                    />
+                    <div className="text-xs text-center bg-white/90 px-2 py-1 rounded backdrop-blur-sm">
+                      <div className="font-semibold text-slate-900">Phase {phase}</div>
+                      <div className="text-slate-600 text-[10px] leading-tight mt-0.5 max-w-[100px]">
+                        {phaseNames[phase]}
+                      </div>
+                      {phaseUnlocked && (
+                        <div className="text-slate-600 mt-1">{phaseProgress}%</div>
+                      )}
                     </div>
-                    {phaseUnlocked && (
-                      <div className="text-slate-600 mt-1">{phaseProgress}%</div>
-                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Progress Bar */}
