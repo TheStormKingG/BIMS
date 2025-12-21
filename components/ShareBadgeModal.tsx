@@ -71,9 +71,11 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
     try {
       const canvas = await html2canvas(badgeCardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher quality
+        scale: 1, // Card is already at full size, scale 1 for A4 quality
         logging: false,
         useCORS: true,
+        width: 1684,
+        height: 1191,
       });
 
       const link = document.createElement('a');
@@ -160,7 +162,7 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-900">Preview</h3>
               <div className="border-2 border-slate-200 rounded-lg p-4 bg-slate-50 overflow-auto" style={{ maxHeight: '600px' }}>
-                <div ref={badgeCardRef} className="scale-50 origin-top-left">
+                <div ref={badgeCardRef} className="origin-top-left" style={{ transform: 'scale(0.35)' }}>
                   <BadgeCard credential={credential} />
                 </div>
               </div>

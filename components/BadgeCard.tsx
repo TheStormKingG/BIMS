@@ -29,20 +29,27 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
 
   const verificationUrl = `${getBaseUrl()}/verify/${credential.credential_number}`;
 
+  // A4 landscape dimensions: 297mm x 210mm
+  // At 96 DPI: 1123px x 794px
+  // At 144 DPI: 1684px x 1191px
+  // Using 1684x1191 for better quality when scaled
+  const a4LandscapeWidth = 1684;
+  const a4LandscapeHeight = 1191;
+  
   return (
-    <div className={`bg-white rounded-2xl shadow-xl border-2 border-emerald-200 overflow-hidden ${className}`} style={{ width: '1200px', minHeight: '800px' }}>
+    <div className={`bg-white rounded-2xl shadow-xl border-2 border-emerald-200 overflow-hidden ${className}`} style={{ width: `${a4LandscapeWidth}px`, height: `${a4LandscapeHeight}px` }}>
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-8 py-6 border-b-2 border-emerald-200">
+      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-16 py-8 border-b-2 border-emerald-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <img
               src="/stashway-logo.png"
               alt="Stashway Logo"
-              className="w-16 h-16 object-contain"
+              className="w-20 h-20 object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Certificate of Achievement</h1>
-              <p className="text-sm text-slate-600">Stashway Badge Credential</p>
+              <h1 className="text-3xl font-bold text-slate-900">Certificate of Achievement</h1>
+              <p className="text-base text-slate-600">Stashway Badge Credential</p>
             </div>
           </div>
         </div>
@@ -106,16 +113,16 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
       </div>
 
       {/* Footer Section */}
-      <div className="bg-slate-50 px-12 py-8 border-t-2 border-slate-200">
+      <div className="bg-slate-50 px-16 py-10 border-t-2 border-slate-200 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-600 mb-1">Issued by</p>
-            <p className="text-lg font-semibold text-slate-900">{credential.issuing_org_name}</p>
-            <p className="text-sm text-slate-600">{credential.issuing_org_url}</p>
+            <p className="text-base text-slate-600 mb-2">Issued by</p>
+            <p className="text-xl font-semibold text-slate-900">{credential.issuing_org_name}</p>
+            <p className="text-base text-slate-600">{credential.issuing_org_url}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-slate-600 mb-1">Verify this credential</p>
-            <p className="text-sm font-mono text-emerald-600 break-all max-w-xs">
+            <p className="text-base text-slate-600 mb-2">Verify this credential</p>
+            <p className="text-base font-mono text-emerald-600 break-all max-w-md">
               {verificationUrl}
             </p>
           </div>
