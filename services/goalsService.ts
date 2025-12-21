@@ -115,6 +115,26 @@ export const getSystemGoalsByPhase = async (): Promise<Record<number, SystemGoal
 };
 
 /**
+ * Get a system goal by ID
+ */
+export const getSystemGoalById = async (goalId: number): Promise<SystemGoal> => {
+  try {
+    const { data, error } = await supabaseClient
+      .from('system_goals')
+      .select('*')
+      .eq('id', goalId)
+      .single();
+
+    if (error) throw error;
+    if (!data) throw new Error(`Goal with id ${goalId} not found`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching system goal by ID:', error);
+    throw error;
+  }
+};
+
+/**
  * Get user's goal progress
  */
 export const getUserGoalProgress = async (userId: string): Promise<UserGoalProgress[]> => {
