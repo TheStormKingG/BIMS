@@ -4,6 +4,7 @@ import { BadgeCredential } from '../services/credentialService';
 import { BadgeCard } from './BadgeCard';
 import { logCredentialEvent } from '../services/credentialService';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface ShareBadgeModalProps {
   isOpen: boolean;
@@ -64,16 +65,22 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
     }
   };
 
-  const handleDownloadImage = async () => {
+  const handleDownloadPDF = async () => {
     if (!badgeCardRef.current) return;
 
     setDownloading(true);
     try {
-      // Capture at A4 landscape dimensions (297mm x 210mm)
-      // Using scale 2 for high quality output
+      // A4 landscape dimensions in mm: 297mm x 210mm
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Convert HTML to canvas first for better quality
       const canvas = await html2canvas(badgeCardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher quality for print
+        scale: 2, // Higher quality
         logging: false,
         useCORS: true,
         width: 1684,
@@ -82,19 +89,27 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
         windowHeight: 1191,
       });
 
-      const link = document.createElement('a');
-      link.download = `stashway-badge-${credential.credential_number}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // Convert canvas to image data
+      const imgData = canvas.toDataURL('image/png');
+
+      // Calculate dimensions to fit A4 landscape (297mm x 210mm)
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Add image to PDF, fitting the full page
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+
+      // Download PDF
+      pdf.save(`stashway-badge-${credential.credential_number}.pdf`);
 
       // Log share event
       await logCredentialEvent(credential.id, 'SHARED', {
-        method: 'download_image',
+        method: 'download_pdf',
         credential_number: credential.credential_number
       });
     } catch (error) {
-      console.error('Failed to download image:', error);
-      alert('Failed to download badge image. Please try again.');
+      console.error('Failed to download PDF:', error);
+      alert('Failed to download badge PDF. Please try again.');
     } finally {
       setDownloading(false);
     }
@@ -213,21 +228,21 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
                   )}
                 </button>
 
-                {/* Download Image */}
+                {/* Download PDF */}
                 <button
-                  onClick={handleDownloadImage}
+                  onClick={handleDownloadPDF}
                   disabled={downloading}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 mb-6 disabled:bg-slate-400 disabled:cursor-not-allowed"
                 >
                   {downloading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Generating Image...</span>
+                      <span>Generating PDF...</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-5 h-5" />
-                      <span>Download Badge Image</span>
+                      <span>Download Badge PDF</span>
                     </>
                   )}
                 </button>
