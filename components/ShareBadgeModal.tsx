@@ -166,7 +166,7 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-900">Preview</h3>
               <div className="border-2 border-slate-200 rounded-lg p-4 bg-slate-50 overflow-auto" style={{ maxHeight: '600px' }}>
-                <div ref={badgeCardRef} className="origin-top-left" style={{ transform: 'scale(0.35)' }}>
+                <div ref={badgeCardRef} className="origin-top-left" style={{ transform: 'scale(0.35)', transformOrigin: 'top left' }}>
                   <BadgeCard credential={credential} />
                 </div>
               </div>

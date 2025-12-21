@@ -38,12 +38,15 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
   
   return (
     <div 
-      className={`bg-white overflow-hidden ${className}`} 
+      className={`bg-white ${className}`} 
       style={{ 
         width: `${a4LandscapeWidth}px`, 
         height: `${a4LandscapeHeight}px`,
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        margin: 0,
+        padding: 0,
+        boxSizing: 'border-box'
       }}
     >
       {/* Header Section */}
@@ -64,7 +67,7 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
       </div>
 
       {/* Main Content - Flex to fill available space */}
-      <div className="px-12 py-8 flex-1 flex flex-col justify-center min-h-0 overflow-y-auto">
+      <div className="px-12 py-6 flex-1 flex flex-col justify-center min-h-0" style={{ boxSizing: 'border-box' }}>
         {/* Badge Display */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center mb-4">
@@ -124,7 +127,7 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
       </div>
 
       {/* Footer Section */}
-      <div className="bg-slate-50 px-12 py-6 border-t-2 border-slate-200 flex-shrink-0">
+      <div className="bg-slate-50 px-12 py-5 border-t-2 border-slate-200 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-600 mb-1">Issued by</p>
