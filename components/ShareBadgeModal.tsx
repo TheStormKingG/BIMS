@@ -69,13 +69,17 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
 
     setDownloading(true);
     try {
+      // Capture at A4 landscape dimensions (297mm x 210mm)
+      // Using scale 2 for high quality output
       const canvas = await html2canvas(badgeCardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 1, // Card is already at full size, scale 1 for A4 quality
+        scale: 2, // Higher quality for print
         logging: false,
         useCORS: true,
         width: 1684,
         height: 1191,
+        windowWidth: 1684,
+        windowHeight: 1191,
       });
 
       const link = document.createElement('a');
