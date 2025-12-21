@@ -87,7 +87,7 @@ export const SystemGoals: React.FC = () => {
             <div className="text-3xl font-bold text-emerald-600">
               {progress.filter(p => p.is_completed).length}
             </div>
-            <div className="text-sm text-slate-600 mt-1">Goals Completed</div>
+            <div className="text-sm text-slate-600 mt-1">Badges Earned</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-amber-600">
