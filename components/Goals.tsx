@@ -83,7 +83,7 @@ export const Goals: React.FC<GoalsProps> = ({
             background: 'linear-gradient(to bottom, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(255, 255, 255, 0) 100%)'
           }}>
             {/* Winding Road SVG */}
-            <svg className="absolute inset-0 w-full h-full h-[160px] md:h-[200px]" preserveAspectRatio="none" viewBox="0 0 1200 200" style={{ height: '160px' }}>
+            <svg className="absolute inset-0 w-full h-[160px] md:h-[200px]" preserveAspectRatio="none" viewBox="0 0 1200 200">
               <defs>
                 <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#1f2937" />
