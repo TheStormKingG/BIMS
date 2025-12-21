@@ -52,25 +52,7 @@ export const Goals: React.FC<GoalsProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Goals</h2>
-          <p className="text-slate-500 text-sm mt-1">
-            {activeGoals.length} active goal{activeGoals.length !== 1 ? 's' : ''}
-            {achievedGoals.length > 0 && ` • ${achievedGoals.length} achieved`}
-          </p>
-        </div>
-        <button
-          onClick={onAddGoal}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          New Goal
-        </button>
-      </div>
-
-      {/* System Goals Progress Section */}
+      {/* Achievement Goals Section */}
       {!systemGoalsLoading && (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -152,6 +134,24 @@ export const Goals: React.FC<GoalsProps> = ({
           </div>
         </div>
       )}
+
+      {/* Goals Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Goals</h2>
+          <p className="text-slate-500 text-sm mt-1">
+            {activeGoals.length} active goal{activeGoals.length !== 1 ? 's' : ''}
+            {achievedGoals.length > 0 && ` • ${achievedGoals.length} achieved`}
+          </p>
+        </div>
+        <button
+          onClick={onAddGoal}
+          className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          New Goal
+        </button>
+      </div>
 
       {/* Goals List */}
       {goals.length === 0 ? (
