@@ -3,6 +3,7 @@ import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, M
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
+import { BackfillCredentials } from './BackfillCredentials';
 
 interface SettingsProps {
   user: any;
@@ -110,6 +111,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
     setSelectedOption('problem-suggestions');
   };
 
+  const handleBackfillCredentials = () => {
+    setSelectedOption('backfill-credentials');
+  };
+
   const handleShare = (platform: string) => {
     const shareUrl = 'https://stashway.app';
     const shareText = 'Check out Stashway - Personal Finance App!';
@@ -153,6 +158,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               {selectedOption === 'invite-contact' && 'Share in a post'}
               {selectedOption === 'tips-frequency' && 'Tips Frequency'}
               {selectedOption === 'problem-suggestions' && 'Problem/Suggestions'}
+              {selectedOption === 'backfill-credentials' && 'Backfill Badge Credentials'}
             </h1>
             <button
               onClick={() => setSelectedOption(null)}
@@ -459,6 +465,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           )}
 
           {/* Problem/Suggestions */}
+          {selectedOption === 'backfill-credentials' && (
+            <BackfillCredentials />
+          )}
+
           {selectedOption === 'problem-suggestions' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
               <p className="text-slate-600">We'd love to hear from you! Share any problems you've encountered or suggestions for improvement.</p>
@@ -560,6 +570,18 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <Lightbulb className="w-5 h-5 text-amber-600" />
               </div>
               <span className="font-medium text-slate-900">Tips Frequency</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-400" />
+          </button>
+
+          {/* Backfill Credentials */}
+          <button
+            onClick={handleBackfillCredentials}
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+          >
+            <div className="flex items-center gap-3">
+              <Info className="w-5 h-5 text-slate-600" />
+              <span className="text-slate-900 font-medium">Backfill Badge Credentials</span>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
