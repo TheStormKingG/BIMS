@@ -91,10 +91,10 @@ BEGIN
   LOOP
     -- Check if credential already exists
     SELECT * INTO existing_cred
-    FROM badge_credentials
-    WHERE badge_credentials.user_id = badge_record.user_id
-      AND badge_credentials.goal_id = badge_record.goal_id
-      AND badge_credentials.status = 'ACTIVE'
+    FROM badge_credentials bc
+    WHERE bc.user_id = badge_record.user_id
+      AND bc.goal_id = badge_record.goal_id
+      AND bc.status = 'ACTIVE'
     LIMIT 1;
     
     -- Skip if credential already exists
@@ -218,7 +218,7 @@ BEGIN
         metadata,
         occurred_at
       ) VALUES (
-        (SELECT id FROM badge_credentials WHERE credential_number = new_credential_number),
+        (SELECT bc.id FROM badge_credentials bc WHERE bc.credential_number = new_credential_number),
         'ISSUED',
         jsonb_build_object(
           'backfilled', true,
