@@ -6,6 +6,7 @@ import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
 import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
 import { ShareBadgeModal } from './ShareBadgeModal';
+import { fixMissingCredentialsForUser } from '../services/fixMissingCredentials';
 
 export const SystemGoals: React.FC = () => {
   const navigate = useNavigate();
