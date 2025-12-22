@@ -81,7 +81,8 @@ export async function issuePhaseCertificate(
       goalTitle,
       criteriaSummary,
       recipientDisplayName,
-      `Phase ${phase}`
+      `Phase ${phase}`,
+      phaseName // Pass phaseName for celebration
     );
   } catch (error) {
     console.error(`Error issuing phase ${phase} certificate:`, error);
@@ -100,7 +101,8 @@ async function issuePhaseCredentialDirect(
   goalTitle: string,
   criteriaSummary: string,
   recipientDisplayName: string,
-  badgeLevel: string
+  badgeLevel: string,
+  phaseName: string
 ): Promise<any> {
   try {
     // Import credential functions
@@ -149,6 +151,7 @@ async function issuePhaseCredentialDirect(
     const signature = CryptoJS.HmacSHA256(canonicalJson, secret).toString();
 
     // Insert credential with phase_number and NULL goal_id
+    // Handle duplicate key errors gracefully (race condition protection)
     const { data, error } = await supabase
       .from('badge_credentials')
       .insert({
@@ -169,7 +172,18 @@ async function issuePhaseCredentialDirect(
       .select()
       .single();
 
-    if (error) throw error;
+    // Handle duplicate key error (23505) - certificate already exists
+    if (error) {
+      if (error.code === '23505' && error.message?.includes('idx_badge_credentials_user_phase')) {
+        // Certificate already exists, fetch and return it
+        console.log(`Phase ${phase} certificate already exists, fetching existing certificate...`);
+        const existingCert = await getPhaseCertificate(userId, phase);
+        if (existingCert) {
+          return existingCert;
+        }
+      }
+      throw error;
+    }
 
     // Log issuance event
     await credentialService.logCredentialEvent(data.id, 'ISSUED', {
@@ -262,33 +276,40 @@ export async function createPhaseCelebration(
  */
 export async function checkAndIssuePhaseCertificates(userId: string): Promise<void> {
   try {
+    // Phase names mapping
+    const phaseNames: Record<number, string> = {
+      1: 'The Quick-Start Sprint',
+      2: 'Basic Engagement',
+      3: 'Intermediate Tracking',
+      4: 'Advanced Budgeting',
+      5: 'Financial Mastery'
+    };
+
     for (let phase = 1; phase <= 5; phase++) {
       const isComplete = await isPhaseComplete(userId, phase);
       if (isComplete) {
-        // Check if certificate already exists
-        const existingCert = await getPhaseCertificate(userId, phase);
-        if (!existingCert) {
-          try {
-            await issuePhaseCertificate(userId, phase);
-            console.log(`✓ Phase ${phase} certificate issued`);
+        try {
+          // Issue certificate (will return existing if already exists, handles duplicates gracefully)
+          const cert = await issuePhaseCertificate(userId, phase);
+          if (cert) {
+            console.log(`✓ Phase ${phase} certificate ready (${cert.credential_number || 'existing'})`);
             // Celebration is created inside issuePhaseCertificate
-          } catch (error) {
+          }
+        } catch (error: any) {
+          // If it's a duplicate key error, that's okay - certificate already exists
+          if (error.code === '23505') {
+            console.log(`Phase ${phase} certificate already exists`);
+            // Still try to ensure celebration exists
+            const phaseName = phaseNames[phase] || `Phase ${phase}`;
+            try {
+              await createPhaseCelebration(userId, phase, `Phase ${phase} Certificate`, phaseName);
+            } catch (celebError) {
+              // Celebration might already exist, that's fine
+              console.log(`Celebration for Phase ${phase} already exists or failed to create`);
+            }
+          } else {
             console.error(`Failed to issue Phase ${phase} certificate:`, error);
           }
-        } else {
-          // Certificate exists, but check if celebration exists
-          // This handles cases where certificate was created but celebration wasn't
-          const goalsByPhase = await getSystemGoalsByPhase();
-          const phaseGoals = goalsByPhase[phase] || [];
-          const phaseNames: Record<number, string> = {
-            1: 'The Quick-Start Sprint',
-            2: 'Basic Engagement',
-            3: 'Intermediate Tracking',
-            4: 'Advanced Budgeting',
-            5: 'Financial Mastery'
-          };
-          const phaseName = phaseNames[phase] || `Phase ${phase}`;
-          await createPhaseCelebration(userId, phase, `Phase ${phase} Certificate`, phaseName);
         }
       }
     }
