@@ -107,10 +107,12 @@ function App() {
       setUser(session?.user ?? null);
       
       // Check and issue phase certificates for completed phases (including Phase 1) on initial load
-      if (session?.user?.id) {
+      // Only run once per session to avoid retriggering celebrations
+      if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
         try {
           console.log('Checking for completed phases and issuing certificates on initial load...');
           await checkAndIssuePhaseCertificates(session.user.id);
+          sessionStorage.setItem('phase_cert_check_done', 'true');
           console.log('Phase certificate check completed');
         } catch (error) {
           console.error('Error checking phase certificates on initial load:', error);
@@ -142,10 +144,12 @@ function App() {
         }
         
         // Check and issue phase certificates for completed phases (including Phase 1)
-        if (session?.user?.id) {
+        // Only run once per session to avoid retriggering celebrations
+        if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
           try {
             console.log('Checking for completed phases and issuing certificates...');
             await checkAndIssuePhaseCertificates(session.user.id);
+            sessionStorage.setItem('phase_cert_check_done', 'true');
             console.log('Phase certificate check completed');
           } catch (error) {
             console.error('Error checking phase certificates on auth:', error);
@@ -154,6 +158,7 @@ function App() {
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        sessionStorage.removeItem('phase_cert_check_done');
         navigate('/', { replace: true });
       }
       setAuthLoading(false);

@@ -104,16 +104,24 @@ export const useCelebrations = () => {
   // Function to handle modal close and mark celebration as shown
   const handleCloseCelebration = useCallback(async () => {
     if (pendingCelebration) {
+      const celebrationId = pendingCelebration.id;
+      // Always close the modal immediately, even if marking as shown fails
+      setPendingCelebration(null);
+      setIsShowingCelebration(false);
+      
+      // Mark as shown in the background
       try {
-        await markCelebrationShown(pendingCelebration.id);
-        setPendingCelebration(null);
-        setIsShowingCelebration(false);
-        // After closing, check for more celebrations
+        await markCelebrationShown(celebrationId);
+        // After closing, check for more celebrations after a delay
         setTimeout(() => {
           checkCelebrations();
         }, 1000);
       } catch (error) {
         console.error('Error marking celebration as shown:', error);
+        // Still check for more celebrations even if marking failed
+        setTimeout(() => {
+          checkCelebrations();
+        }, 1000);
       }
     }
   }, [pendingCelebration, checkCelebrations]);

@@ -256,10 +256,10 @@ export async function createPhaseCelebration(
   phaseName: string
 ): Promise<void> {
   try {
-    // Check if celebration already exists
+    // Check if celebration already exists (regardless of shown_at status - don't create duplicates)
     const { data: existingCelebration, error: celebrationCheckError } = await supabase
       .from('user_celebrations')
-      .select('id')
+      .select('id, shown_at')
       .eq('user_id', userId)
       .eq('phase_number', phase)
       .limit(1)
@@ -270,7 +270,7 @@ export async function createPhaseCelebration(
     }
 
     if (!existingCelebration) {
-      // Create celebration
+      // Create celebration only if it doesn't exist
       const { error: celebrationError } = await supabase
         .from('user_celebrations')
         .insert({
@@ -281,8 +281,19 @@ export async function createPhaseCelebration(
           message: `Congratulations! You completed all goals in "${phaseName}" and earned your Phase ${phase} Certificate!`,
         });
 
-      if (celebrationError) throw celebrationError;
-      console.log(`✓ Phase ${phase} celebration created`);
+      if (celebrationError) {
+        // If it's a duplicate key error, that's fine - celebration already exists
+        if (celebrationError.code === '23505') {
+          console.log(`Phase ${phase} celebration already exists (duplicate key)`);
+        } else {
+          throw celebrationError;
+        }
+      } else {
+        console.log(`✓ Phase ${phase} celebration created`);
+      }
+    } else {
+      // Celebration already exists
+      console.log(`Phase ${phase} celebration already exists (id: ${existingCelebration.id}, shown: ${existingCelebration.shown_at ? 'yes' : 'no'})`);
     }
   } catch (error) {
     console.error(`Error creating phase ${phase} celebration:`, error);
@@ -309,24 +320,24 @@ export async function checkAndIssuePhaseCertificates(userId: string): Promise<vo
       const isComplete = await isPhaseComplete(userId, phase);
       if (isComplete) {
         try {
-          // Issue certificate (will return existing if already exists, handles duplicates gracefully)
-          const cert = await issuePhaseCertificate(userId, phase);
-          if (cert) {
-            console.log(`✓ Phase ${phase} certificate ready (${cert.credential_number || 'existing'})`);
-            // Celebration is created inside issuePhaseCertificate
+          // Check if certificate already exists first
+          const existingCert = await getPhaseCertificate(userId, phase);
+          
+          if (!existingCert) {
+            // Certificate doesn't exist, try to issue it (will create celebration inside)
+            const cert = await issuePhaseCertificate(userId, phase);
+            if (cert) {
+              console.log(`✓ Phase ${phase} certificate issued (${cert.credential_number})`);
+            }
+          } else {
+            // Certificate exists, just ensure celebration exists (createPhaseCelebration checks for duplicates)
+            const phaseName = phaseNames[phase] || `Phase ${phase}`;
+            await createPhaseCelebration(userId, phase, `Phase ${phase} Certificate`, phaseName);
           }
         } catch (error: any) {
           // If it's a duplicate key error, that's okay - certificate already exists
           if (error.code === '23505') {
             console.log(`Phase ${phase} certificate already exists`);
-            // Still try to ensure celebration exists
-            const phaseName = phaseNames[phase] || `Phase ${phase}`;
-            try {
-              await createPhaseCelebration(userId, phase, `Phase ${phase} Certificate`, phaseName);
-            } catch (celebError) {
-              // Celebration might already exist, that's fine
-              console.log(`Celebration for Phase ${phase} already exists or failed to create`);
-            }
           } else {
             console.error(`Failed to issue Phase ${phase} certificate:`, error);
           }
