@@ -1,4 +1,5 @@
 import React from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { BadgeCredential } from '../services/credentialService';
 
 interface BadgeCardProps {
@@ -30,9 +31,7 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
   const verificationUrl = `${getBaseUrl()}/verify/${credential.credential_number}`;
 
   // A4 landscape dimensions: 297mm x 210mm
-  // At 300 DPI (print quality): 3508px x 2480px
   // At 144 DPI (web display): 1684px x 1191px
-  // Using 1684x1191 for screen display, html2canvas will scale up for print
   const a4LandscapeWidth = 1684;
   const a4LandscapeHeight = 1191;
   
@@ -43,106 +42,231 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
         width: `${a4LandscapeWidth}px`, 
         height: `${a4LandscapeHeight}px`,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         margin: 0,
         padding: 0,
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        position: 'relative',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden'
       }}
     >
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-12 py-5 border-b-2 border-emerald-200 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
+      {/* Subtle background pattern */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.03,
+          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)',
+          pointerEvents: 'none',
+          zIndex: 0
+        }}
+      />
+
+      {/* Large watermark badge in center background */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          opacity: 0.05,
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      >
+        <img
+          src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
+          alt="Watermark"
+          style={{ width: '600px', height: '600px', objectFit: 'contain' }}
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <div 
+        style={{
+          flex: 1,
+          padding: '60px 80px 50px 80px',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          zIndex: 1,
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Header */}
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#059669', marginBottom: '4px' }}>
+            VERIFIED
+          </div>
+          <div style={{ fontSize: '18px', color: '#6b7280', fontWeight: '500', letterSpacing: '1px' }}>
+            CERTIFICATE of ACHIEVEMENT
+          </div>
+        </div>
+
+        {/* Main Certificate Text */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '30px', lineHeight: '1.6' }}>
+            This is to certify that
+          </div>
+          
+          <div style={{ fontSize: '42px', fontWeight: 'bold', color: '#111827', marginBottom: '30px', lineHeight: '1.2' }}>
+            {credential.recipient_display_name}
+          </div>
+          
+          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '30px', lineHeight: '1.6' }}>
+            successfully completed and received a passing grade in
+          </div>
+          
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', marginBottom: '20px', lineHeight: '1.3' }}>
+            {credential.goal_title}
+          </div>
+          
+          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '40px', lineHeight: '1.6', maxWidth: '700px' }}>
+            {credential.badge_description}
+          </div>
+
+          {/* Achievement Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '30px', marginBottom: '40px' }}>
             <img
-              src="/stashway-logo.png"
-              alt="Stashway Logo"
-              className="w-16 h-16 object-contain"
+              src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
+              alt="Badge"
+              style={{ width: '120px', height: '120px', objectFit: 'contain' }}
             />
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Certificate of Achievement</h1>
-              <p className="text-sm text-slate-600">Stashway Badge Credential</p>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>
+                {credential.badge_name}
+              </div>
+              {credential.badge_level && (
+                <div style={{ fontSize: '18px', color: '#059669', fontWeight: '600' }}>
+                  {credential.badge_level}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section with QR Code and Verification */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '60px', marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #e5e7eb' }}>
+          {/* Left: QR Code and Issue Details */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '30px' }}>
+            <div>
+              <QRCodeSVG value={verificationUrl} size={120} level="H" />
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '8px', letterSpacing: '0.5px' }}>
+                ISSUE DATE
+              </div>
+              <div style={{ fontSize: '14px', color: '#111827', marginBottom: '20px', fontFamily: 'monospace' }}>
+                {credential.credential_number}
+              </div>
+              <div style={{ fontSize: '14px', color: '#4b5563' }}>
+                Issued {formatDate(credential.issued_at)}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Verification URL */}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '8px', letterSpacing: '0.5px' }}>
+              VERIFY AT:
+            </div>
+            <div style={{ fontSize: '13px', color: '#059669', fontFamily: 'monospace', wordBreak: 'break-all', lineHeight: '1.5' }}>
+              {verificationUrl}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Flex to fill available space */}
-      <div className="px-12 py-6 flex-1 flex flex-col justify-center min-h-0" style={{ boxSizing: 'border-box' }}>
-        {/* Badge Display */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center mb-4">
-            <img
-              src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
-              alt="Badge"
-              className="w-48 h-48 object-contain"
-            />
-          </div>
-          <h2 className="text-4xl font-bold text-slate-900 mb-2">
-            {credential.badge_name}
-          </h2>
-          {credential.badge_level && (
-            <p className="text-xl text-emerald-700 font-semibold mb-3">
-              {credential.badge_level}
-            </p>
-          )}
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-6">
-            {credential.badge_description}
-          </p>
-        </div>
-
-        {/* Awarded To Section */}
-        <div className="text-center mb-6">
-          <p className="text-base text-slate-600 mb-2">Awarded to</p>
-          <p className="text-3xl font-bold text-slate-900">
-            {credential.recipient_display_name}
-          </p>
-        </div>
-
-        {/* Horizontal Divider */}
-        <div className="border-t border-emerald-200 my-6"></div>
-
-        {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-6 mb-6">
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-sm font-semibold text-slate-700 mb-1">Achievement</p>
-            <p className="text-base text-slate-900">{credential.goal_title}</p>
-          </div>
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-sm font-semibold text-slate-700 mb-1">Issued</p>
-            <p className="text-base text-slate-900">{formatDate(credential.issued_at)}</p>
+      {/* Right Sidebar */}
+      <div 
+        style={{
+          width: '280px',
+          backgroundColor: '#f9fafb',
+          borderLeft: '1px solid #e5e7eb',
+          padding: '50px 30px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Logo at top */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '40px' }}>
+          <img
+            src="/stashway-logo.png"
+            alt="Stashway Logo"
+            style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '15px' }}
+          />
+          <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', letterSpacing: '1px' }}>
+            Stashway
           </div>
         </div>
 
-        {/* Criteria */}
-        <div className="bg-emerald-50 rounded-lg p-4 mb-6 border border-emerald-200">
-          <p className="text-sm font-semibold text-emerald-900 mb-1">Criteria</p>
-          <p className="text-base text-emerald-800 leading-relaxed">{credential.criteria_summary}</p>
-        </div>
-
-        {/* Credential Number */}
-        <div className="bg-slate-50 rounded-lg p-4">
-          <p className="text-sm font-semibold text-slate-700 mb-1">Credential ID</p>
-          <p className="text-xl font-mono text-slate-900">{credential.credential_number}</p>
-        </div>
-      </div>
-
-      {/* Footer Section */}
-      <div className="bg-slate-50 px-12 py-5 border-t-2 border-slate-200 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-slate-600 mb-1">Issued by</p>
-            <p className="text-lg font-semibold text-slate-900">{credential.issuing_org_name}</p>
-            <p className="text-sm text-slate-600">{credential.issuing_org_url}</p>
+        {/* Verified Seal */}
+        <div 
+          style={{
+            width: '180px',
+            height: '180px',
+            borderRadius: '50%',
+            backgroundColor: '#059669',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '4px solid #10b981',
+            marginBottom: '40px',
+            position: 'relative'
+          }}
+        >
+          {/* Outer dotted circle */}
+          <div 
+            style={{
+              position: 'absolute',
+              width: '160px',
+              height: '160px',
+              borderRadius: '50%',
+              border: '2px dashed #ffffff',
+              opacity: 0.5
+            }}
+          />
+          {/* Inner dotted circle */}
+          <div 
+            style={{
+              position: 'absolute',
+              width: '130px',
+              height: '130px',
+              borderRadius: '50%',
+              border: '2px dashed #ffffff',
+              opacity: 0.3
+            }}
+          />
+          {/* Checkmark */}
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style={{ position: 'relative', zIndex: 1 }}>
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#ffffff" />
+          </svg>
+          {/* Text around seal */}
+          <div style={{ position: 'absolute', bottom: '-30px', fontSize: '11px', color: '#059669', fontWeight: 'bold', letterSpacing: '1px' }}>
+            VERIFIED CERTIFICATE
           </div>
-          <div className="text-right">
-            <p className="text-sm text-slate-600 mb-1">Verify this credential</p>
-            <p className="text-sm font-mono text-emerald-600 break-all max-w-md">
-              {verificationUrl}
-            </p>
+        </div>
+
+        {/* Signature Area */}
+        <div style={{ textAlign: 'center', marginTop: 'auto' }}>
+          <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+            {credential.issuing_org_name}
+          </div>
+          <div style={{ fontSize: '12px', color: '#9ca3af', lineHeight: '1.5' }}>
+            {credential.issuing_org_url}
           </div>
         </div>
       </div>
     </div>
   );
 };
-
