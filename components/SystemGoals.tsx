@@ -72,7 +72,37 @@ export const SystemGoals: React.FC = () => {
             </p>
           </div>
         </div>
+        {/* Fix Missing Credentials Button */}
+        <button
+          onClick={handleFixMissingCredentials}
+          disabled={isFixingCredentials}
+          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
+          title="Create credentials for badges that are missing them"
+        >
+          {isFixingCredentials ? (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Fixing...</span>
+            </>
+          ) : (
+            <>
+              <RefreshCw className="w-4 h-4" />
+              <span>Fix Missing Credentials</span>
+            </>
+          )}
+        </button>
       </div>
+      
+      {fixCredentialsMessage && (
+        <div className={`p-4 rounded-lg flex items-center gap-2 ${
+          fixCredentialsMessage.startsWith('Error') 
+            ? 'bg-red-50 border border-red-200 text-red-700' 
+            : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+        }`}>
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm">{fixCredentialsMessage}</span>
+        </div>
+      )}
 
       {/* Overall Progress Summary */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
