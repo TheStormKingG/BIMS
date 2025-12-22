@@ -1003,6 +1003,23 @@ function App() {
            </Routes>
       </main>
 
+      {/* Celebration Modal */}
+      {isShowingCelebration && pendingCelebration && (
+        <CelebrationModal
+          isOpen={isShowingCelebration}
+          onClose={async () => {
+            // Mark celebration as shown when user closes modal
+            try {
+              const { markCelebrationShown } = await import('./services/celebrationService');
+              await markCelebrationShown(pendingCelebration.id);
+            } catch (error) {
+              console.error('Error marking celebration as shown:', error);
+            }
+          }}
+          celebration={pendingCelebration}
+        />
+      )}
+
       {/* Floating Chat Button - Desktop (bottom right) */}
       {!isChatRoute && <ChatButton className="hidden md:flex fixed bottom-6 right-6 w-14 h-14" />}
 
