@@ -5,8 +5,9 @@ const supabase = getSupabase();
 export interface Celebration {
   id: number;
   user_id: string;
-  goal_id: number;
-  badge_id: number;
+  goal_id: number | null;
+  badge_id: number | null;
+  phase_number: number | null;
   message: string;
   created_at: string;
   shown_at: string | null;

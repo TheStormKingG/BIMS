@@ -14,7 +14,8 @@ export interface BadgeCredential {
   issued_at: string;
   issuing_org_name: string;
   issuing_org_url: string;
-  goal_id: number;
+  goal_id: number | null;
+  phase_number?: number | null;
   goal_title: string;
   criteria_summary: string;
   evidence_hash: string;

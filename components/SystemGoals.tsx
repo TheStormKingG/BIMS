@@ -5,6 +5,7 @@ import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
 import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
+import { getPhaseCertificate } from '../services/phaseCertificateService';
 import { ShareBadgeModal } from './ShareBadgeModal';
 import { fixMissingCredentialsForUser } from '../services/fixMissingCredentials';
 
@@ -13,6 +14,7 @@ export const SystemGoals: React.FC = () => {
   const { goals, progress, badges, phaseUnlocks, loading } = useSystemGoals();
   const [badgesWithGoals, setBadgesWithGoals] = useState<Array<{ goal_id: number }>>([]);
   const [credentials, setCredentials] = useState<Map<number, BadgeCredential>>(new Map());
+  const [phaseCertificates, setPhaseCertificates] = useState<Map<number, BadgeCredential>>(new Map());
   const [selectedCredential, setSelectedCredential] = useState<BadgeCredential | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const supabase = getSupabase();
@@ -41,6 +43,16 @@ export const SystemGoals: React.FC = () => {
       }
       
       setCredentials(credentialsMap);
+      
+      // Fetch phase certificates
+      const phaseCertsMap = new Map<number, BadgeCredential>();
+      for (let phase = 1; phase <= 5; phase++) {
+        const phaseCert = await getPhaseCertificate(user.id, phase);
+        if (phaseCert) {
+          phaseCertsMap.set(phase, phaseCert as BadgeCredential);
+        }
+      }
+      setPhaseCertificates(phaseCertsMap);
       
       // Automatically backfill any missing credentials (silently, without user interaction)
       if (missingCredentials.length > 0) {
@@ -185,11 +197,34 @@ export const SystemGoals: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                {!isUnlocked && (
-                  <div className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">
-                    Locked
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  {/* Phase Certificate Icon (Golden Coin) - extreme right */}
+                  {phaseCertificates.has(phase) && (
+                    <button
+                      onClick={() => {
+                        const cert = phaseCertificates.get(phase);
+                        if (cert) {
+                          setSelectedCredential(cert);
+                          setShowShareModal(true);
+                        }
+                      }}
+                      className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity"
+                      title="Phase Certificate - Click to share"
+                    >
+                      <img
+                        src="/Gold_coin_icon.png"
+                        alt={`Phase ${phase} Certificate`}
+                        className="w-12 h-12 object-contain"
+                      />
+                      <span className="text-xs font-semibold text-amber-600">Certificate</span>
+                    </button>
+                  )}
+                  {!isUnlocked && (
+                    <div className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">
+                      Locked
+                    </div>
+                  )}
+                </div>
               </div>
               {/* Phase Progress Bar */}
               {isUnlocked && (
@@ -324,16 +359,31 @@ export const SystemGoals: React.FC = () => {
       })}
 
       {/* Share Badge Modal */}
-      {showShareModal && selectedCredential && (
-        <ShareBadgeModal
-          isOpen={showShareModal}
-          onClose={() => {
-            setShowShareModal(false);
-            setSelectedCredential(null);
-          }}
-          credential={selectedCredential}
-        />
-      )}
+      {showShareModal && selectedCredential && (() => {
+        const phaseCert = selectedCredential as any;
+        const isPhaseCert = phaseCert.goal_id === null && phaseCert.phase_number !== undefined;
+        const phaseNumber = isPhaseCert ? phaseCert.phase_number : undefined;
+        const phaseNames: Record<number, string> = {
+          1: 'The Quick-Start Sprint',
+          2: 'Basic Engagement',
+          3: 'Intermediate Tracking',
+          4: 'Advanced Budgeting',
+          5: 'Financial Mastery'
+        };
+        return (
+          <ShareBadgeModal
+            isOpen={showShareModal}
+            onClose={() => {
+              setShowShareModal(false);
+              setSelectedCredential(null);
+            }}
+            credential={selectedCredential}
+            isCertificate={isPhaseCert}
+            phaseNumber={phaseNumber}
+            phaseName={phaseNumber ? phaseNames[phaseNumber] : undefined}
+          />
+        );
+      })()}
     </div>
   );
 };

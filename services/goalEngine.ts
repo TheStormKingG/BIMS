@@ -326,6 +326,16 @@ export class GoalEngine {
         })
         .eq('user_id', userId)
         .eq('goal_id', goalId);
+
+      // Check if phase is now complete and issue phase certificate + celebration
+      try {
+        const { checkAndIssuePhaseCertificates, createPhaseCelebration } = await import('./phaseCertificateService');
+        await checkAndIssuePhaseCertificates(userId);
+        // The checkAndIssuePhaseCertificates will create celebrations internally
+      } catch (phaseError) {
+        // Don't block goal completion if phase certificate check fails
+        console.error('Error checking phase certificates:', phaseError);
+      }
     } catch (error) {
       console.error('Error completing goal:', error);
       throw error;
