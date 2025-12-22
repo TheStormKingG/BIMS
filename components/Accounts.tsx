@@ -3,6 +3,7 @@ import { BankAccount, CashWallet } from '../types';
 import { Building2, Plus, Trash2, ArrowDownToLine, X, ChevronRight, ArrowLeft, Wallet, Archive, ArchiveRestore, Download, ChevronDown } from 'lucide-react';
 import { exportWalletTransactionsToCSV, exportWalletTransactionsToExcel, exportWalletTransactionsToPdf, exportBankTransactionsToCSV, exportBankTransactionsToExcel, exportBankTransactionsToPdf } from '../services/exportsService';
 import { getSupabase } from '../services/supabaseClient';
+import { emitEvent } from '../services/eventService';
 
 interface BankTransaction {
   id: string; // This is the bank_id (destination)
@@ -97,10 +98,16 @@ export const Accounts: React.FC<AccountsProps> = ({
   const walletExportDropdownRef = useRef<HTMLDivElement>(null);
   const bankExportDropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newName && newBalance) {
       onAddAccount(newName, Number(newBalance));
+      // Emit event for goal tracking
+      await emitEvent('ADD_ACCOUNT', {
+        account_name: newName,
+        account_type: 'BANK',
+        initial_balance: Number(newBalance)
+      });
       setNewName('');
       setNewBalance('');
       setIsAdding(false);

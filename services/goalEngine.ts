@@ -255,7 +255,8 @@ export class GoalEngine {
             badgeData.badge_description || badgeName,
             goalData.title,
             goalData.description || goalData.title,
-            recipientDisplayName
+            recipientDisplayName,
+            undefined // badgeLevel (optional)
           );
         } catch (credentialError) {
           // Log error but don't block celebration
