@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { parseReceiptImage } from '../services/geminiService';
 import { ReceiptScanResult, Account } from '../types';
 import { Upload as UploadIcon, Loader2, Check, AlertCircle, X, FileImage } from 'lucide-react';
+import { emitEvent } from '../services/eventService';
 
 interface UploadProps {
   accounts: Account[];
@@ -37,6 +38,13 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
     if (!scanResult) return accountsWithBalance;
     return accountsWithBalance.filter(acc => acc.available >= scanResult.total);
   }, [accountsWithBalance, scanResult]);
+
+  // Emit VIEW_UPLOAD event when component mounts (user views upload page)
+  useEffect(() => {
+    emitEvent('VIEW_UPLOAD').catch(err => {
+      console.error('Error emitting VIEW_UPLOAD event:', err);
+    });
+  }, []); // Run once on mount
 
   // Auto-select first account with sufficient funds when scan result changes
   useEffect(() => {

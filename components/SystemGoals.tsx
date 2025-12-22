@@ -1,11 +1,12 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Check, Trophy, Share2 } from 'lucide-react';
+import { ArrowLeft, Lock, Check, Trophy, Share2, RefreshCw, AlertCircle } from 'lucide-react';
 import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
 import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
 import { ShareBadgeModal } from './ShareBadgeModal';
+import { fixMissingCredentialsForUser } from '../services/fixMissingCredentials';
 
 export const SystemGoals: React.FC = () => {
   const navigate = useNavigate();
@@ -18,28 +19,6 @@ export const SystemGoals: React.FC = () => {
 
   // Fetch badges with goal IDs and credentials
   useEffect(() => {
-    const fetchBadgesAndCredentials = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const userBadgesWithGoals = await getUserBadgesWithGoals(user.id);
-        setBadgesWithGoals(userBadgesWithGoals);
-
-        // Fetch credentials for all completed goals
-        const credentialsMap = new Map<number, BadgeCredential>();
-        for (const badge of userBadgesWithGoals) {
-          const credential = await getCredentialByUserAndGoal(user.id, badge.goal_id);
-          if (credential) {
-            credentialsMap.set(badge.goal_id, credential);
-          }
-        }
-        setCredentials(credentialsMap);
-      } catch (error) {
-        console.error('Error fetching badges with goals:', error);
-      }
-    };
-
     if (!loading) {
       fetchBadgesAndCredentials();
     }
