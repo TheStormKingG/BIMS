@@ -72,7 +72,11 @@ ALTER TABLE user_celebrations
   );
 
 -- Update unique constraint to allow phase celebrations
-DROP INDEX IF EXISTS user_celebrations_user_id_goal_id_key;
+-- First drop the existing unique constraint (it's a constraint, not just an index)
+ALTER TABLE user_celebrations 
+  DROP CONSTRAINT IF EXISTS user_celebrations_user_id_goal_id_key;
+
+-- Create new unique indexes/constraints for goal-based and phase-based celebrations
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_celebrations_user_goal 
   ON user_celebrations(user_id, goal_id) 
   WHERE goal_id IS NOT NULL;
