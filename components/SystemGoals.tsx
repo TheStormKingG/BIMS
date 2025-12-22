@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Check, Trophy, Share2 } from 'lucide-react';
+import { ArrowLeft, Lock, Check, Trophy, Share2, CheckCircle } from 'lucide-react';
 import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
@@ -215,26 +215,50 @@ export const SystemGoals: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* Phase Certificate Icon (Golden Coin) - extreme right */}
+                  {/* Phase Certificate Icon (Golden Coin) - extreme right with Certificate Earned and Share */}
                   {phaseCertificates.has(phase) && (
-                    <button
-                      onClick={() => {
-                        const cert = phaseCertificates.get(phase);
-                        if (cert) {
-                          setSelectedCredential(cert);
-                          setShowShareModal(true);
-                        }
-                      }}
-                      className="flex flex-col items-center gap-1 hover:opacity-80 transition-opacity"
-                      title="Phase Certificate - Click to share"
-                    >
-                      <img
-                        src="/Gold_coin_icon.png"
-                        alt={`Phase ${phase} Certificate`}
-                        className="w-12 h-12 object-contain"
-                      />
-                      <span className="text-xs font-semibold text-amber-600">Certificate</span>
-                    </button>
+                    <div className="flex flex-col items-center gap-2">
+                      {/* Certificate Earned with Checkmark */}
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs font-semibold text-emerald-600">Certificate Earned</span>
+                      </div>
+                      
+                      {/* Coin Icon */}
+                      <button
+                        onClick={() => {
+                          const cert = phaseCertificates.get(phase);
+                          if (cert) {
+                            setSelectedCredential(cert);
+                            setShowShareModal(true);
+                          }
+                        }}
+                        className="hover:opacity-80 transition-opacity"
+                        title="Phase Certificate - Click to share"
+                      >
+                        <img
+                          src="/Gold_coin_icon.png"
+                          alt={`Phase ${phase} Certificate`}
+                          className="w-12 h-12 object-contain"
+                        />
+                      </button>
+                      
+                      {/* Share Button */}
+                      <button
+                        onClick={() => {
+                          const cert = phaseCertificates.get(phase);
+                          if (cert) {
+                            setSelectedCredential(cert);
+                            setShowShareModal(true);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                        title="Share Phase Certificate"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>Share</span>
+                      </button>
+                    </div>
                   )}
                   {!isUnlocked && (
                     <div className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">
