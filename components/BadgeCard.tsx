@@ -152,9 +152,14 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, phaseNumber, p
             </div>
           </div>
 
-          {/* 30-word Description - appears after badge, before QR code */}
-          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '40px', lineHeight: '1.6', maxWidth: '700px' }}>
-            {credential.badge_description}
+          {/* Transcript: 30-word Description - appears after badge, before QR code */}
+          <div style={{ marginBottom: '40px', maxWidth: '700px' }}>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px', letterSpacing: '0.5px' }}>
+              Transcript:
+            </div>
+            <div style={{ fontSize: '16px', color: '#4b5563', lineHeight: '1.6' }}>
+              {credential.badge_description}
+            </div>
           </div>
         </div>
 
