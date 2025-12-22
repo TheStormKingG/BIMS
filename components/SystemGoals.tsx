@@ -54,12 +54,16 @@ export const SystemGoals: React.FC = () => {
         return;
       }
 
-      await fixMissingCredentialsForUser(user.id);
+      const createdCount = await fixMissingCredentialsForUser(user.id);
       
       // Refresh credentials after fixing
       await fetchBadgesAndCredentials();
       
-      setFixCredentialsMessage('Successfully created missing credentials!');
+      setFixCredentialsMessage(
+        createdCount > 0 
+          ? `Successfully created ${createdCount} missing credential${createdCount > 1 ? 's' : ''}!`
+          : 'All badges already have credentials.'
+      );
       setTimeout(() => setFixCredentialsMessage(null), 5000);
     } catch (error: any) {
       console.error('Error fixing credentials:', error);

@@ -13,7 +13,7 @@ const supabase = getSupabase();
  * Fix missing credentials for a specific user
  * Creates credentials for all earned badges that don't have credentials yet
  */
-export const fixMissingCredentialsForUser = async (userId: string): Promise<void> => {
+export const fixMissingCredentialsForUser = async (userId: string): Promise<number> => {
   try {
     console.log(`Fixing missing credentials for user ${userId}...`);
 
@@ -99,6 +99,7 @@ export const fixMissingCredentialsForUser = async (userId: string): Promise<void
     }
 
     console.log(`Credential fix complete: ${createdCount} created, ${errorCount} errors`);
+    return createdCount;
   } catch (error) {
     console.error('Error fixing missing credentials:', error);
     throw error;
