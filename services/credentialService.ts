@@ -228,10 +228,10 @@ export async function issueCredential(
     // Insert credential with retry logic for reliability
     let data;
     let error;
-    let attempts = 0;
-    const maxAttempts = 3;
+    let insertAttempts = 0;
+    const maxInsertAttempts = 3;
     
-    while (attempts < maxAttempts) {
+    while (insertAttempts < maxInsertAttempts) {
       const result = await supabase
         .from('badge_credentials')
         .insert({
@@ -256,10 +256,10 @@ export async function issueCredential(
       
       if (!error) break;
       
-      attempts++;
-      if (attempts < maxAttempts) {
+      insertAttempts++;
+      if (insertAttempts < maxInsertAttempts) {
         // Wait before retry (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, 500 * attempts));
+        await new Promise(resolve => setTimeout(resolve, 500 * insertAttempts));
       }
     }
 
@@ -272,7 +272,7 @@ export async function issueCredential(
         hint: error.hint,
       };
       console.error('Credential insert error after retries:', errorDetails);
-      throw new Error(`Failed to create credential after ${maxAttempts} attempts: ${error.message}`);
+      throw new Error(`Failed to create credential after ${maxInsertAttempts} attempts: ${error.message}`);
     }
 
     // Log issuance event
