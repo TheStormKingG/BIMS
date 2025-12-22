@@ -39,10 +39,12 @@ export const useCelebrations = () => {
 
   // Show celebration with confetti
   const showCelebration = useCallback(async (celebration: Celebration) => {
+    // Set celebration and show state immediately so modal appears
+    setPendingCelebration(celebration);
     setIsShowingCelebration(true);
 
     // Trigger confetti animation
-    const duration = 3000;
+    const duration = 5000; // Increased to 5 seconds to match modal display
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 

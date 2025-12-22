@@ -4,14 +4,17 @@ import { Celebration } from '../services/celebrationService';
 import { SystemGoal, getSystemGoalById } from '../services/goalsService';
 
 interface CelebrationModalProps {
-  celebration: Celebration;
+  celebration: Celebration | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration, onClose }) => {
+export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration, isOpen, onClose }) => {
   const [goal, setGoal] = useState<SystemGoal | null>(null);
 
   useEffect(() => {
+    if (!celebration || !isOpen) return;
+    
     const fetchGoal = async () => {
       try {
         const goalData = await getSystemGoalById(celebration.goal_id);
@@ -22,10 +25,10 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration,
     };
 
     fetchGoal();
-  }, [celebration.goal_id]);
+  }, [celebration?.goal_id, isOpen]);
 
-  if (!goal) {
-    return null; // Or show loading state
+  if (!isOpen || !celebration || !goal) {
+    return null;
   }
 
   return (
