@@ -28,6 +28,26 @@ This guide will walk you through setting up the badge credentials system for pro
    - Paste into SQL Editor
    - Click "Run"
 
+5. **Run Migration 013** (Fix Badge Credentials RLS)
+   - Open file: `supabase/migrations/013_fix_badge_credentials_rls.sql`
+   - Copy the entire contents
+   - Paste into SQL Editor
+   - Click "Run"
+
+6. **Run Migration 014** (Phase Certificates Support - REQUIRED for Phase Certificates)
+   - Open file: `supabase/migrations/014_allow_null_goal_id_for_phase_certificates.sql`
+   - Copy the entire contents
+   - Paste into SQL Editor
+   - Click "Run"
+   - **This adds the `phase_number` column to `badge_credentials`**
+
+7. **Run Migration 015** (Phase Celebrations Support - REQUIRED for Phase Certificates)
+   - Open file: `supabase/migrations/015_add_phase_celebrations.sql`
+   - Copy the entire contents
+   - Paste into SQL Editor
+   - Click "Run"
+   - **This adds phase certificate support to `user_celebrations`**
+
 ### Option B: If you see "policy already exists" errors
 
 If you encounter errors about policies already existing, run migration 011 which will:
