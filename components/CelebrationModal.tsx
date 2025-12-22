@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Check } from 'lucide-react';
+import { Trophy, Check } from 'lucide-react';
 import { Celebration } from '../services/celebrationService';
 import { SystemGoal, getSystemGoalById } from '../services/goalsService';
 
@@ -34,14 +34,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
       <div className="bg-white rounded-xl border-2 border-emerald-500 shadow-2xl p-6 max-w-md w-full mx-4 relative animate-scale-in">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-6">
           {/* Circular check icon on the left, vertically centered */}
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center">
@@ -64,6 +57,16 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration,
               {goal.description}
             </p>
           </div>
+        </div>
+
+        {/* OK Button - Required to close modal */}
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+          >
+            OK
+          </button>
         </div>
       </div>
     </div>

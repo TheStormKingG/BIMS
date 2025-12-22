@@ -29,6 +29,7 @@ import { useGoals } from './hooks/useGoals';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
+import { emitEvent } from './services/eventService';
 import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
 function App() {
@@ -92,7 +93,7 @@ function App() {
   } = useGoals(spentItems, totalInBanks);
 
   // Celebration system (must be before any conditional returns)
-  const { pendingCelebration, isShowingCelebration } = useCelebrations();
+  const { pendingCelebration, isShowingCelebration, handleCloseCelebration } = useCelebrations();
 
   // Check auth state on mount and listen for changes
   useEffect(() => {
@@ -430,6 +431,13 @@ function App() {
       console.log('Adding spent items:', spentItemsToAdd);
       const addedSpentItems = await addSpentItems(spentItemsToAdd);
       console.log('Successfully added spent items:', addedSpentItems);
+      
+      // Emit event for goal tracking - receipt scanned (for SCAN_RECEIPT source)
+      if (spentItemsToAdd[0]?.source === 'SCAN_RECEIPT') {
+        emitEvent('RECEIPT_SCANNED', { itemCount: receiptData.items.length, total: receiptData.total }).catch(err => {
+          console.error('Error emitting RECEIPT_SCANNED event:', err);
+        });
+      }
       
       // Save receipt image if file is provided (for scanned receipts)
       if (file && addedSpentItems.length > 0) {
@@ -1007,15 +1015,7 @@ function App() {
       {isShowingCelebration && pendingCelebration && (
         <CelebrationModal
           isOpen={isShowingCelebration}
-          onClose={async () => {
-            // Mark celebration as shown when user closes modal
-            try {
-              const { markCelebrationShown } = await import('./services/celebrationService');
-              await markCelebrationShown(pendingCelebration.id);
-            } catch (error) {
-              console.error('Error marking celebration as shown:', error);
-            }
-          }}
+          onClose={handleCloseCelebration}
           celebration={pendingCelebration}
         />
       )}

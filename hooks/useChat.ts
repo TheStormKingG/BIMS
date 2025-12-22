@@ -11,6 +11,7 @@ import {
 } from '../services/chatDatabase';
 import { generateChatResponse, generateChatName } from '../services/chatService';
 import { SpentItem } from '../services/spentTableDatabase';
+import { emitEvent } from '../services/eventService';
 
 export const useChat = (spentItems: SpentItem[] = []) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -104,6 +105,12 @@ export const useChat = (spentItems: SpentItem[] = []) => {
         content,
       });
       setMessages(prev => [...prev, userMessage]);
+
+      // Emit event for goal tracking - AI chat message sent
+      emitEvent('AI_CHAT_MESSAGE_SENT', { sessionId: sessionToUse.id, messageContent: content }).catch(err => {
+        console.error('Error emitting AI_CHAT_MESSAGE_SENT event:', err);
+        // Don't block the message send if event emission fails
+      });
 
       // Generate AI response with updated messages including the new user message
       const updatedMessages = [...messages, userMessage];

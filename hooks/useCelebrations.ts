@@ -44,7 +44,7 @@ export const useCelebrations = () => {
     setIsShowingCelebration(true);
 
     // Trigger confetti animation
-    const duration = 5000; // Increased to 5 seconds to match modal display
+    const duration = 5000; // 5 seconds of confetti
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
@@ -72,16 +72,9 @@ export const useCelebrations = () => {
       });
     }, 250);
 
-    // Wait for confetti to finish, then mark as shown
-    setTimeout(async () => {
-      try {
-        await markCelebrationShown(celebration.id);
-        setPendingCelebration(null);
-        setIsShowingCelebration(false);
-      } catch (error) {
-        console.error('Error marking celebration as shown:', error);
-        setIsShowingCelebration(false);
-      }
+    // Stop confetti after duration - modal will remain open until user clicks OK
+    setTimeout(() => {
+      clearInterval(interval);
     }, duration);
   }, []);
 

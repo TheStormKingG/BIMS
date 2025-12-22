@@ -332,6 +332,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       const userAvatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
       
       await exportOverviewToPdf(accounts, spentItems, totalBalance, userEmail, userAvatarUrl);
+      emitEvent('EXPORT_PDF', { type: 'overview', itemCount: spentItems.length }).catch(err => {
+        console.error('Error emitting EXPORT_PDF event:', err);
+      });
     } catch (err) {
       console.error('Error exporting overview PDF:', err);
       alert('Failed to generate PDF. Please try again.');

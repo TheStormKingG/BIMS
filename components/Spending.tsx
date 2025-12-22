@@ -6,6 +6,7 @@ import { CashWallet, BankAccount } from '../types';
 import { ReceiptModal } from './ReceiptModal';
 import { exportSpendingToCSV, exportSpendingToExcel, exportSpendingToPdf } from '../services/exportsService';
 import { getSupabase } from '../services/supabaseClient';
+import { emitEvent } from '../services/eventService';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -78,12 +79,18 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
   const handleExportCSV = () => {
     exportSpendingToCSV(filteredItems);
+    emitEvent('EXPORT_CSV', { itemCount: filteredItems.length }).catch(err => {
+      console.error('Error emitting EXPORT_CSV event:', err);
+    });
     setShowExportDropdown(false);
   };
 
   const handleExportExcel = async () => {
     try {
       await exportSpendingToExcel(filteredItems);
+      emitEvent('EXPORT_EXCEL', { itemCount: filteredItems.length }).catch(err => {
+        console.error('Error emitting EXPORT_EXCEL event:', err);
+      });
     } catch (err) {
       alert('Failed to export to Excel: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
@@ -97,6 +104,9 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       const userEmail = session?.user?.email || undefined;
       const userAvatarUrl = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null;
       await exportSpendingToPdf(filteredItems, currentMonthName, userEmail, userAvatarUrl);
+      emitEvent('EXPORT_PDF', { itemCount: filteredItems.length, month: currentMonthName }).catch(err => {
+        console.error('Error emitting EXPORT_PDF event:', err);
+      });
     } catch (err) {
       alert('Failed to export to PDF: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
