@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Check, Trophy, Share2, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Lock, Check, Trophy, Share2 } from 'lucide-react';
 import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
@@ -95,25 +95,6 @@ export const SystemGoals: React.FC = () => {
             </p>
           </div>
         </div>
-        {/* Fix Missing Credentials Button */}
-        <button
-          onClick={handleFixMissingCredentials}
-          disabled={isFixingCredentials}
-          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
-          title="Create credentials for badges that are missing them"
-        >
-          {isFixingCredentials ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Fixing...</span>
-            </>
-          ) : (
-            <>
-              <RefreshCw className="w-4 h-4" />
-              <span>Fix Missing Credentials</span>
-            </>
-          )}
-        </button>
       </div>
 
       {/* Overall Progress Summary */}
