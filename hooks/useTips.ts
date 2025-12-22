@@ -107,6 +107,11 @@ export const useTips = () => {
       setTips(prev => prev.map(tip => 
         tip.id === tipId ? { ...tip, readAt: new Date().toISOString() } : tip
       ));
+      // Emit event for goal tracking - tip viewed
+      const { emitEvent } = await import('../services/eventService');
+      emitEvent('TIP_VIEWED', { tipId }).catch(err => {
+        console.error('Error emitting TIP_VIEWED event:', err);
+      });
     } catch (err) {
       console.error('Failed to mark tip as read:', err);
       throw err;

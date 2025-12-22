@@ -271,6 +271,11 @@ function App() {
       if (walletBank) {
         await addFundsInTransaction(walletBank.id, amount, source);
       }
+      
+      // Emit event for goal tracking - cash wallet funds added
+      emitEvent('CASH_WALLET_FUNDS_ADDED', { amount, source }).catch(err => {
+        console.error('Error emitting CASH_WALLET_FUNDS_ADDED event:', err);
+      });
 
       // If source is a bank account, deduct the amount from it
       if (source !== 'Cash-In (Payments, Gifts, Etc.)' && !source.startsWith('Cash-In')) {
@@ -1238,6 +1243,10 @@ const GoalsPageWrapper: React.FC<{
         await onEditGoal(editingGoal.id, input);
       } else {
         await onAddGoal(input);
+        // Emit event for goal tracking - goal created
+        emitEvent('GOAL_CREATED', { goalType: input.goalType, targetAmount: input.targetAmount }).catch(err => {
+          console.error('Error emitting GOAL_CREATED event:', err);
+        });
       }
       setIsModalOpen(false);
       setEditingGoal(null);

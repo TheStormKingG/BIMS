@@ -27,6 +27,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   const [selectedReceiptItem, setSelectedReceiptItem] = useState<SpentItem | null>(null);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
+  const searchEventEmittedRef = useRef(false); // Track if we've emitted search event for this search
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -239,6 +240,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
     if (!onUpdateSpend || !editingItem) return;
 
     try {
+      const originalCategory = editingItem.category;
       await onUpdateSpend(editingItem.id, {
         transactionDateTime: new Date(formData.transactionDateTime).toISOString(),
         category: formData.category,
@@ -249,6 +251,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
         paymentMethod: formData.paymentMethod || null,
         source: formData.source,
       });
+      
+      // Emit event for goal tracking - transaction categorized (only if category changed)
+      if (originalCategory !== formData.category) {
+        emitEvent('TRANSACTION_CATEGORIZED', { category: formData.category, originalCategory }).catch(err => {
+          console.error('Error emitting TRANSACTION_CATEGORIZED event:', err);
+        });
+      }
       
       handleCloseModal();
     } catch (err) {
@@ -277,7 +286,19 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
             type="text"
             placeholder="Search items, categories..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              // Emit event for goal tracking - spending searched (only once per search session)
+              if (e.target.value.trim() !== '' && !searchEventEmittedRef.current) {
+                searchEventEmittedRef.current = true;
+                emitEvent('SPENDING_SEARCHED', { searchTerm: e.target.value }).catch(err => {
+                  console.error('Error emitting SPENDING_SEARCHED event:', err);
+                });
+              } else if (e.target.value.trim() === '') {
+                // Reset flag when search is cleared
+                searchEventEmittedRef.current = false;
+              }
+            }}
             className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
           />
         </div>
