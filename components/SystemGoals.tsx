@@ -15,7 +15,59 @@ export const SystemGoals: React.FC = () => {
   const [credentials, setCredentials] = useState<Map<number, BadgeCredential>>(new Map());
   const [selectedCredential, setSelectedCredential] = useState<BadgeCredential | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isFixingCredentials, setIsFixingCredentials] = useState(false);
+  const [fixCredentialsMessage, setFixCredentialsMessage] = useState<string | null>(null);
   const supabase = getSupabase();
+
+  // Function to fetch badges with goal IDs and credentials
+  const fetchBadgesAndCredentials = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const userBadgesWithGoals = await getUserBadgesWithGoals(user.id);
+      setBadgesWithGoals(userBadgesWithGoals);
+
+      // Fetch credentials for all completed goals
+      const credentialsMap = new Map<number, BadgeCredential>();
+      for (const badge of userBadgesWithGoals) {
+        const credential = await getCredentialByUserAndGoal(user.id, badge.goal_id);
+        if (credential) {
+          credentialsMap.set(badge.goal_id, credential);
+        }
+      }
+      setCredentials(credentialsMap);
+    } catch (error) {
+      console.error('Error fetching badges with goals:', error);
+    }
+  };
+
+  // Function to fix missing credentials
+  const handleFixMissingCredentials = async () => {
+    try {
+      setIsFixingCredentials(true);
+      setFixCredentialsMessage(null);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setFixCredentialsMessage('Error: User not authenticated');
+        return;
+      }
+
+      await fixMissingCredentialsForUser(user.id);
+      
+      // Refresh credentials after fixing
+      await fetchBadgesAndCredentials();
+      
+      setFixCredentialsMessage('Successfully created missing credentials!');
+      setTimeout(() => setFixCredentialsMessage(null), 5000);
+    } catch (error: any) {
+      console.error('Error fixing credentials:', error);
+      setFixCredentialsMessage(`Error: ${error.message || 'Failed to fix credentials'}`);
+    } finally {
+      setIsFixingCredentials(false);
+    }
+  };
 
   // Fetch badges with goal IDs and credentials
   useEffect(() => {
