@@ -191,12 +191,15 @@ export class GoalEngine {
       if (badgeError) throw badgeError;
 
       // Check if badge already awarded (idempotency)
-      const { data: existingBadge } = await supabase
+      const { data: existingBadge, error: badgeCheckError } = await supabase
         .from('user_badges')
         .select('id')
         .eq('user_id', userId)
         .eq('badge_id', badge.badge_id)
-        .single();
+        .limit(1)
+        .maybeSingle();
+
+      if (badgeCheckError) throw badgeCheckError;
 
       if (!existingBadge) {
         // Award badge
@@ -211,12 +214,15 @@ export class GoalEngine {
       }
 
       // Check if celebration already exists (idempotency)
-      const { data: existingCelebration } = await supabase
+      const { data: existingCelebration, error: celebrationCheckError } = await supabase
         .from('user_celebrations')
         .select('id')
         .eq('user_id', userId)
         .eq('goal_id', goalId)
-        .single();
+        .limit(1)
+        .maybeSingle();
+
+      if (celebrationCheckError) throw celebrationCheckError;
 
       if (!existingCelebration) {
         // Get goal and badge details for message and credential

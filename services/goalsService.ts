@@ -228,13 +228,15 @@ const awardBadge = async (userId: string, goalId: number): Promise<void> => {
     if (badgeError) throw badgeError;
 
     // Check if badge already awarded
-    const { data: existing } = await supabaseClient
+    const { data: existing, error: existingError } = await supabaseClient
       .from('user_badges')
       .select('id')
       .eq('user_id', userId)
       .eq('badge_id', badge.badge_id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
+    if (existingError) throw existingError;
     if (existing) return; // Already awarded
 
     // Award badge
