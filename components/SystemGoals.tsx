@@ -28,13 +28,41 @@ export const SystemGoals: React.FC = () => {
 
       // Fetch credentials for all completed goals
       const credentialsMap = new Map<number, BadgeCredential>();
+      const missingCredentials: number[] = [];
+      
       for (const badge of userBadgesWithGoals) {
         const credential = await getCredentialByUserAndGoal(user.id, badge.goal_id);
         if (credential) {
           credentialsMap.set(badge.goal_id, credential);
+        } else {
+          // Track badges missing credentials for automatic backfill
+          missingCredentials.push(badge.goal_id);
         }
       }
+      
       setCredentials(credentialsMap);
+      
+      // Automatically backfill any missing credentials (silently, without user interaction)
+      if (missingCredentials.length > 0) {
+        console.log(`Found ${missingCredentials.length} badge(s) missing credentials, automatically creating them...`);
+        try {
+          const createdCount = await fixMissingCredentialsForUser(user.id);
+          if (createdCount > 0) {
+            console.log(`✓ Automatically created ${createdCount} missing credential(s)`);
+            // Refresh credentials after backfill
+            for (const goalId of missingCredentials) {
+              const credential = await getCredentialByUserAndGoal(user.id, goalId);
+              if (credential) {
+                credentialsMap.set(goalId, credential);
+              }
+            }
+            setCredentials(new Map(credentialsMap));
+          }
+        } catch (backfillError) {
+          console.error('Error automatically backfilling credentials:', backfillError);
+          // Don't show error to user - this is a background operation
+        }
+      }
     } catch (error) {
       console.error('Error fetching badges with goals:', error);
     }
