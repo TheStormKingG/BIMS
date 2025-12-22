@@ -48,6 +48,14 @@ This guide will walk you through setting up the badge credentials system for pro
    - Click "Run"
    - **This adds phase certificate support to `user_celebrations`**
 
+8. **Run Migration 016** (Update Existing Phase Certificate Descriptions - OPTIONAL but Recommended)
+   - Open file: `supabase/migrations/016_update_existing_phase_certificate_descriptions.sql`
+   - Copy the entire contents
+   - Paste into SQL Editor
+   - Click "Run"
+   - **This updates existing phase certificates with the new 30-word transcript descriptions**
+   - **Only run this if you have existing phase certificates that need updating**
+
 ### Option B: If you see "policy already exists" errors
 
 If you encounter errors about policies already existing, run migration 011 which will:
