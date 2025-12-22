@@ -118,14 +118,11 @@ export async function getCredentialByNumber(credentialNumber: string): Promise<B
       .from('badge_credentials')
       .select('*')
       .eq('credential_number', credentialNumber)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
-    if (error) {
-      if (error.code === 'PGRST116') return null; // Not found
-      throw error;
-    }
-
-    return data;
+    if (error) throw error;
+    return data as BadgeCredential | null;
   } catch (error) {
     console.error('Error fetching credential by number:', error);
     return null;
