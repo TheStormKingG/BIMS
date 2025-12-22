@@ -34,11 +34,11 @@ export async function isPhaseComplete(userId: string, phase: number): Promise<bo
 function generatePhaseDescription(phase: number, phaseName: string): string {
   // Each description is exactly 30 words - describes knowledge, skills, and behavioral change with NLP techniques
   const descriptions: Record<number, string> = {
-    1: `You now understand financial tracking basics and established account management skills. You developed the habit of reviewing your financial overview regularly. You gained confidence using digital tools and built readiness for deeper engagement.`,
-    2: `You now track transactions digitally, organize spending by category, and maintain weekly financial awareness. You developed skills in receipt scanning, manual logging, and cash wallet management. You consistently review insights and are ready for detailed tracking.`,
-    3: `You now maintain consistent tracking habits, analyze spending patterns across categories, and manage multiple accounts effectively. You developed skills in budget maintenance, spending reduction, and long-term financial awareness. You regularly use AI insights and are ready for advanced strategies.`,
-    4: `You now master monthly budget planning, achieve significant spending reductions, and maintain disciplined financial habits. You developed advanced skills in net worth management, comprehensive cash tracking, and strategic goal achievement. You consistently analyze progress and are ready for mastery.`,
-    5: `You now maintain complete financial visibility, achieve substantial efficiency gains, and demonstrate mastery of personal finance management. You developed expert skills in long-term wealth building, comprehensive tracking, and strategic financial optimization. You consistently apply advanced techniques and embody excellence.`
+    1: `Established confident financial footing by navigating Stashway, setting initial goals, engaging AI guidance, and building core tracking habits that transform awareness into intentional control from day one with clarity momentum.`,
+    2: `Developed disciplined data capture skills through scanning, manual entry, categorisation, reporting, and insight review, converting raw transactions into organised information that supports smarter, calmer, and more confident daily financial decisions.`,
+    3: `Built analytical consistency by sustaining tracking streaks, managing multiple assets, comparing categories, leveraging AI insights, and reviewing trends, strengthening pattern recognition and proactive decision-making across weeks and real-life spending situations.`,
+    4: `Mastered advanced budgeting behaviours by controlling long-term limits, optimising cash transparency, reducing overspend, analysing trends, and reinforcing habits that compound discipline, foresight, and measurable net worth growth over time sustainably.`,
+    5: `Demonstrated financial mastery through complete visibility, extreme consistency, strategic efficiency, and sustained net worth growth, proving the ability to self-govern money intelligently, calmly, and purposefully across long horizons with confidence.`
   };
   
   return descriptions[phase] || `You have successfully completed ${phaseName} and demonstrated consistent progress in your financial journey.`;
