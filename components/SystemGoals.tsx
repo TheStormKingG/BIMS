@@ -5,7 +5,7 @@ import { useSystemGoals } from '../hooks/useSystemGoals';
 import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
 import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
-import { getPhaseCertificate } from '../services/phaseCertificateService';
+import { getPhaseCertificate, checkAndIssuePhaseCertificates } from '../services/phaseCertificateService';
 import { ShareBadgeModal } from './ShareBadgeModal';
 import { fixMissingCredentialsForUser } from '../services/fixMissingCredentials';
 
@@ -53,6 +53,23 @@ export const SystemGoals: React.FC = () => {
         }
       }
       setPhaseCertificates(phaseCertsMap);
+      
+      // Check and issue any missing phase certificates for completed phases
+      try {
+        await checkAndIssuePhaseCertificates(user.id);
+        // Refresh phase certificates after checking
+        const updatedPhaseCertsMap = new Map<number, BadgeCredential>();
+        for (let phase = 1; phase <= 5; phase++) {
+          const phaseCert = await getPhaseCertificate(user.id, phase);
+          if (phaseCert) {
+            updatedPhaseCertsMap.set(phase, phaseCert as BadgeCredential);
+          }
+        }
+        setPhaseCertificates(updatedPhaseCertsMap);
+      } catch (phaseCertError) {
+        console.error('Error checking phase certificates:', phaseCertError);
+        // Don't show error to user - this is a background operation
+      }
       
       // Automatically backfill any missing credentials (silently, without user interaction)
       if (missingCredentials.length > 0) {
