@@ -1,5 +1,6 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { Share2, CheckCircle } from 'lucide-react';
 import { BadgeCredential } from '../services/credentialService';
 
 interface BadgeCardProps {
@@ -128,14 +129,52 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, phaseNumber, p
             {credential.goal_title}
           </div>
 
-          {/* Achievement Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '30px', marginBottom: '40px' }}>
-            <img
-              src={isPhaseCertificate ? "/Gold_coin_icon.png" : "/pngtree-3d-star-badge-clipart-png-image_6564314.png"}
-              alt={isPhaseCertificate ? "Phase Certificate" : "Badge"}
-              style={{ width: '120px', height: '120px', objectFit: 'contain' }}
-            />
-            <div>
+          {/* Achievement Badge - Vertical Layout */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '30px', marginTop: '30px', marginBottom: '40px' }}>
+            {/* Left: Certificate Coin/Badge with Certificate Earned and Share Button (Vertical Stack) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              {/* Certificate Earned with Checkmark */}
+              {isPhaseCertificate && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <CheckCircle style={{ width: '18px', height: '18px', color: '#059669', flexShrink: 0 }} />
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#059669', letterSpacing: '0.5px' }}>
+                    Certificate Earned
+                  </div>
+                </div>
+              )}
+              
+              {/* Coin/Badge Icon */}
+              <img
+                src={isPhaseCertificate ? "/Gold_coin_icon.png" : "/pngtree-3d-star-badge-clipart-png-image_6564314.png"}
+                alt={isPhaseCertificate ? "Phase Certificate" : "Badge"}
+                style={{ width: '120px', height: '120px', objectFit: 'contain' }}
+              />
+              
+              {/* Share Button - Visual element for certificate display */}
+              {isPhaseCertificate && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    backgroundColor: '#059669',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    width: 'fit-content'
+                  }}
+                >
+                  <Share2 style={{ width: '16px', height: '16px' }} />
+                  <span>Share</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Right: Badge Name and Details */}
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>
                 {credential.badge_name}
               </div>
