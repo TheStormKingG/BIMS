@@ -77,31 +77,49 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
         format: 'a4'
       });
 
-      // Get the badge card element and its parent container
+      // Get the badge card element (the actual card, not the scaled wrapper)
       const badgeCardElement = badgeCardRef.current;
       const parentContainer = badgeCardElement.parentElement;
-      const originalParentTransform = parentContainer?.style.transform || '';
-      const originalParentDisplay = parentContainer?.style.display || '';
-      const originalDisplay = badgeCardElement.style.display || '';
       
-      // Temporarily show at full size for capture (remove scale transform)
-      if (parentContainer) {
-        parentContainer.style.transform = 'scale(1)';
-        parentContainer.style.transformOrigin = 'top left';
-      }
-      badgeCardElement.style.display = 'block';
-      badgeCardElement.style.position = 'absolute';
-      badgeCardElement.style.left = '-9999px';
-      badgeCardElement.style.top = '0';
-      badgeCardElement.style.zIndex = '-1';
+      // Store original styles
+      const originalParentTransform = parentContainer?.style.transform || '';
+      const originalParentPosition = parentContainer?.style.position || '';
+      const originalParentLeft = parentContainer?.style.left || '';
+      const originalParentTop = parentContainer?.style.top || '';
+      const originalParentZIndex = parentContainer?.style.zIndex || '';
+      const originalBadgeDisplay = badgeCardElement.style.display || '';
+      const originalBadgePosition = badgeCardElement.style.position || '';
+      const originalBadgeLeft = badgeCardElement.style.left || '';
+      const originalBadgeTop = badgeCardElement.style.top || '';
+      const originalBadgeZIndex = badgeCardElement.style.zIndex || '';
+      
+      // Create a temporary container off-screen at full size for capture
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '1684px';
+      tempContainer.style.height = '1191px';
+      tempContainer.style.overflow = 'hidden';
+      document.body.appendChild(tempContainer);
+      
+      // Clone the badge card and add to temp container at full size
+      const badgeClone = badgeCardElement.cloneNode(true) as HTMLElement;
+      badgeClone.style.transform = 'scale(1)';
+      badgeClone.style.transformOrigin = 'top left';
+      badgeClone.style.position = 'relative';
+      badgeClone.style.left = '0';
+      badgeClone.style.top = '0';
+      tempContainer.appendChild(badgeClone);
+      
+      // Wait a moment for rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Convert HTML to canvas - capture at exact A4 dimensions
-      // A4 landscape at 300 DPI: 3508px x 2480px
-      // At 144 DPI (for web): 1684px x 1191px
-      // Using higher scale for better quality in PDF
-      const canvas = await html2canvas(badgeCardRef.current, {
+      // A4 landscape: 297mm x 210mm = 1684px x 1191px at 144 DPI
+      const canvas = await html2canvas(tempContainer, {
         backgroundColor: '#ffffff',
-        scale: 2.5, // Higher scale for better PDF quality
+        scale: 2, // Higher scale for better PDF quality
         logging: false,
         useCORS: true,
         width: 1684,
@@ -111,16 +129,8 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
         allowTaint: false,
       });
 
-      // Restore original styling
-      if (parentContainer) {
-        parentContainer.style.transform = originalParentTransform;
-        parentContainer.style.display = originalParentDisplay;
-      }
-      badgeCardElement.style.display = originalDisplay;
-      badgeCardElement.style.position = '';
-      badgeCardElement.style.left = '';
-      badgeCardElement.style.top = '';
-      badgeCardElement.style.zIndex = '';
+      // Cleanup temporary container
+      document.body.removeChild(tempContainer);
 
       // Convert canvas to image data
       const imgData = canvas.toDataURL('image/png', 1.0);
@@ -129,29 +139,8 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
       const pdfWidth = pdf.internal.pageSize.getWidth(); // 297mm
       const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
       
-      // Calculate aspect ratio to ensure image fills entire page
-      const canvasAspect = canvas.width / canvas.height;
-      const pdfAspect = pdfWidth / pdfHeight;
-      
-      let imgWidth = pdfWidth;
-      let imgHeight = pdfHeight;
-      let xOffset = 0;
-      let yOffset = 0;
-      
-      // If canvas is wider than PDF aspect, fit to width
-      if (canvasAspect > pdfAspect) {
-        imgWidth = pdfWidth;
-        imgHeight = pdfWidth / canvasAspect;
-        yOffset = (pdfHeight - imgHeight) / 2;
-      } else {
-        // If canvas is taller, fit to height
-        imgHeight = pdfHeight;
-        imgWidth = pdfHeight * canvasAspect;
-        xOffset = (pdfWidth - imgWidth) / 2;
-      }
-      
-      // Add image to PDF, filling the entire page (centered if needed)
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight, undefined, 'FAST');
+      // Add image to PDF, filling the entire page exactly
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
 
       // Download PDF
       pdf.save(`stashway-badge-${credential.credential_number}.pdf`);
