@@ -28,6 +28,22 @@ export async function isPhaseComplete(userId: string, phase: number): Promise<bo
 }
 
 /**
+ * Generate a 30-word phase certificate description
+ * Describes knowledge gained, skills developed, and behavioral change achieved
+ */
+function generatePhaseDescription(phase: number, phaseName: string): string {
+  const descriptions: Record<number, string> = {
+    1: `You now understand financial tracking basics and established account management skills. You developed the habit of reviewing your financial overview regularly. You've gained confidence using digital tools and built readiness for deeper engagement.`,
+    2: `You now track transactions digitally, organize spending by category, and maintain weekly financial awareness. You've developed skills in receipt scanning, manual logging, and cash wallet management. You consistently review insights and are ready for detailed tracking.`,
+    3: `You now maintain consistent tracking habits, analyze spending patterns across categories, and manage multiple accounts effectively. You've developed skills in budget maintenance, spending reduction, and long-term financial awareness. You regularly use AI insights and are ready for advanced strategies.`,
+    4: `You now master monthly budget planning, achieve significant spending reductions, and maintain disciplined financial habits. You've developed advanced skills in net worth management, comprehensive cash tracking, and strategic goal achievement. You consistently analyze progress and are ready for mastery.`,
+    5: `You now maintain complete financial visibility, achieve substantial efficiency gains, and demonstrate mastery of personal finance management. You've developed expert skills in long-term wealth building, comprehensive tracking, and strategic financial optimization. You consistently apply advanced techniques and embody excellence.`
+  };
+  
+  return descriptions[phase] || `You have successfully completed ${phaseName} and demonstrated consistent progress in your financial journey.`;
+}
+
+/**
  * Issue a phase certificate credential
  * Uses phase_number column to distinguish from regular badge credentials (goal_id is NULL)
  */
@@ -72,12 +88,15 @@ export async function issuePhaseCertificate(
       || user.email?.split('@')[0] 
       || 'User';
     
+    // Generate the 30-word phase description
+    const phaseDescription = generatePhaseDescription(phase, phaseName);
+    
     // Use issuePhaseCredentialDirect to insert with phase_number
     return await issuePhaseCredentialDirect(
       userId,
       phase,
       badgeName,
-      `Congratulations! You've completed all goals in ${phaseName} and earned your Phase ${phase} Certificate.`,
+      phaseDescription, // 30-word description for certificate
       goalTitle,
       criteriaSummary,
       recipientDisplayName,
