@@ -4,6 +4,8 @@ import { BadgeCredential } from '../services/credentialService';
 
 interface BadgeCardProps {
   credential: BadgeCredential;
+  phaseNumber?: number;
+  phaseName?: string;
   className?: string;
 }
 

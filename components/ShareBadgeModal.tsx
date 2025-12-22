@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Copy, Download, Share2, Linkedin, MessageCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import { BadgeCredential } from '../services/credentialService';
 import { BadgeCard } from './BadgeCard';
+import { Badge } from './Badge';
 import { logCredentialEvent } from '../services/credentialService';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -10,12 +11,18 @@ interface ShareBadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   credential: BadgeCredential;
+  isCertificate?: boolean; // true for phase certificates, false for individual badges
+  phaseNumber?: number;
+  phaseName?: string;
 }
 
 export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
   isOpen,
   onClose,
   credential,
+  isCertificate = false,
+  phaseNumber,
+  phaseName,
 }) => {
   const [copied, setCopied] = useState<'link' | 'number' | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -65,94 +72,114 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownload = async () => {
     if (!badgeCardRef.current) return;
 
     setDownloading(true);
     try {
-      // A4 landscape dimensions in mm: 297mm x 210mm
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
+      if (isCertificate) {
+        // Certificate: Download as PDF (A4 landscape)
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
 
-      // Get the badge card element (the actual card, not the scaled wrapper)
-      const badgeCardElement = badgeCardRef.current;
-      const parentContainer = badgeCardElement.parentElement;
-      
-      // Store original styles
-      const originalParentTransform = parentContainer?.style.transform || '';
-      const originalParentPosition = parentContainer?.style.position || '';
-      const originalParentLeft = parentContainer?.style.left || '';
-      const originalParentTop = parentContainer?.style.top || '';
-      const originalParentZIndex = parentContainer?.style.zIndex || '';
-      const originalBadgeDisplay = badgeCardElement.style.display || '';
-      const originalBadgePosition = badgeCardElement.style.position || '';
-      const originalBadgeLeft = badgeCardElement.style.left || '';
-      const originalBadgeTop = badgeCardElement.style.top || '';
-      const originalBadgeZIndex = badgeCardElement.style.zIndex || '';
-      
-      // Create a temporary container off-screen at full size for capture
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '1684px';
-      tempContainer.style.height = '1191px';
-      tempContainer.style.overflow = 'hidden';
-      document.body.appendChild(tempContainer);
-      
-      // Clone the badge card and add to temp container at full size
-      const badgeClone = badgeCardElement.cloneNode(true) as HTMLElement;
-      badgeClone.style.transform = 'scale(1)';
-      badgeClone.style.transformOrigin = 'top left';
-      badgeClone.style.position = 'relative';
-      badgeClone.style.left = '0';
-      badgeClone.style.top = '0';
-      tempContainer.appendChild(badgeClone);
-      
-      // Wait a moment for rendering
-      await new Promise(resolve => setTimeout(resolve, 100));
+        const badgeCardElement = badgeCardRef.current;
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '1684px';
+        tempContainer.style.height = '1191px';
+        tempContainer.style.overflow = 'hidden';
+        document.body.appendChild(tempContainer);
+        
+        const badgeClone = badgeCardElement.cloneNode(true) as HTMLElement;
+        badgeClone.style.transform = 'scale(1)';
+        badgeClone.style.transformOrigin = 'top left';
+        badgeClone.style.position = 'relative';
+        badgeClone.style.left = '0';
+        badgeClone.style.top = '0';
+        tempContainer.appendChild(badgeClone);
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Convert HTML to canvas - capture at exact A4 dimensions
-      // A4 landscape: 297mm x 210mm = 1684px x 1191px at 144 DPI
-      const canvas = await html2canvas(tempContainer, {
-        backgroundColor: '#ffffff',
-        scale: 2, // Higher scale for better PDF quality
-        logging: false,
-        useCORS: true,
-        width: 1684,
-        height: 1191,
-        windowWidth: 1684,
-        windowHeight: 1191,
-        allowTaint: false,
-      });
+        const canvas = await html2canvas(tempContainer, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          width: 1684,
+          height: 1191,
+          windowWidth: 1684,
+          windowHeight: 1191,
+          allowTaint: false,
+        });
 
-      // Cleanup temporary container
-      document.body.removeChild(tempContainer);
+        document.body.removeChild(tempContainer);
 
-      // Convert canvas to image data
-      const imgData = canvas.toDataURL('image/png', 1.0);
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.save(`stashway-certificate-${credential.credential_number}.pdf`);
 
-      // Get exact A4 landscape dimensions in mm
-      const pdfWidth = pdf.internal.pageSize.getWidth(); // 297mm
-      const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
-      
-      // Add image to PDF, filling the entire page exactly
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        await logCredentialEvent(credential.id, 'SHARED', {
+          method: 'download_pdf',
+          credential_number: credential.credential_number
+        });
+      } else {
+        // Badge: Download as PNG (portrait)
+        const badgeCardElement = badgeCardRef.current;
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '1191px';
+        tempContainer.style.height = '1684px';
+        tempContainer.style.overflow = 'hidden';
+        document.body.appendChild(tempContainer);
+        
+        const badgeClone = badgeCardElement.cloneNode(true) as HTMLElement;
+        badgeClone.style.transform = 'scale(1)';
+        badgeClone.style.transformOrigin = 'top left';
+        badgeClone.style.position = 'relative';
+        badgeClone.style.left = '0';
+        badgeClone.style.top = '0';
+        tempContainer.appendChild(badgeClone);
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Download PDF
-      pdf.save(`stashway-badge-${credential.credential_number}.pdf`);
+        const canvas = await html2canvas(tempContainer, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          width: 1191,
+          height: 1684,
+          windowWidth: 1191,
+          windowHeight: 1684,
+          allowTaint: false,
+        });
 
-      // Log share event
-      await logCredentialEvent(credential.id, 'SHARED', {
-        method: 'download_pdf',
-        credential_number: credential.credential_number
-      });
+        document.body.removeChild(tempContainer);
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const link = document.createElement('a');
+        link.download = `stashway-badge-${credential.credential_number}.png`;
+        link.href = imgData;
+        link.click();
+
+        await logCredentialEvent(credential.id, 'SHARED', {
+          method: 'download_image',
+          credential_number: credential.credential_number
+        });
+      }
     } catch (error) {
-      console.error('Failed to download PDF:', error);
-      alert('Failed to download badge PDF. Please try again.');
+      console.error('Failed to download:', error);
+      alert(`Failed to download ${isCertificate ? 'certificate' : 'badge'}. Please try again.`);
     } finally {
       setDownloading(false);
     }
@@ -271,21 +298,21 @@ export const ShareBadgeModal: React.FC<ShareBadgeModalProps> = ({
                   )}
                 </button>
 
-                {/* Download PDF */}
+                {/* Download Button */}
                 <button
-                  onClick={handleDownloadPDF}
+                  onClick={handleDownload}
                   disabled={downloading}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 mb-6 disabled:bg-slate-400 disabled:cursor-not-allowed"
                 >
                   {downloading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Generating PDF...</span>
+                      <span>Generating {isCertificate ? 'PDF' : 'Image'}...</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-5 h-5" />
-                      <span>Download Badge PDF</span>
+                      <span>Download {isCertificate ? 'Certificate PDF' : 'Badge Image'}</span>
                     </>
                   )}
                 </button>
