@@ -1,6 +1,6 @@
 import { getSupabase } from './supabaseClient';
 import { EventType } from './eventService';
-import { SystemGoal, UserGoalProgress, CompletionCriteria } from './goalsService';
+import { SystemGoal, UserGoalProgress, CompletionCriteria, getPhaseUnlockStatus, getSystemGoalsByPhase } from './goalsService';
 import { issueCredential } from './credentialService';
 
 const supabase = getSupabase();
@@ -14,6 +14,9 @@ export class GoalEngine {
    */
   static async processEvent(userId: string, eventType: EventType, metadata: Record<string, any> = {}): Promise<void> {
     try {
+      // Get phase unlock status first
+      const phaseUnlocks = await getPhaseUnlockStatus(userId);
+      
       // Find all goals that might be affected by this event type
       const { data: goals, error: goalsError } = await supabase
         .from('system_goals')
@@ -22,13 +25,15 @@ export class GoalEngine {
 
       if (goalsError) throw goalsError;
 
-      // Filter goals that match this event type
+      // Filter goals that match this event type AND are from unlocked phases
       const relevantGoals = (goals || []).filter(goal => {
         const criteria = goal.completion_criteria as CompletionCriteria;
-        return criteria.event_type === this.mapEventTypeToCriteria(eventType);
+        const matchesEventType = criteria.event_type === this.mapEventTypeToCriteria(eventType);
+        const isPhaseUnlocked = phaseUnlocks[goal.phase] === true;
+        return matchesEventType && isPhaseUnlocked;
       });
 
-      // Evaluate each relevant goal
+      // Evaluate each relevant goal (only from unlocked phases)
       for (const goal of relevantGoals) {
         await this.evaluateGoal(userId, goal, eventType, metadata);
       }
