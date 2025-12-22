@@ -30,6 +30,7 @@ import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDa
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
 import { emitEvent } from './services/eventService';
+import { checkAndIssuePhaseCertificates } from './services/phaseCertificateService';
 import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
 function App() {
@@ -98,12 +99,25 @@ function App() {
   // Check auth state on mount and listen for changes
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         console.error('Error getting session:', error);
         // If it's a 403, it might be a configuration issue, but we'll still show login
       }
       setUser(session?.user ?? null);
+      
+      // Check and issue phase certificates for completed phases (including Phase 1) on initial load
+      if (session?.user?.id) {
+        try {
+          console.log('Checking for completed phases and issuing certificates on initial load...');
+          await checkAndIssuePhaseCertificates(session.user.id);
+          console.log('Phase certificate check completed');
+        } catch (error) {
+          console.error('Error checking phase certificates on initial load:', error);
+          // Don't block app load if this fails
+        }
+      }
+      
       setAuthLoading(false);
     }).catch((err) => {
       console.error('Failed to get session:', err);
@@ -125,6 +139,18 @@ function App() {
         // Redirect to overview if on login page
         if (location.pathname === '/') {
           navigate('/overview', { replace: true });
+        }
+        
+        // Check and issue phase certificates for completed phases (including Phase 1)
+        if (session?.user?.id) {
+          try {
+            console.log('Checking for completed phases and issuing certificates...');
+            await checkAndIssuePhaseCertificates(session.user.id);
+            console.log('Phase certificate check completed');
+          } catch (error) {
+            console.error('Error checking phase certificates on auth:', error);
+            // Don't block auth flow if this fails
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
