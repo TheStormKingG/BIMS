@@ -174,8 +174,7 @@ export const getUserBadges = async (userId: string): Promise<UserBadge[]> => {
 
 /**
  * Get phase unlock status for a user
- * Phase unlocks when 70% of previous phase goals are completed
- * Phase 5 only unlocks after Phase 4 is complete
+ * Each phase unlocks when 100% of previous phase goals are completed
  */
 export const getPhaseUnlockStatus = async (userId: string): Promise<Record<number, boolean>> => {
   try {
@@ -187,23 +186,13 @@ export const getPhaseUnlockStatus = async (userId: string): Promise<Record<numbe
     };
 
     // Calculate unlock status for phases 2-5
+    // Each phase requires 100% completion of the previous phase
     for (let phase = 2; phase <= 5; phase++) {
-      if (phase === 5) {
-        // Phase 5 requires 100% completion of Phase 4
-        const phase4Goals = goalsByPhase[4] || [];
-        const phase4Completed = progress.filter(
-          p => phase4Goals.some(g => g.id === p.goal_id) && p.is_completed
-        ).length;
-        unlockStatus[phase] = phase4Completed === phase4Goals.length;
-      } else {
-        // Other phases require 70% completion of previous phase
-        const prevPhaseGoals = goalsByPhase[phase - 1] || [];
-        const prevPhaseCompleted = progress.filter(
-          p => prevPhaseGoals.some(g => g.id === p.goal_id) && p.is_completed
-        ).length;
-        const requiredCompleted = Math.ceil(prevPhaseGoals.length * 0.7);
-        unlockStatus[phase] = prevPhaseCompleted >= requiredCompleted;
-      }
+      const prevPhaseGoals = goalsByPhase[phase - 1] || [];
+      const prevPhaseCompleted = progress.filter(
+        p => prevPhaseGoals.some(g => g.id === p.goal_id) && p.is_completed
+      ).length;
+      unlockStatus[phase] = prevPhaseCompleted === prevPhaseGoals.length && prevPhaseGoals.length > 0;
     }
 
     return unlockStatus;

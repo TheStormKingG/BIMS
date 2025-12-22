@@ -315,10 +315,7 @@ export const SystemGoals: React.FC = () => {
                 <Lock className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                 <h4 className="text-lg font-semibold text-slate-900 mb-2">Phase {phase} is Locked</h4>
                 <p className="text-slate-500">
-                  {phase === 5 
-                    ? 'Complete all goals in Phase 4 to unlock Phase 5'
-                    : `Complete 70% of Phase ${phase - 1} goals to unlock Phase ${phase}`
-                  }
+                  Complete all goals in Phase {phase - 1} to unlock Phase {phase}
                 </p>
               </div>
             )}
