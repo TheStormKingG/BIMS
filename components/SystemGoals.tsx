@@ -6,7 +6,6 @@ import { getUserBadgesWithGoals } from '../services/badgesService';
 import { getSupabase } from '../services/supabaseClient';
 import { getCredentialByUserAndGoal, BadgeCredential } from '../services/credentialService';
 import { ShareBadgeModal } from './ShareBadgeModal';
-import { fixMissingCredentialsForUser } from '../services/fixMissingCredentials';
 
 export const SystemGoals: React.FC = () => {
   const navigate = useNavigate();
@@ -15,8 +14,6 @@ export const SystemGoals: React.FC = () => {
   const [credentials, setCredentials] = useState<Map<number, BadgeCredential>>(new Map());
   const [selectedCredential, setSelectedCredential] = useState<BadgeCredential | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [isFixingCredentials, setIsFixingCredentials] = useState(false);
-  const [fixCredentialsMessage, setFixCredentialsMessage] = useState<string | null>(null);
   const supabase = getSupabase();
 
   // Function to fetch badges with goal IDs and credentials
@@ -42,36 +39,6 @@ export const SystemGoals: React.FC = () => {
     }
   };
 
-  // Function to fix missing credentials
-  const handleFixMissingCredentials = async () => {
-    try {
-      setIsFixingCredentials(true);
-      setFixCredentialsMessage(null);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setFixCredentialsMessage('Error: User not authenticated');
-        return;
-      }
-
-      const createdCount = await fixMissingCredentialsForUser(user.id);
-      
-      // Refresh credentials after fixing
-      await fetchBadgesAndCredentials();
-      
-      setFixCredentialsMessage(
-        createdCount > 0 
-          ? `Successfully created ${createdCount} missing credential${createdCount > 1 ? 's' : ''}!`
-          : 'All badges already have credentials.'
-      );
-      setTimeout(() => setFixCredentialsMessage(null), 5000);
-    } catch (error: any) {
-      console.error('Error fixing credentials:', error);
-      setFixCredentialsMessage(`Error: ${error.message || 'Failed to fix credentials'}`);
-    } finally {
-      setIsFixingCredentials(false);
-    }
-  };
 
   // Fetch badges with goal IDs and credentials
   useEffect(() => {
@@ -148,17 +115,6 @@ export const SystemGoals: React.FC = () => {
           )}
         </button>
       </div>
-      
-      {fixCredentialsMessage && (
-        <div className={`p-4 rounded-lg flex items-center gap-2 ${
-          fixCredentialsMessage.startsWith('Error') 
-            ? 'bg-red-50 border border-red-200 text-red-700' 
-            : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-        }`}>
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <span className="text-sm">{fixCredentialsMessage}</span>
-        </div>
-      )}
 
       {/* Overall Progress Summary */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">

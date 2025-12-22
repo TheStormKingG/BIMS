@@ -225,27 +225,55 @@ export async function issueCredential(
     const evidenceHash = hashEvidence(payload);
     const signature = computeSignature(payload);
 
-    // Insert credential
-    const { data, error } = await supabase
-      .from('badge_credentials')
-      .insert({
-        credential_number: credentialNumber,
-        user_id: userId,
-        recipient_display_name: recipientDisplayName,
-        badge_name: badgeName,
-        badge_description: badgeDescription,
-        badge_level: badgeLevel || null,
-        goal_id: goalId,
-        goal_title: goalTitle,
-        criteria_summary: criteriaSummary,
-        evidence_hash: evidenceHash,
-        signature: signature,
-        status: 'ACTIVE'
-      })
-      .select()
-      .single();
+    // Insert credential with retry logic for reliability
+    let data;
+    let error;
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      const result = await supabase
+        .from('badge_credentials')
+        .insert({
+          credential_number: credentialNumber,
+          user_id: userId,
+          recipient_display_name: recipientDisplayName,
+          badge_name: badgeName,
+          badge_description: badgeDescription,
+          badge_level: badgeLevel || null,
+          goal_id: goalId,
+          goal_title: goalTitle,
+          criteria_summary: criteriaSummary,
+          evidence_hash: evidenceHash,
+          signature: signature,
+          status: 'ACTIVE'
+        })
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+      
+      if (!error) break;
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 500 * attempts));
+      }
+    }
 
-    if (error) throw error;
+    if (error) {
+      // Provide detailed error information
+      const errorDetails = {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      };
+      console.error('Credential insert error after retries:', errorDetails);
+      throw new Error(`Failed to create credential after ${maxAttempts} attempts: ${error.message}`);
+    }
 
     // Log issuance event
     await logCredentialEvent(data.id, 'ISSUED', {

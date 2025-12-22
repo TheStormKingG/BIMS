@@ -247,33 +247,48 @@ export class GoalEngine {
           || 'User';
 
         // Issue credential (creates shareable/verifiable certificate)
-        // CRITICAL: All badges must have credentials to be shareable
-        try {
-          const credential = await issueCredential(
-            userId,
-            goalId,
-            badgeName,
-            badgeData.badge_description || badgeName,
-            goalData.title,
-            goalData.description || goalData.title,
-            recipientDisplayName,
-            undefined // badgeLevel (optional)
-          );
-          console.log(`✓ Credential issued for goal ${goalId} (${goalData.title}): ${credential.credential_number}`);
-        } catch (credentialError: any) {
-          // Log detailed error prominently - credential creation is critical for shareable badges
-          console.error(`⚠️ CRITICAL: Failed to issue credential for goal ${goalId} (${goalData.title})`);
-          console.error('Credential error details:', {
-            message: credentialError?.message,
-            code: credentialError?.code,
-            details: credentialError?.details,
-            hint: credentialError?.hint,
-            stack: credentialError?.stack,
-          });
-          // Log a warning that the badge won't be shareable until credential is created
-          console.warn(`⚠️ Badge "${badgeName}" for goal "${goalData.title}" will not be shareable until credential is created. Use "Fix Missing Credentials" button to create it.`);
-          // Continue with goal completion - the fixMissingCredentials function can create it later
-          // We don't throw here to allow goal completion, but we log prominently so issues are visible
+        // CRITICAL: All badges MUST have credentials to be shareable
+        // Retry logic to ensure credential creation succeeds
+        let credentialCreated = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (!credentialCreated && retryCount < maxRetries) {
+          try {
+            const credential = await issueCredential(
+              userId,
+              goalId,
+              badgeName,
+              badgeData.badge_description || badgeName,
+              goalData.title,
+              goalData.description || goalData.title,
+              recipientDisplayName,
+              undefined // badgeLevel (optional)
+            );
+            console.log(`✓ Credential issued for goal ${goalId} (${goalData.title}): ${credential.credential_number}`);
+            credentialCreated = true;
+          } catch (credentialError: any) {
+            retryCount++;
+            console.error(`⚠️ Attempt ${retryCount}/${maxRetries}: Failed to issue credential for goal ${goalId} (${goalData.title})`);
+            console.error('Credential error details:', {
+              message: credentialError?.message,
+              code: credentialError?.code,
+              details: credentialError?.details,
+              hint: credentialError?.hint,
+            });
+            
+            if (retryCount >= maxRetries) {
+              // Final attempt failed - log critical error but still continue with goal completion
+              // The credential can be created later if needed, but we don't want to block goal completion
+              console.error(`✗ CRITICAL: Failed to create credential after ${maxRetries} attempts for goal ${goalId} (${goalData.title})`);
+              console.error(`Badge "${badgeName}" may not be shareable until credential is created.`);
+              // Don't throw - allow goal completion to proceed
+              break;
+            }
+            
+            // Wait a bit before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          }
         }
 
         // Create celebration
