@@ -9,7 +9,8 @@ interface BadgeCardProps {
   className?: string;
 }
 
-export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = '' }) => {
+export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, phaseNumber, phaseName, className = '' }) => {
+  const isPhaseCertificate = phaseNumber !== undefined && phaseNumber !== null;
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -126,16 +127,12 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', marginBottom: '20px', lineHeight: '1.3' }}>
             {credential.goal_title}
           </div>
-          
-          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '40px', lineHeight: '1.6', maxWidth: '700px' }}>
-            {credential.badge_description}
-          </div>
 
           {/* Achievement Badge */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '30px', marginBottom: '40px' }}>
             <img
-              src="/pngtree-3d-star-badge-clipart-png-image_6564314.png"
-              alt="Badge"
+              src={isPhaseCertificate ? "/Gold_coin_icon.png" : "/pngtree-3d-star-badge-clipart-png-image_6564314.png"}
+              alt={isPhaseCertificate ? "Phase Certificate" : "Badge"}
               style={{ width: '120px', height: '120px', objectFit: 'contain' }}
             />
             <div>
@@ -147,7 +144,17 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ credential, className = ''
                   {credential.badge_level}
                 </div>
               )}
+              {isPhaseCertificate && phaseName && (
+                <div style={{ fontSize: '18px', color: '#059669', fontWeight: '600', marginTop: '8px' }}>
+                  {phaseName}
+                </div>
+              )}
             </div>
+          </div>
+
+          {/* 30-word Description - appears after badge, before QR code */}
+          <div style={{ fontSize: '16px', color: '#4b5563', marginBottom: '40px', lineHeight: '1.6', maxWidth: '700px' }}>
+            {credential.badge_description}
           </div>
         </div>
 
