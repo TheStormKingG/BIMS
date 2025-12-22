@@ -955,8 +955,16 @@ function App() {
                        }
                      }
                      
-                     const addedItems = await addSpentItems([item]);
-                     await loadCurrentMonth();
+                    const addedItems = await addSpentItems([item]);
+                    
+                    // Emit event for goal tracking - manual spend added
+                    if (item.source === 'MANUAL') {
+                      emitEvent('MANUAL_SPEND_ADDED', { itemTotal: item.itemTotal, category: item.category }).catch(err => {
+                        console.error('Error emitting MANUAL_SPEND_ADDED event:', err);
+                      });
+                    }
+                    
+                    await loadCurrentMonth();
                      
                      if (item.paymentMethod) {
                        const isWallet = item.paymentMethod === 'Cash Wallet';

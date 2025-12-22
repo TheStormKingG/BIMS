@@ -101,9 +101,27 @@ export const useCelebrations = () => {
     }
   }, [pendingCelebration, isShowingCelebration, showCelebration]);
 
+  // Function to handle modal close and mark celebration as shown
+  const handleCloseCelebration = useCallback(async () => {
+    if (pendingCelebration) {
+      try {
+        await markCelebrationShown(pendingCelebration.id);
+        setPendingCelebration(null);
+        setIsShowingCelebration(false);
+        // After closing, check for more celebrations
+        setTimeout(() => {
+          checkCelebrations();
+        }, 1000);
+      } catch (error) {
+        console.error('Error marking celebration as shown:', error);
+      }
+    }
+  }, [pendingCelebration, checkCelebrations]);
+
   return {
     pendingCelebration,
     isShowingCelebration,
     checkCelebrations,
+    handleCloseCelebration,
   };
 };
