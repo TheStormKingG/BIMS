@@ -494,9 +494,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             </select>
           </div>
         </div>
-        <div className="h-80 min-h-[320px]">
+        <div className="w-full" style={{ height: '320px', minHeight: '320px' }}>
           {spendingOverTime.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+            <ResponsiveContainer width="100%" height={320}>
               <LineChart data={spendingOverTime}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis 
@@ -543,9 +543,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         {/* Spending Chart */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-4">Spending by Category</h3>
-          <div className="h-64 min-h-[256px]">
+          <div className="w-full" style={{ height: '256px', minHeight: '256px' }}>
             {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%" minHeight={256}>
+              <ResponsiveContainer width="100%" height={256}>
                 <PieChart>
                   <Pie
                     data={categoryData}
