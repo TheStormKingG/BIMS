@@ -559,7 +559,11 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <div className="flex flex-col">
                   <span className="font-medium text-slate-900">Current Plan</span>
                   <span className="text-xs text-slate-500 capitalize">
-                    {entitlement.effectivePlan === 'none' ? 'Free Trial' : entitlement.effectivePlan.replace('_', ' ').toUpperCase()}
+                    {entitlement.isTrialActive 
+                      ? 'PRO (Trial)' 
+                      : entitlement.effectivePlan === 'none' 
+                        ? 'Free Trial' 
+                        : entitlement.effectivePlan.replace('_', ' ').toUpperCase()}
                   </span>
                 </div>
               </div>
@@ -569,7 +573,15 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </span>
               )}
             </div>
-            {(entitlement.status === 'expired' || entitlement.effectivePlan === 'none') && (
+            {entitlement.isTrialActive && (
+              <button
+                onClick={handleUpgradePlan}
+                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors"
+              >
+                Upgrade Now
+              </button>
+            )}
+            {(entitlement.status === 'expired' || entitlement.effectivePlan === 'none') && !entitlement.isTrialActive && (
               <button
                 onClick={handleUpgradePlan}
                 className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors"
