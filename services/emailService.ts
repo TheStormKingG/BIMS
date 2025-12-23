@@ -19,9 +19,6 @@ export async function sendMMGUploadEmail(params: {
     throw new Error('EmailJS configuration is missing. Please check environment variables.');
   }
 
-  // Initialize EmailJS
-  emailjs.init(publicKey);
-
   // Prepare template parameters
   const templateParams = {
     to_email: 'stefan.gravesande@preqal.com,stefan.gravesande@gmail.com',
@@ -34,7 +31,9 @@ export async function sendMMGUploadEmail(params: {
   };
 
   try {
-    await emailjs.send(serviceId, templateId, templateParams);
+    await emailjs.send(serviceId, templateId, templateParams, {
+      publicKey: publicKey,
+    });
     console.log('MMG upload notification email sent successfully');
   } catch (error) {
     console.error('Error sending MMG upload notification email:', error);
