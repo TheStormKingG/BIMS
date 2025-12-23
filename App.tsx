@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from './constants';
 import { Accounts } from './components/Accounts';
@@ -36,7 +36,7 @@ import { checkAndIssuePhaseCertificates } from './services/phaseCertificateServi
 import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
 // Inner app content that uses subscription context
-function AppContent({ user, setUser, authLoading }: { user: any; setUser: (user: any) => void; authLoading: boolean }) {
+function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) {
   const [showScanModal, setShowScanModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,77 +97,6 @@ function AppContent({ user, setUser, authLoading }: { user: any; setUser: (user:
 
   // Celebration system (must be before any conditional returns)
   const { pendingCelebration, isShowingCelebration, handleCloseCelebration } = useCelebrations();
-
-  // Check auth state on mount and listen for changes
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
-      if (error) {
-        console.error('Error getting session:', error);
-        // If it's a 403, it might be a configuration issue, but we'll still show login
-      }
-      setUser(session?.user ?? null);
-      
-      // Check and issue phase certificates for completed phases (including Phase 1) on initial load
-      // Only run once per session to avoid retriggering celebrations
-      if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
-        try {
-          console.log('Checking for completed phases and issuing certificates on initial load...');
-          await checkAndIssuePhaseCertificates(session.user.id);
-          sessionStorage.setItem('phase_cert_check_done', 'true');
-          console.log('Phase certificate check completed');
-        } catch (error) {
-          console.error('Error checking phase certificates on initial load:', error);
-          // Don't block app load if this fails
-        }
-      }
-      
-      setAuthLoading(false);
-    }).catch((err) => {
-      console.error('Failed to get session:', err);
-      setAuthLoading(false);
-    });
-
-    // Listen for auth changes (this will catch OAuth callbacks)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setUser(session?.user ?? null);
-        // Clean up URL hash after successful sign in
-        if (window.location.hash) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        // Redirect to overview if on login page
-        if (location.pathname === '/') {
-          navigate('/overview', { replace: true });
-        }
-        
-        // Check and issue phase certificates for completed phases (including Phase 1)
-        // Only run once per session to avoid retriggering celebrations
-        if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
-          try {
-            console.log('Checking for completed phases and issuing certificates...');
-            await checkAndIssuePhaseCertificates(session.user.id);
-            sessionStorage.setItem('phase_cert_check_done', 'true');
-            console.log('Phase certificate check completed');
-          } catch (error) {
-            console.error('Error checking phase certificates on auth:', error);
-            // Don't block auth flow if this fails
-          }
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        sessionStorage.removeItem('phase_cert_check_done');
-        navigate('/', { replace: true });
-      }
-      setAuthLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // Public routes that don't require authentication (accessible to all users)
   const publicRoutes = ['/', '/privacy', '/terms', '/about', '/verify'];
@@ -1344,36 +1273,70 @@ function App() {
   const location = useLocation();
   const supabase = getSupabase();
 
+  // Refs to prevent duplicate bootstrap/certificate checks
+  const certificateCheckRef = useRef(false);
+  const lastSessionTokenRef = useRef<string | null>(null);
+
   // Auth state management
   useEffect(() => {
+    let mounted = true;
+
+    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (!mounted) return;
+      
       if (error) {
         console.error('Error getting session:', error);
+        setAuthLoading(false);
+        return;
       }
+      
       setUser(session?.user ?? null);
       
       // Check and issue phase certificates for completed phases (including Phase 1) on initial load
-      if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
+      // Only run once per session to avoid retriggering celebrations
+      if (session?.user?.id && !certificateCheckRef.current && !sessionStorage.getItem('phase_cert_check_done')) {
+        certificateCheckRef.current = true;
         try {
-          console.log('Checking for completed phases and issuing certificates on initial load...');
           await checkAndIssuePhaseCertificates(session.user.id);
           sessionStorage.setItem('phase_cert_check_done', 'true');
-          console.log('Phase certificate check completed');
         } catch (error) {
           console.error('Error checking phase certificates on initial load:', error);
+          certificateCheckRef.current = false; // Reset on error so it can retry
         }
+      }
+      
+      if (session?.access_token) {
+        lastSessionTokenRef.current = session.access_token;
       }
       
       setAuthLoading(false);
     }).catch((err) => {
+      if (!mounted) return;
       console.error('Failed to get session:', err);
       setAuthLoading(false);
     });
 
+    // Listen for auth changes (this will catch OAuth callbacks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
+      if (!mounted) return;
+      
+      // Ignore INITIAL_SESSION events with undefined session or duplicate tokens
+      if (event === 'INITIAL_SESSION') {
+        if (!session?.user || !session?.access_token) {
+          return; // Don't process incomplete sessions
+        }
+        // Ignore if we've already seen this token
+        if (lastSessionTokenRef.current === session.access_token) {
+          return;
+        }
+        lastSessionTokenRef.current = session.access_token;
+      }
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session?.access_token) {
+          lastSessionTokenRef.current = session.access_token;
+        }
         setUser(session?.user ?? null);
         if (window.location.hash) {
           window.history.replaceState({}, document.title, window.location.pathname);
@@ -1382,26 +1345,33 @@ function App() {
           navigate('/overview', { replace: true });
         }
         
-        if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
+        // Check and issue phase certificates - only run once per session
+        if (session?.user?.id && !certificateCheckRef.current && !sessionStorage.getItem('phase_cert_check_done')) {
+          certificateCheckRef.current = true;
           try {
-            console.log('Checking for completed phases and issuing certificates...');
             await checkAndIssuePhaseCertificates(session.user.id);
             sessionStorage.setItem('phase_cert_check_done', 'true');
-            console.log('Phase certificate check completed');
           } catch (error) {
             console.error('Error checking phase certificates on auth:', error);
+            certificateCheckRef.current = false; // Reset on error
           }
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         sessionStorage.removeItem('phase_cert_check_done');
+        certificateCheckRef.current = false;
+        lastSessionTokenRef.current = null;
         navigate('/', { replace: true });
       }
+      
       setAuthLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate, location.pathname]);
 
   // Show loading while checking auth
   if (authLoading) {
@@ -1417,7 +1387,7 @@ function App() {
 
   return (
     <SubscriptionProvider user={user}>
-      <AppContent user={user} setUser={setUser} authLoading={authLoading} />
+      <AppContent user={user} authLoading={authLoading} />
     </SubscriptionProvider>
   );
 }
