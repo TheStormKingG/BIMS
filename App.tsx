@@ -1295,10 +1295,20 @@ function App() {
   // Auth state management
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    // Add timeout to prevent infinite loading (10 seconds max)
+    timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth initialization timed out, continuing anyway');
+        setAuthLoading(false);
+      }
+    }, 10000);
 
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (!mounted) return;
+      if (timeoutId) clearTimeout(timeoutId);
       
       if (error) {
         console.error('Error getting session:', error);
@@ -1310,15 +1320,16 @@ function App() {
       
       // Check and issue phase certificates for completed phases (including Phase 1) on initial load
       // Only run once per session to avoid retriggering celebrations
+      // Run this asynchronously so it doesn't block auth loading
       if (session?.user?.id && !certificateCheckRef.current && !sessionStorage.getItem('phase_cert_check_done')) {
         certificateCheckRef.current = true;
-        try {
-          await checkAndIssuePhaseCertificates(session.user.id);
+        // Don't await - let it run in background
+        checkAndIssuePhaseCertificates(session.user.id).then(() => {
           sessionStorage.setItem('phase_cert_check_done', 'true');
-        } catch (error) {
+        }).catch((error) => {
           console.error('Error checking phase certificates on initial load:', error);
           certificateCheckRef.current = false; // Reset on error so it can retry
-        }
+        });
       }
       
       if (session?.access_token) {
@@ -1328,9 +1339,15 @@ function App() {
       setAuthLoading(false);
     }).catch((err) => {
       if (!mounted) return;
+      if (timeoutId) clearTimeout(timeoutId);
       console.error('Failed to get session:', err);
       setAuthLoading(false);
     });
+
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
 
     // Listen for auth changes (this will catch OAuth callbacks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
