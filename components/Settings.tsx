@@ -112,7 +112,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
   const handleShare = (platform: string) => {
-    const shareUrl = 'https://stashway.app';
+    const shareUrl = 'https://stashway.app/about';
     const shareText = 'Check out Stashway™ - Financial Intelligence!';
 
     const shareUrls: Record<string, string> = {
@@ -128,7 +128,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText('https://stashway.app');
+    navigator.clipboard.writeText('https://stashway.app/about');
     alert('Link copied to clipboard!');
   };
 
@@ -380,7 +380,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    value="https://stashway.app"
+                    value="https://stashway.app/about"
                     readOnly
                     className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg text-sm border border-slate-600"
                   />
