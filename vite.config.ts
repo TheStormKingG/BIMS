@@ -13,14 +13,16 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [
         react(),
-        // Copy 404.html to dist folder after build
+        // Copy static HTML files to dist folder after build
         {
-          name: 'copy-404',
+          name: 'copy-static-html',
           closeBundle() {
             try {
               copyFileSync('404.html', 'dist/404.html');
+              copyFileSync('public/about-share.html', 'dist/about-share.html');
+              copyFileSync('public/about-share-wa.html', 'dist/about-share-wa.html');
             } catch (err) {
-              console.warn('Could not copy 404.html:', err);
+              console.warn('Could not copy static HTML files:', err);
             }
           }
         }
