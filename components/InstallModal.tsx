@@ -121,12 +121,21 @@ export const InstallModal: React.FC = () => {
   // Listen for app installation
   useEffect(() => {
     const handleAppInstalled = () => {
+      console.log('App installed event received');
       setIsInstalled(true);
       setShowModal(false);
       setDeferredPrompt(null);
+      (window as any).deferredPrompt = null;
+      localStorage.setItem('pwa_installed', 'true');
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Check if already installed on mount
+    const installed = localStorage.getItem('pwa_installed') === 'true';
+    if (installed || window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
 
     return () => {
       window.removeEventListener('appinstalled', handleAppInstalled);
@@ -134,19 +143,28 @@ export const InstallModal: React.FC = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('User accepted the PWA install prompt');
-        setIsInstalled(true);
-        setShowModal(false);
-      } else {
-        console.log('User dismissed the PWA install prompt');
+    const prompt = deferredPrompt || (window as any).deferredPrompt;
+    
+    if (prompt) {
+      try {
+        await prompt.prompt();
+        const { outcome } = await prompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('User accepted the PWA install prompt');
+          setIsInstalled(true);
+          setShowModal(false);
+          localStorage.setItem('pwa_installed', 'true');
+        } else {
+          console.log('User dismissed the PWA install prompt');
+        }
+        
+        setDeferredPrompt(null);
+        (window as any).deferredPrompt = null;
+        promptHandledRef.current = false;
+      } catch (error) {
+        console.error('Error showing install prompt:', error);
       }
-      
-      setDeferredPrompt(null);
     } else {
       // Fallback: Show instructions for manual installation
       alert('To install this app:\n\nOn Android: Tap the menu (⋮) and select "Add to Home screen"\n\nOn iOS: Tap the Share button and select "Add to Home Screen"');
@@ -155,6 +173,7 @@ export const InstallModal: React.FC = () => {
 
   const handleDismiss = () => {
     setShowModal(false);
+    promptHandledRef.current = false; // Allow showing again on next login
   };
 
   if (!showModal || isInstalled) {
