@@ -123,16 +123,19 @@ export const Pricing: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Hero Section with Background */}
       <div 
-        className="relative bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 py-20 px-4"
+        className="relative py-20 px-4 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(16,185,129,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(20,184,166,0.1) 0%, transparent 50%)'
+          backgroundImage: 'url(/pexels-andriy-nestruiev-288919368-19896100.jpg)'
         }}
       >
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/30"></div>
+        
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
             Affordable plans for all your needs
           </h1>
-          <p className="text-xl text-slate-700 mb-8">
+          <p className="text-xl text-white/95 mb-8 drop-shadow-md">
             Start with a free 14-day trial. No credit card required.
           </p>
         </div>
