@@ -107,10 +107,6 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
 
   // Handle public routes immediately - accessible to both authenticated and unauthenticated users
   // This must be checked before authLoading to prevent infinite loading
-  if (location.pathname === '/about') {
-    return <Landing />;
-  }
-
   if (location.pathname === '/privacy') {
     return <PrivacyPolicy />;
   }
@@ -624,6 +620,9 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
       {/* Main Content Area */}
       <main className={`${isChatRoute ? 'p-0 max-w-none w-full h-full m-0' : 'p-4 md:p-8 max-w-6xl'} ${isChatRoute ? '' : 'mx-auto'} w-full ${isChatRoute ? 'h-screen md:h-screen' : ''}`}>
          <Routes>
+           {/* Public routes */}
+           <Route path="/about" element={<Landing />} />
+           
            {/* Public verification routes */}
            <Route path="/verify" element={<VerifySearch />} />
            <Route path="/verify/:credential_number" element={<VerifyCredential />} />
