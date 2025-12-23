@@ -148,7 +148,7 @@ export const createWallet = async (initialBalance: number = 0): Promise<CashWall
 // Update wallet balance
 export const updateWalletBalance = async (newBalance: number): Promise<CashWallet> => {
   try {
-    // First, check if wallet exists
+    // First, check if wallet exists and get its ID
     let wallet = await fetchWallet();
     
     if (!wallet) {
@@ -156,7 +156,7 @@ export const updateWalletBalance = async (newBalance: number): Promise<CashWalle
       return await createWallet(newBalance);
     }
     
-    // Update wallet balance
+    // Update wallet balance using the wallet ID directly to avoid updating multiple rows
     // Get current user for filtering
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -166,14 +166,7 @@ export const updateWalletBalance = async (newBalance: number): Promise<CashWalle
         total: newBalance,
         updated: new Date().toISOString()
       })
-      .eq('bank_name', 'Cash Wallet');
-    
-    // Filter by user_id if user is logged in
-    if (user) {
-      updateQuery = updateQuery.eq('user_id', user.id);
-    } else {
-      updateQuery = updateQuery.is('user_id', null);
-    }
+      .eq('id', wallet.id); // Use wallet ID instead of bank_name to ensure only one row is updated
     
     const { data, error } = await updateQuery.select().maybeSingle();
     

@@ -240,13 +240,15 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTra
                 >
                   <option value="">Select source...</option>
                   <option value="Cash-In">Cash-In (Payments, Gifts, Etc.)</option>
-                  {banks.length > 0 && (
+                  {banks.filter(bank => bank.bank_name !== 'Cash Wallet').length > 0 && (
                     <optgroup label="From Bank Account">
-                      {banks.map(bank => (
-                        <option key={bank.id} value={bank.name}>
-                          {bank.name}
-                        </option>
-                      ))}
+                      {banks
+                        .filter(bank => bank.bank_name !== 'Cash Wallet') // Exclude Cash Wallet from source options
+                        .map(bank => (
+                          <option key={bank.id} value={bank.bank_name}>
+                            {bank.bank_name}
+                          </option>
+                        ))}
                     </optgroup>
                   )}
                 </select>
