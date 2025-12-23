@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Mail, Facebook, Twitter, LogOut, Lightbulb } from 'lucide-react';
+import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
@@ -112,14 +112,13 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
   const handleShare = (platform: string) => {
-    const shareUrl = 'https://stashway.app/about-share.html';
-    const shareText = 'Stashway™ - Financial Intelligence App! https://stashway.app/about-share.html';
+    const whatsappUrl = 'https://stashway.app/about-share-wa.html';
+    const facebookUrl = 'https://stashway.app/about-share.html';
+    const shareText = 'Stashway™ - Financial Intelligence App!';
 
     const shareUrls: Record<string, string> = {
-      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
-      email: `mailto:?subject=${encodeURIComponent('Stashway™ - Financial Intelligence App!')}&body=${encodeURIComponent(shareUrl)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + whatsappUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookUrl)}`,
     };
 
     if (shareUrls[platform]) {
@@ -353,24 +352,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                       <Facebook className="w-6 h-6 text-white" />
                     </div>
                     <span className="text-xs text-slate-300">Facebook</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare('twitter')}
-                    className="flex flex-col items-center gap-2 min-w-[60px]"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
-                      <Twitter className="w-6 h-6 text-white" />
-                    </div>
-                    <span className="text-xs text-slate-300">X</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare('email')}
-                    className="flex flex-col items-center gap-2 min-w-[60px]"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-white" />
-                    </div>
-                    <span className="text-xs text-slate-300">Email</span>
                   </button>
                 </div>
               </div>
