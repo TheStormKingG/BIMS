@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.2.1';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const ADMIN_EMAILS = [
