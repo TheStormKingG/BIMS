@@ -22,19 +22,8 @@ export const Pricing: React.FC = () => {
       return;
     }
 
-    try {
-      setSelectingPlan(planId);
-      const plan = planId as SubscriptionPlan;
-      await updateUserSubscriptionPlan(user.id, plan);
-      await refreshSubscription();
-      alert(`Successfully upgraded to ${planId.toUpperCase()} plan!`);
-      navigate('/overview');
-    } catch (error) {
-      console.error('Error selecting plan:', error);
-      alert('Failed to select plan. Please try again.');
-    } finally {
-      setSelectingPlan(null);
-    }
+    // Navigate to MMG payment flow instead of directly updating subscription
+    navigate(`/pay/mmg?plan=${planId}`);
   };
 
   const plans = [

@@ -22,6 +22,8 @@ import { SystemGoals } from './components/SystemGoals';
 import { CelebrationModal } from './components/CelebrationModal';
 import { VerifyCredential } from './components/VerifyCredential';
 import { VerifySearch } from './components/VerifySearch';
+import { PayMMG } from './components/PayMMG';
+import { AdminVerifyMMG } from './components/AdminVerifyMMG';
 import { useCelebrations } from './hooks/useCelebrations';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
@@ -33,6 +35,7 @@ import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
 import { emitEvent } from './services/eventService';
 import { checkAndIssuePhaseCertificates } from './services/phaseCertificateService';
+import { checkPlanUpgradeNotification, markNotificationRead } from './services/notificationService';
 import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
 // Inner app content that uses subscription context
