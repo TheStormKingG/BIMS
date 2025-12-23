@@ -113,7 +113,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleShare = (platform: string) => {
     const shareUrl = 'https://stashway.app';
-    const shareText = 'Check out Stashway - Personal Finance App!';
+    const shareText = 'Check out Stashway™ - Financial Intelligence!';
 
     const shareUrls: Record<string, string> = {
       whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
