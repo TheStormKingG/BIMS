@@ -24,6 +24,7 @@ import { VerifyCredential } from './components/VerifyCredential';
 import { VerifySearch } from './components/VerifySearch';
 import { PayMMG } from './components/PayMMG';
 import { AdminVerifyMMG } from './components/AdminVerifyMMG';
+import { InstallModal } from './components/InstallModal';
 import { useCelebrations } from './hooks/useCelebrations';
 import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
@@ -1318,6 +1319,14 @@ function App() {
       
       setUser(session?.user ?? null);
       
+      // Mark user as logged in for PWA install modal
+      if (session?.user) {
+        sessionStorage.setItem('user_logged_in', 'true');
+        localStorage.setItem('user_logged_in', 'true');
+        // Dispatch custom event to trigger install modal
+        window.dispatchEvent(new Event('user-logged-in'));
+      }
+      
       // Check and issue phase certificates for completed phases (including Phase 1) on initial load
       // Only run once per session to avoid retriggering celebrations
       // Run this asynchronously so it doesn't block auth loading
@@ -1369,6 +1378,15 @@ function App() {
           lastSessionTokenRef.current = session.access_token;
         }
         setUser(session?.user ?? null);
+        
+        // Mark user as logged in for PWA install modal
+        if (session?.user) {
+          sessionStorage.setItem('user_logged_in', 'true');
+          localStorage.setItem('user_logged_in', 'true');
+          // Dispatch custom event to trigger install modal
+          window.dispatchEvent(new Event('user-logged-in'));
+        }
+        
         if (window.location.hash) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -1420,6 +1438,7 @@ function App() {
 
   return (
     <SubscriptionProvider user={user}>
+      <InstallModal />
       <AppContent user={user} authLoading={authLoading} />
     </SubscriptionProvider>
   );

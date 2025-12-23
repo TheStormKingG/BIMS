@@ -3,17 +3,30 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-// Unregister any existing service workers to prevent errors and network issues
+// Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    const unregisterPromises = registrations.map((registration) => 
-      registration.unregister().catch(() => {
-        // Silently ignore errors - service worker may already be unregistered
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker registered successfully:', registration.scope);
+        
+        // Check for updates periodically
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New service worker available, can prompt user to refresh
+                console.log('New service worker available');
+              }
+            });
+          }
+        });
       })
-    );
-    return Promise.all(unregisterPromises);
-  }).catch(() => {
-    // Silently ignore if getRegistrations fails
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+      });
   });
 }
 
