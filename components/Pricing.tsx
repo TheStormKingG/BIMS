@@ -5,14 +5,16 @@ import { X, Check } from 'lucide-react';
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
 
+  // Convert USD to GYD (approximately 209 GYD per USD)
+  const usdToGyd = (usd: number) => Math.round(usd * 209);
+
   const plans = [
     {
       id: 'personal',
       title: 'Personal',
       subtitle: 'Start managing your finances',
-      monthlyPrice: 6,
-      annualPrice: 6,
-      monthlyBilling: 7.99,
+      usdPrice: 9,
+      gydPrice: usdToGyd(9),
       features: [
         'Unlimited Transactions',
         'Unlimited Goals',
@@ -25,9 +27,8 @@ export const Pricing: React.FC = () => {
       id: 'pro',
       title: 'Pro',
       subtitle: 'Build your financial future',
-      monthlyPrice: 12,
-      annualPrice: 12,
-      monthlyBilling: 14.99,
+      usdPrice: 18,
+      gydPrice: usdToGyd(18),
       features: [
         'Everything in Personal',
         'Advanced Analytics',
@@ -35,38 +36,22 @@ export const Pricing: React.FC = () => {
         'Custom Categories',
         'AI Financial Insights'
       ],
-      popular: false
+      popular: true
     },
     {
-      id: 'pro-plus',
-      title: 'Pro Plus',
-      subtitle: 'Expand your financial mastery',
-      monthlyPrice: 24,
-      annualPrice: 24,
-      monthlyBilling: 28.99,
+      id: 'pro-max',
+      title: 'Pro Max',
+      subtitle: 'Maximum financial mastery',
+      usdPrice: 45,
+      gydPrice: usdToGyd(45),
       features: [
         'Everything in Pro',
         'Priority Support',
         'Multiple Bank Accounts',
         'Advanced Budgeting Tools',
         'Financial Forecasting',
-        'Custom Reports'
-      ],
-      popular: true
-    },
-    {
-      id: 'unlimited',
-      title: 'Unlimited',
-      subtitle: 'Unlimited room for your business',
-      monthlyPrice: 44,
-      annualPrice: 44,
-      monthlyBilling: 49.99,
-      features: [
-        'Everything in Pro Plus',
-        'Team Collaboration',
-        'API Access',
-        'White-label Options',
-        'Dedicated Account Manager'
+        'Custom Reports',
+        'API Access'
       ],
       popular: false
     }
@@ -81,16 +66,16 @@ export const Pricing: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Hero Section with Background */}
       <div 
-        className="relative bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 py-20 px-4"
+        className="relative bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 py-20 px-4"
         style={{
-          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%)'
+          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(16,185,129,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(20,184,166,0.1) 0%, transparent 50%)'
         }}
       >
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
             Affordable plans for all your needs
           </h1>
-          <p className="text-xl text-white/90 mb-8">
+          <p className="text-xl text-slate-700 mb-8">
             Try Stashway's 14-day free trial. No credit card required.
           </p>
           <button
@@ -104,7 +89,7 @@ export const Pricing: React.FC = () => {
 
       {/* Pricing Plans Section */}
       <div className="max-w-7xl mx-auto px-4 py-16">
-        {/* Most Popular Badge */}
+        {/* Most Popular Badge - positioned above middle card (Pro plan) */}
         <div className="relative mb-8">
           <div className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-20">
             <div className="bg-green-500 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
@@ -114,7 +99,7 @@ export const Pricing: React.FC = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={plan.id}
@@ -132,14 +117,14 @@ export const Pricing: React.FC = () => {
                 </p>
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-slate-900">
-                    ${plan.monthlyPrice}
+                    GYD {plan.gydPrice.toLocaleString()}
                   </span>
                   <span className="text-slate-600 text-lg ml-2">
                     / month
                   </span>
                 </div>
                 <p className="text-sm text-slate-500 mb-6">
-                  Billed annually or ${plan.monthlyBilling.toFixed(2)} month-to-month
+                  ${plan.usdPrice} USD per month
                 </p>
                 <button
                   onClick={() => handleGetStarted(plan.id)}
