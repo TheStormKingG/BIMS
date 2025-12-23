@@ -1344,11 +1344,6 @@ function App() {
       setAuthLoading(false);
     });
 
-    return () => {
-      mounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-
     // Listen for auth changes (this will catch OAuth callbacks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
@@ -1356,14 +1351,18 @@ function App() {
       // Ignore INITIAL_SESSION events with undefined session or duplicate tokens
       if (event === 'INITIAL_SESSION') {
         if (!session?.user || !session?.access_token) {
+          setAuthLoading(false); // Ensure loading stops even if we return early
           return; // Don't process incomplete sessions
         }
         // Ignore if we've already seen this token
         if (lastSessionTokenRef.current === session.access_token) {
+          setAuthLoading(false);
           return;
         }
         lastSessionTokenRef.current = session.access_token;
       }
+      
+      if (timeoutId) clearTimeout(timeoutId);
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session?.access_token) {
@@ -1378,15 +1377,16 @@ function App() {
         }
         
         // Check and issue phase certificates - only run once per session
+        // Run asynchronously so it doesn't block auth loading
         if (session?.user?.id && !certificateCheckRef.current && !sessionStorage.getItem('phase_cert_check_done')) {
           certificateCheckRef.current = true;
-          try {
-            await checkAndIssuePhaseCertificates(session.user.id);
+          // Don't await - let it run in background
+          checkAndIssuePhaseCertificates(session.user.id).then(() => {
             sessionStorage.setItem('phase_cert_check_done', 'true');
-          } catch (error) {
+          }).catch((error) => {
             console.error('Error checking phase certificates on auth:', error);
             certificateCheckRef.current = false; // Reset on error
-          }
+          });
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
