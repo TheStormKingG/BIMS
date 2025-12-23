@@ -55,8 +55,8 @@ export const AdminVerifyMMG: React.FC = () => {
         return;
       }
 
-      const { data: userData } = await supabase.auth.admin.getUserById(user.id);
-      const userEmail = userData?.user?.email?.toLowerCase();
+      // Check user email directly (client-side safe)
+      const userEmail = user.email?.toLowerCase();
       
       setIsAdmin(userEmail ? ADMIN_EMAILS.includes(userEmail) : false);
       
