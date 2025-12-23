@@ -113,13 +113,13 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleShare = (platform: string) => {
     const shareUrl = 'https://stashway.app/about';
-    const shareText = 'Check out Stashway™ - Financial Intelligence!';
+    const shareText = 'Stashway™ - Financial Intelligence App! https://stashway.app/about';
 
     const shareUrls: Record<string, string> = {
-      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      email: `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(shareUrl)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
+      email: `mailto:?subject=${encodeURIComponent('Stashway™ - Financial Intelligence App!')}&body=${encodeURIComponent(shareUrl)}`,
     };
 
     if (shareUrls[platform]) {
