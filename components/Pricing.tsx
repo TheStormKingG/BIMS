@@ -255,33 +255,6 @@ export const Pricing: React.FC = () => {
                   >
                     {isSelecting ? 'Processing...' : isCurrentPlan ? (entitlement.isTrialActive ? 'Trial Active' : 'Current Plan') : 'Choose Plan'}
                   </button>
-                  <p className="text-slate-600 text-sm mb-6">
-                    {plan.subtitle}
-                  </p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-slate-900">
-                      GYD {plan.gydPrice.toLocaleString()}
-                    </span>
-                    <span className="text-slate-600 text-lg ml-2">
-                      / month
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-500 mb-6">
-                    ${plan.usdPrice} USD per month
-                  </p>
-                  <button
-                    onClick={() => handleChoosePlan(plan.id)}
-                    disabled={isCurrentPlan || isSelecting}
-                    className={`w-full py-3 rounded-lg font-semibold transition-colors mb-6 ${
-                      isCurrentPlan
-                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                        : plan.popular
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-emerald-400'
-                        : 'bg-green-600 hover:bg-green-700 text-white disabled:bg-green-400'
-                    }`}
-                  >
-                    {isSelecting ? 'Processing...' : isCurrentPlan ? 'Current Plan' : 'Choose Plan'}
-                  </button>
 
                   {/* Features List */}
                   <div className="max-h-96 overflow-y-auto">
