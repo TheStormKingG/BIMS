@@ -16,6 +16,7 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsAndConditions } from './components/TermsAndConditions';
 import { SettingsPrivacy } from './components/SettingsPrivacy';
 import { SettingsTerms } from './components/SettingsTerms';
+import { Pricing } from './components/Pricing';
 import { Landing } from './components/Landing';
 import { SystemGoals } from './components/SystemGoals';
 import { CelebrationModal } from './components/CelebrationModal';
@@ -839,6 +840,11 @@ function App() {
             <Route path="/settings/terms" element={
               <ProtectedRoute>
                 <SettingsTerms />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings/pricing" element={
+              <ProtectedRoute>
+                <Pricing />
               </ProtectedRoute>
             } />
             

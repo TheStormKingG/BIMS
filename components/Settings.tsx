@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb } from 'lucide-react';
+import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
@@ -108,6 +108,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleProblemSuggestions = () => {
     setSelectedOption('problem-suggestions');
+  };
+
+  const handleUpgradePlan = () => {
+    navigate('/settings/pricing');
   };
 
 
@@ -539,6 +543,20 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <UserPlus className="w-5 h-5 text-purple-600" />
               </div>
               <span className="font-medium text-slate-900">Invite a Contact</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-400" />
+          </button>
+
+          {/* Upgrade Plan */}
+          <button
+            onClick={handleUpgradePlan}
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <Star className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="font-medium text-slate-900">Upgrade Plan</span>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
