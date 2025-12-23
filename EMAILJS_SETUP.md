@@ -28,7 +28,25 @@ EmailJS is already installed. The package used is `@emailjs/browser`.
 - `request_id` - Payment request ID
 - `uploaded_at` - Upload timestamp (ISO format)
 
-### Example Template:
+### Email Template Options:
+
+#### Option 1: HTML Template (Recommended - Beautiful & Professional)
+
+1. In EmailJS dashboard, select "HTML" as the content type
+2. Copy and paste the HTML from `EMAILJS_TEMPLATE_HTML.html` file in this repository
+3. The template includes:
+   - Professional gradient header with emoji icon
+   - Clean card-based layout
+   - All payment details in an organized format
+   - Call-to-action button linking to admin verification page
+   - Responsive design that works on mobile and desktop
+
+**Subject:**
+```
+MMG Payment Screenshot Uploaded – {{plan}}
+```
+
+#### Option 2: Plain Text Template (Simple Alternative)
 
 **Subject:**
 ```
@@ -45,8 +63,10 @@ Reference: {{reference_message}}
 Request ID: {{request_id}}
 Uploaded at: {{uploaded_at}}
 
-Please proceed with verification.
+Please proceed with verification: https://stashway.app/admin/mmg/verify?request_id={{request_id}}
 ```
+
+**Note:** We recommend using the HTML template for a more professional appearance.
 
 ## Step 4: Get Public Key
 
