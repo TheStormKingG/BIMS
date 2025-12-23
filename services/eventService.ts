@@ -20,7 +20,9 @@ export type EventType =
   | 'TRANSACTION_CATEGORIZED'
   | 'CASH_WALLET_FUNDS_ADDED'
   | 'SPENDING_SEARCHED'
-  | 'LOGIN';
+  | 'LOGIN'
+  | 'TOP_SPENDING_ITEM_VIEWED'
+  | 'DAILY_TARGET_SET';
 
 /**
  * Map frontend EventType to stored event type format
@@ -42,6 +44,8 @@ const mapEventTypeToStoredFormat = (eventType: EventType): string => {
     'CASH_WALLET_FUNDS_ADDED': 'cash_wallet_funds_added',
     'SPENDING_SEARCHED': 'spending_searched',
     'LOGIN': 'overview_viewed',
+    'TOP_SPENDING_ITEM_VIEWED': 'top_spending_item_viewed',
+    'DAILY_TARGET_SET': 'daily_target_set',
   };
   return mapping[eventType] || eventType.toLowerCase();
 };

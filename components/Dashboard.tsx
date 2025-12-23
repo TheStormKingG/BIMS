@@ -635,7 +635,66 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Most Money Spent On Item (Detailed breakdown - optional, show if topItem exists) */}
       {topItem && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <TopSpendingItemSection 
+          topItem={topItem}
+          topItemMetrics={topItemMetrics}
+        />
+      )}
+    </div>
+  );
+};
+
+// Separate component for Top Spending Item section to enable intersection observer
+const TopSpendingItemSection: React.FC<{
+  topItem: { name: string; totalSpent: number };
+  topItemMetrics: {
+    spentToday: number;
+    spentLast7Days: number;
+    spentLast30Days: number;
+    avgDaily: number;
+    avgWeekly: number;
+    avgMonthly: number;
+  };
+}> = ({ topItem, topItemMetrics }) => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+  const [hasBeenViewed, setHasBeenViewed] = React.useState(false);
+
+  // Use intersection observer to detect when section comes into view
+  React.useEffect(() => {
+    if (!sectionRef.current || hasBeenViewed) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasBeenViewed) {
+            setHasBeenViewed(true);
+            // Emit event when section is first viewed
+            emitEvent('TOP_SPENDING_ITEM_VIEWED', {
+              itemName: topItem.name,
+              totalSpent: topItem.totalSpent,
+            }).catch((err) => {
+              console.error('Error emitting TOP_SPENDING_ITEM_VIEWED event:', err);
+            });
+            // Disconnect observer after first view
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of the section is visible
+        rootMargin: '0px 0px -100px 0px', // Trigger slightly before fully in view
+      }
+    );
+
+    observer.observe(sectionRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasBeenViewed, topItem.name, topItem.totalSpent]);
+
+  return (
+    <div ref={sectionRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="font-bold text-slate-800 mb-6 text-xl">
             Top Spending Item: <span className="text-emerald-600">{topItem.name}</span>
           </h3>
@@ -712,7 +771,5 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      );
 };
