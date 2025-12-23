@@ -823,13 +823,15 @@ export const Accounts: React.FC<AccountsProps> = ({
                 >
                   <option value="">Select source...</option>
                   <option value="Cash-In (Payments, Gifts, Etc.)">Cash-In (Payments, Gifts, Etc.)</option>
-                  {accounts.length > 0 && (
+                  {accounts.filter(acc => acc.name !== 'Cash Wallet' && acc.type !== 'CASH_WALLET').length > 0 && (
                     <optgroup label="From Bank Account">
-                      {accounts.map(bank => (
-                        <option key={bank.id} value={bank.name}>
-                          {bank.name}
-                        </option>
-                      ))}
+                      {accounts
+                        .filter(acc => acc.name !== 'Cash Wallet' && acc.type !== 'CASH_WALLET') // Exclude Cash Wallet from source options
+                        .map(bank => (
+                          <option key={bank.id} value={bank.name}>
+                            {bank.name}
+                          </option>
+                        ))}
                     </optgroup>
                   )}
                 </select>
