@@ -58,12 +58,6 @@ USING (
   )
 );
 
-COMMENT ON POLICY "Users can upload user_success screenshots to their requests" ON storage.objects IS 
-  'Allows users to upload payment success screenshots to their own payment requests';
-COMMENT ON POLICY "Users can read their own payment screenshots" ON storage.objects IS
-  'Allows users to view their own uploaded payment screenshots';
-COMMENT ON POLICY "Admins can upload admin_received screenshots" ON storage.objects IS
-  'Allows admins to upload funds received notification screenshots';
-COMMENT ON POLICY "Admins can read all payment screenshots" ON storage.objects IS
-  'Allows admins to view all payment screenshots for verification';
+-- Note: COMMENT ON POLICY is not supported for storage.objects policies in Supabase
+-- Storage policies are documented in MMG_STORAGE_SETUP.md
 
