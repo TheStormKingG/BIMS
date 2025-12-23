@@ -1,5 +1,3 @@
-import emailjs from '@emailjs/browser';
-
 /**
  * Send MMG payment screenshot upload notification email
  */
@@ -11,6 +9,15 @@ export async function sendMMGUploadEmail(params: {
   requestId: string;
   uploadedAt: string;
 }): Promise<void> {
+  // Lazy load EmailJS to avoid import issues
+  let emailjs: any;
+  try {
+    emailjs = (await import('@emailjs/browser')).default;
+  } catch (importError) {
+    console.error('Failed to load EmailJS library:', importError);
+    throw new Error('EmailJS library is not available');
+  }
+
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
