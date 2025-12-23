@@ -320,7 +320,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               <div className="p-4 bg-slate-800">
                 <div className="rounded-lg overflow-hidden border-2 border-slate-600">
                   <img 
-                    src="/StashwayFlyer1.png" 
+                    src="/StashwayFlyer12.png" 
                     alt="Stashway Financial Intelligence App" 
                     className="w-full h-auto"
                   />
