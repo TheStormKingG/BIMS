@@ -4,6 +4,7 @@ import { Copy, Check, Upload, X, Loader2, AlertCircle, CheckCircle } from 'lucid
 import { createPaymentRequest, uploadPaymentScreenshot, getPaymentRequest, PLAN_PRICES, MMG_PAYEE_PHONE } from '../services/mmgPayments';
 import { SubscriptionPlan } from '../services/subscriptionService';
 import { getSupabase } from '../services/supabaseClient';
+import { sendMMGUploadEmail } from '../services/emailService';
 
 export const PayMMG: React.FC = () => {
   const navigate = useNavigate();
@@ -107,7 +108,31 @@ export const PayMMG: React.FC = () => {
       setUploading(true);
       setError(null);
 
+      // Upload screenshot to Supabase Storage and trigger AI parsing
       await uploadPaymentScreenshot(paymentRequestId, uploadFile);
+      
+      // Get user email for email notification
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email || 'Unknown';
+      
+      // Send email notification after successful upload
+      try {
+        const planName = planNames[plan] || plan;
+        await sendMMGUploadEmail({
+          userEmail,
+          plan: planName,
+          amountExpected,
+          referenceMessage: generatedMessage || '',
+          requestId: paymentRequestId,
+          uploadedAt: new Date().toISOString(),
+        });
+      } catch (emailError: any) {
+        // Email failure should not block the upload flow
+        console.warn('Failed to send email notification:', emailError);
+        // Show a subtle warning but don't block the UI
+        // The upload was successful, so we continue
+      }
       
       setUploaded(true);
       setUploadFile(null);
