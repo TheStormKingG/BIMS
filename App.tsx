@@ -792,6 +792,18 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               </ProtectedRoute>
             } />
             
+            <Route path="/pay/mmg" element={
+              <ProtectedRoute>
+                <PayMMG />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/mmg/verify" element={
+              <ProtectedRoute>
+                <AdminVerifyMMG />
+              </ProtectedRoute>
+            } />
+            
             <Route path="/spending" element={
               <ProtectedRoute>
                <Spending 
