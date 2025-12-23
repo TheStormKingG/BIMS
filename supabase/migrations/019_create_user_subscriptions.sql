@@ -120,7 +120,7 @@ SELECT
   'none',
   'trialing',
   NOW(),
-  NOW() + INTERVAL '7 days'
+  NOW() + INTERVAL '14 days'
 FROM auth.users
 WHERE id NOT IN (SELECT user_id FROM user_subscriptions)
 ON CONFLICT (user_id) DO NOTHING;

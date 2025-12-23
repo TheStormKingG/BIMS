@@ -3,6 +3,9 @@ import { getSupabase } from './supabaseClient';
 export type SubscriptionPlan = 'none' | 'personal' | 'pro' | 'pro_max';
 export type SubscriptionStatus = 'trialing' | 'active' | 'expired' | 'canceled';
 
+// Trial duration in days
+export const TRIAL_DURATION_DAYS = 14;
+
 export interface UserSubscription {
   id: string;
   user_id: string;
@@ -206,7 +209,7 @@ export async function initializeUserSubscription(userId: string): Promise<UserSu
   const supabase = getSupabase();
   
   const trialEnd = new Date();
-  trialEnd.setDate(trialEnd.getDate() + 7); // 7 days from now
+  trialEnd.setDate(trialEnd.getDate() + TRIAL_DURATION_DAYS); // 14 days from now
 
   const { data, error } = await supabase
     .from('user_subscriptions')

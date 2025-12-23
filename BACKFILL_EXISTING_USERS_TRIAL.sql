@@ -1,4 +1,4 @@
--- Backfill Script: Give all existing users a 7-day trial
+-- Backfill Script: Give all existing users a 14-day trial
 -- Run this in Supabase SQL Editor after running migration 019
 -- This ensures all existing users get a trial subscription starting from now
 
@@ -18,7 +18,7 @@ SELECT
   'none' AS plan,
   'trialing' AS status,
   NOW() AS trial_start_at,
-  NOW() + INTERVAL '7 days' AS trial_end_at,
+  NOW() + INTERVAL '14 days' AS trial_end_at,
   NOW() AS created_at,
   NOW() AS updated_at
 FROM auth.users u

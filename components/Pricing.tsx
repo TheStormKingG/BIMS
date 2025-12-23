@@ -133,7 +133,7 @@ export const Pricing: React.FC = () => {
             Affordable plans for all your needs
           </h1>
           <p className="text-xl text-slate-700 mb-8">
-            Start with a free 7-day trial. No credit card required.
+            Start with a free 14-day trial. No credit card required.
           </p>
         </div>
       </div>

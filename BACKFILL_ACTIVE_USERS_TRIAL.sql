@@ -1,4 +1,4 @@
--- Backfill Script: Give only ACTIVE existing users a 7-day trial (Alternative)
+-- Backfill Script: Give only ACTIVE existing users a 14-day trial (Alternative)
 -- Use this if you want to give trials only to users who logged in recently
 -- Adjust the interval (30 days) based on your definition of "active"
 
@@ -21,7 +21,7 @@ SELECT
   'none' AS plan,
   'trialing' AS status,
   NOW() AS trial_start_at,
-  NOW() + INTERVAL '7 days' AS trial_end_at,
+  NOW() + INTERVAL '14 days' AS trial_end_at,
   NOW() AS created_at,
   NOW() AS updated_at
 FROM auth.users u

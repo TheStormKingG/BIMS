@@ -2,7 +2,7 @@
 
 ## Overview
 
-The subscription system provides tiered access to features across three plans: **Personal**, **Pro**, and **Pro Max**. All new users receive a **7-day free trial** that grants Pro-level access during the trial period.
+The subscription system provides tiered access to features across three plans: **Personal**, **Pro**, and **Pro Max**. All new users receive a **14-day free trial** that grants Pro-level access during the trial period.
 
 ## Architecture
 
@@ -26,7 +26,7 @@ The `user_subscriptions` table tracks:
 **Trial Logic:**
 - During trial: `effectivePlan = 'pro'` (grants Pro access)
 - After trial expires: `effectivePlan = 'none'` if no plan selected
-- Trial lasts 7 days from first signup/login
+- Trial lasts 14 days from first signup/login
 
 ### React Hook (`hooks/useSubscription.tsx`)
 
@@ -194,7 +194,7 @@ Shows:
 
 ## Testing Checklist
 
-- [ ] New user gets 7-day trial on signup
+- [ ] New user gets 14-day trial on signup
 - [ ] Trial grants Pro-level access
 - [ ] After trial expires, user redirected to pricing
 - [ ] Plan selection immediately grants access
