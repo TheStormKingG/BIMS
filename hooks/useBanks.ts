@@ -47,24 +47,44 @@ export const useBanks = () => {
       if (user && !userError) {
         // Check if Cash Wallet exists for this user
         // Since fetchBanks already filters by user_id, we just need to check if any bank is a Cash Wallet
-        const userCashWallet = banksData.find(
+        const userCashWallets = banksData.filter(
           bank => bank.bank_name === 'Cash Wallet'
         );
         
         // If no Cash Wallet exists for this user, create it with their user_id
-        if (!userCashWallet) {
+        if (userCashWallets.length === 0) {
           try {
             console.log('No Cash Wallet found for user, creating one...', user.id);
             const newWallet = await createBank('Cash Wallet', 0);
             // Ensure the wallet has the correct user_id (createBank should handle this, but verify)
             setBanks([newWallet, ...banksData]);
-          } catch (err) {
-            console.error('Failed to auto-create Cash Wallet:', err);
-            // Continue even if wallet creation fails - user can still use the app
-            setBanks(banksData);
+          } catch (err: any) {
+            // If error is due to unique constraint (wallet was created by another process), fetch it
+            if (err?.code === '23505') {
+              console.log('Cash Wallet already exists (created concurrently), fetching...');
+              const refreshedBanks = await fetchBanks(false);
+              setBanks(refreshedBanks);
+            } else {
+              console.error('Failed to auto-create Cash Wallet:', err);
+              // Continue even if wallet creation fails - user can still use the app
+              setBanks(banksData);
+            }
           }
+        } else if (userCashWallets.length > 1) {
+          // Multiple wallets found - this should not happen after migration, but handle it gracefully
+          console.warn(`Multiple Cash Wallets found for user ${user.id}. Please run migration 017_cleanup_duplicate_cash_wallets.sql`);
+          // Use the one with highest balance or most recent
+          const walletToKeep = userCashWallets.sort((a, b) => {
+            if (a.total !== b.total) return b.total - a.total;
+            return new Date(b.updated).getTime() - new Date(a.updated).getTime();
+          })[0];
+          // Filter to show only one wallet in UI (keep the best one, filter out others)
+          const filteredBanks = banksData.filter(bank => 
+            bank.bank_name !== 'Cash Wallet' || bank.id === walletToKeep.id
+          );
+          setBanks(filteredBanks);
         } else {
-          // Wallet exists, use the fetched data
+          // Exactly one wallet exists, use the fetched data
           setBanks(banksData);
         }
       } else {

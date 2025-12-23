@@ -116,6 +116,14 @@ export const createWallet = async (initialBalance: number = 0): Promise<CashWall
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     
+    // First, check if wallet already exists for this user
+    const existing = await fetchWallet();
+    if (existing) {
+      // Wallet exists, return it (don't create duplicate)
+      return existing;
+    }
+    
+    // Wallet doesn't exist, create it
     const { data, error } = await supabase
       .from('banks')
       .insert([{ 
@@ -127,10 +135,10 @@ export const createWallet = async (initialBalance: number = 0): Promise<CashWall
       .single();
     
     if (error) {
-      // If wallet already exists, fetch it
+      // If wallet already exists (race condition), fetch it
       if (error.code === '23505') { // Unique constraint violation
-        const existing = await fetchWallet();
-        if (existing) return existing;
+        const existingWallet = await fetchWallet();
+        if (existingWallet) return existingWallet;
       }
       console.error('Error creating wallet:', error);
       throw error;

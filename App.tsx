@@ -404,6 +404,7 @@ function App() {
       console.log('handleSaveTransaction called with:', { receiptData, accountId, hasFile: !!file });
       
       // Get wallet from banks table (it's now stored as "Cash Wallet" bank entry)
+      // Find the first Cash Wallet (should only be one after migration)
       const walletBank = banks.find(bank => bank.bank_name === 'Cash Wallet');
       const allAccounts = walletBank 
         ? [
@@ -413,6 +414,7 @@ function App() {
               type: 'CASH_WALLET' as const,
               balance: Number(walletBank.total)
             },
+            // Filter out ALL Cash Wallets to ensure only one is shown
             ...banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
               id: bank.id,
               name: bank.bank_name,
@@ -420,7 +422,7 @@ function App() {
               balance: Number(bank.total)
             }))
           ]
-        : banks.map(bank => ({
+        : banks.filter(bank => bank.bank_name !== 'Cash Wallet').map(bank => ({
             id: bank.id,
             name: bank.bank_name,
             type: 'BANK' as const,
