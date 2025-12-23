@@ -1,6 +1,6 @@
 {
-  "name": "Bims",
-  "description": "A comprehensive personal finance tracker for Guyanese Dollars (GYD), featuring multi-account management, physical cash denomination tracking, and AI-powered receipt scanning.",
+  "name": "Stashway",
+  "description": "Track cash + bank in one place. Scan receipts automatically. See spending, trends, and goals clearly. Feel in control every day.",
   "requestFramePermissions": [
     "camera"
   ]
