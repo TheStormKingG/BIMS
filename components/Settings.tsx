@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Info, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb } from 'lucide-react';
+import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
@@ -560,7 +560,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {/* Problem/Suggestions */}
           <button
             onClick={handleProblemSuggestions}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
@@ -570,19 +570,11 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             </div>
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
+        </div>
 
-          {/* App Version */}
-          <div className="w-full flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                <Info className="w-5 h-5 text-slate-600" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-slate-900">App Version</span>
-                <span className="text-sm text-slate-500">1.0.0</span>
-              </div>
-            </div>
-          </div>
+        {/* App Version */}
+        <div className="text-center text-sm text-slate-500 mt-4 mb-4">
+          App Version 1.0.0
         </div>
 
         {/* Logout Button */}
