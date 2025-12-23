@@ -40,6 +40,13 @@ export const InstallModal: React.FC = () => {
       // Store globally for access
       (window as any).deferredPrompt = promptEvent;
       console.log('beforeinstallprompt event captured');
+      
+      // If user is already logged in, trigger modal check
+      const hasLoggedIn = sessionStorage.getItem('user_logged_in') === 'true' || 
+                          localStorage.getItem('user_logged_in') === 'true';
+      if (hasLoggedIn && !promptHandledRef.current) {
+        window.dispatchEvent(new Event('user-logged-in'));
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
