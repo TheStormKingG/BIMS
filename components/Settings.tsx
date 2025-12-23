@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown } from 'lucide-react';
+import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
@@ -26,7 +26,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
     }
   }, [location]);
   const [profileImage, setProfileImage] = useState<string | null>(user?.user_metadata?.avatar_url || null);
-  const [problemText, setProblemText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = getSupabase();
 
@@ -108,10 +107,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
     setSelectedOption('tips-frequency');
   };
 
-  const handleProblemSuggestions = () => {
-    setSelectedOption('problem-suggestions');
-  };
-
   const handleUpgradePlan = () => {
     navigate('/settings/pricing');
   };
@@ -137,16 +132,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
     alert('Link copied to clipboard!');
   };
 
-  const handleSubmitProblem = async () => {
-    if (!problemText.trim()) {
-      alert('Please enter your problem or suggestion');
-      return;
-    }
-    // TODO: Implement feedback submission
-    alert('Thank you for your feedback!');
-    setProblemText('');
-    setSelectedOption(null);
-  };
 
   if (selectedOption) {
     return (
@@ -158,7 +143,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               {selectedOption === 'personal-info' && 'Personal Information'}
               {selectedOption === 'invite-contact' && 'Share in a post'}
               {selectedOption === 'tips-frequency' && 'Tips Frequency'}
-              {selectedOption === 'problem-suggestions' && 'Problem/Suggestions'}
             </h1>
             <button
               onClick={() => setSelectedOption(null)}
@@ -457,28 +441,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             </div>
           )}
 
-          {/* Problem/Suggestions */}
-          {selectedOption === 'problem-suggestions' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
-              <p className="text-slate-600">We'd love to hear from you! Share any problems you've encountered or suggestions for improvement.</p>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Your Feedback</label>
-                <textarea
-                  value={problemText}
-                  onChange={(e) => setProblemText(e.target.value)}
-                  rows={6}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black resize-none"
-                  placeholder="Describe the problem or share your suggestion..."
-                />
-              </div>
-              <button
-                onClick={handleSubmitProblem}
-                className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
-              >
-                Submit Feedback
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -521,34 +483,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          {/* Personal Information */}
-          <button
-            onClick={handlePersonalInformation}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-slate-600" />
-              </div>
-              <span className="font-medium text-slate-900">Personal Information</span>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
-          </button>
-
-          {/* Invite a Contact */}
-          <button
-            onClick={handleInviteContact}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-purple-600" />
-              </div>
-              <span className="font-medium text-slate-900">Invite a Contact</span>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
-          </button>
-
           {/* Current Plan / Upgrade Plan */}
           <div className="w-full p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-2">
@@ -599,6 +533,20 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             )}
           </div>
 
+          {/* Personal Information */}
+          <button
+            onClick={handlePersonalInformation}
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                <User className="w-5 h-5 text-slate-600" />
+              </div>
+              <span className="font-medium text-slate-900">Personal Information</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-400" />
+          </button>
+
           {/* Tips Frequency */}
           <button
             onClick={handleTipsFrequency}
@@ -613,16 +561,16 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
 
-          {/* Problem/Suggestions */}
+          {/* Invite a Contact */}
           <button
-            onClick={handleProblemSuggestions}
+            onClick={handleInviteContact}
             className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-orange-600" />
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-purple-600" />
               </div>
-              <span className="font-medium text-slate-900">Problem/Suggestions</span>
+              <span className="font-medium text-slate-900">Invite a Contact</span>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
