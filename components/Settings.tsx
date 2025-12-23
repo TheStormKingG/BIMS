@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star } from 'lucide-react';
+import { User, UserPlus, MessageSquare, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
+import { useSubscription } from '../hooks/useSubscription';
 
 interface SettingsProps {
   user: any;
@@ -13,6 +14,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const { preferences, updatePreferences } = useTips();
+  const { entitlement } = useSubscription();
 
   // Check if we should open personal info from navigation state
   useEffect(() => {
@@ -547,19 +549,43 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             <ChevronRight className="w-5 h-5 text-slate-400" />
           </button>
 
-          {/* Upgrade Plan */}
-          <button
-            onClick={handleUpgradePlan}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                <Star className="w-5 h-5 text-emerald-600" />
+          {/* Current Plan / Upgrade Plan */}
+          <div className="w-full p-4 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-slate-900">Current Plan</span>
+                  <span className="text-xs text-slate-500 capitalize">
+                    {entitlement.effectivePlan === 'none' ? 'Free Trial' : entitlement.effectivePlan.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
               </div>
-              <span className="font-medium text-slate-900">Upgrade Plan</span>
+              {entitlement.isTrialActive && entitlement.daysLeftOnTrial !== null && (
+                <span className="text-xs font-semibold text-emerald-600">
+                  {entitlement.daysLeftOnTrial} days left
+                </span>
+              )}
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
-          </button>
+            {(entitlement.status === 'expired' || entitlement.effectivePlan === 'none') && (
+              <button
+                onClick={handleUpgradePlan}
+                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors"
+              >
+                Choose Plan
+              </button>
+            )}
+            {entitlement.isPaidActive && (
+              <button
+                onClick={handleUpgradePlan}
+                className="w-full mt-2 border border-emerald-600 text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg font-semibold text-sm transition-colors"
+              >
+                Change Plan
+              </button>
+            )}
+          </div>
 
           {/* Tips Frequency */}
           <button

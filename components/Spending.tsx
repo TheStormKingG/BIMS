@@ -7,6 +7,9 @@ import { ReceiptModal } from './ReceiptModal';
 import { exportSpendingToCSV, exportSpendingToExcel, exportSpendingToPdf } from '../services/exportsService';
 import { getSupabase } from '../services/supabaseClient';
 import { emitEvent } from '../services/eventService';
+import { useSubscription } from '../hooks/useSubscription';
+import { canUse } from '../services/subscriptionService';
+import { PaywallModal } from './PaywallModal';
 
 interface SpendingProps {
   spentItems: SpentItem[];
@@ -20,14 +23,22 @@ interface SpendingProps {
 }
 
 export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false, banks = [], wallet = null, walletBalance = 0, onAddSpend, onUpdateSpend, onDeleteSpend }) => {
+  const { entitlement } = useSubscription();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<SpentItem | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReceiptItem, setSelectedReceiptItem] = useState<SpentItem | null>(null);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState<string>('');
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const searchEventEmittedRef = useRef(false); // Track if we've emitted search event for this search
+  
+  const canExportCSV = canUse('export_csv', entitlement);
+  const canExportExcel = canUse('export_excel', entitlement);
+  const canEditTransactions = canUse('transaction_editing', entitlement);
+  const canDeleteTransactions = canUse('transaction_deletion', entitlement);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -79,6 +90,12 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   }, [showExportDropdown]);
 
   const handleExportCSV = () => {
+    if (!canExportCSV) {
+      setPaywallFeature('CSV Export');
+      setShowPaywall(true);
+      setShowExportDropdown(false);
+      return;
+    }
     exportSpendingToCSV(filteredItems);
     emitEvent('EXPORT_CSV', { itemCount: filteredItems.length }).catch(err => {
       console.error('Error emitting EXPORT_CSV event:', err);
@@ -87,6 +104,12 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   };
 
   const handleExportExcel = async () => {
+    if (!canExportExcel) {
+      setPaywallFeature('Excel Export');
+      setShowPaywall(true);
+      setShowExportDropdown(false);
+      return;
+    }
     try {
       await exportSpendingToExcel(filteredItems);
       emitEvent('EXPORT_EXCEL', { itemCount: filteredItems.length }).catch(err => {
@@ -215,6 +238,11 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   };
 
   const handleEditClick = (item: SpentItem) => {
+    if (!canEditTransactions) {
+      setPaywallFeature('Transaction Editing');
+      setShowPaywall(true);
+      return;
+    }
     setEditingItem(item);
     // Convert ISO datetime to local datetime format for input
     const date = new Date(item.transactionDateTime);
@@ -346,20 +374,50 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
               {/* Dropdown Menu */}
               {showExportDropdown && (
                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
-                  <button
-                    onClick={handleExportCSV}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    CSV
-                  </button>
-                  <button
-                    onClick={handleExportExcel}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    XLS
-                  </button>
+                  {canExportCSV ? (
+                    <button
+                      onClick={handleExportCSV}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setPaywallFeature('CSV Export');
+                        setShowPaywall(true);
+                        setShowExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-400 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      title="Requires Pro plan"
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV <span className="text-xs ml-auto">🔒</span>
+                    </button>
+                  )}
+                  {canExportExcel ? (
+                    <button
+                      onClick={handleExportExcel}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      XLS
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setPaywallFeature('Excel Export');
+                        setShowPaywall(true);
+                        setShowExportDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-400 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      title="Requires Pro plan"
+                    >
+                      <Download className="w-4 h-4" />
+                      XLS <span className="text-xs ml-auto">🔒</span>
+                    </button>
+                  )}
                   <button
                     onClick={handleExportPDF}
                     className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
@@ -458,6 +516,11 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                         {onDeleteSpend && (
                           <button
                             onClick={async () => {
+                              if (!canDeleteTransactions) {
+                                setPaywallFeature('Transaction Deletion');
+                                setShowPaywall(true);
+                                return;
+                              }
                               if (window.confirm('Are you sure you want to delete this spending item?')) {
                                 try {
                                   await onDeleteSpend(item.id);
@@ -466,8 +529,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                                 }
                               }
                             }}
-                            className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete item"
+                            disabled={!canDeleteTransactions}
+                            className={`p-2 rounded-lg transition-colors ${
+                              canDeleteTransactions
+                                ? 'text-slate-600 hover:text-red-600 hover:bg-red-50'
+                                : 'text-slate-300 cursor-not-allowed'
+                            }`}
+                            title={canDeleteTransactions ? 'Delete item' : 'Transaction deletion requires Pro plan'}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -657,6 +725,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
           onClose={() => setSelectedReceiptItem(null)}
         />
       )}
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        requiredPlan="pro"
+        featureName={paywallFeature || 'This feature'}
+      />
     </div>
   );
 };

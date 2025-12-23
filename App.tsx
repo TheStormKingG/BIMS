@@ -27,6 +27,7 @@ import { useWallet } from './hooks/useWallet';
 import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { useGoals } from './hooks/useGoals';
+import { SubscriptionProvider, useSubscription } from './hooks/useSubscription';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
@@ -34,12 +35,12 @@ import { emitEvent } from './services/eventService';
 import { checkAndIssuePhaseCertificates } from './services/phaseCertificateService';
 import { LogOut, User, ScanLine, Camera, Image, Settings as SettingsIcon } from 'lucide-react';
 
-function App() {
-  const [user, setUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+// Inner app content that uses subscription context
+function AppContent({ user, setUser, authLoading }: { user: any; setUser: (user: any) => void; authLoading: boolean }) {
   const [showScanModal, setShowScanModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { entitlement, loading: subscriptionLoading } = useSubscription();
 
   const supabase = getSupabase();
 
@@ -339,10 +340,21 @@ function App() {
 
   const activeTab = getActiveTab();
 
-  // Protected route wrapper component
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const loading = walletLoading || banksLoading || spentItemsLoading;
+  // Protected route wrapper component with subscription check
+  const ProtectedRoute = ({ children, requiresSubscription = true }: { children: React.ReactNode; requiresSubscription?: boolean }) => {
+    const loading = walletLoading || banksLoading || spentItemsLoading || subscriptionLoading;
     const error = walletError || banksError || spentItemsError;
+    
+    // Check if subscription is required and user has access
+    if (requiresSubscription && !subscriptionLoading) {
+      const hasAccess = entitlement.isTrialActive || entitlement.isPaidActive || entitlement.effectivePlan !== 'none';
+      const isAllowedRoute = location.pathname === '/settings' || location.pathname.startsWith('/settings/');
+      
+      // If no access and not on an allowed route, redirect to pricing
+      if (!hasAccess && !isAllowedRoute) {
+        return <Navigate to="/settings/pricing" replace />;
+      }
+    }
     
     if (loading) {
       return (
@@ -1323,5 +1335,91 @@ const GoalsPageWrapper: React.FC<{
     </>
   );
 };
+
+// Main App component that provides subscription context
+function App() {
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const supabase = getSupabase();
+
+  // Auth state management
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+      }
+      setUser(session?.user ?? null);
+      
+      // Check and issue phase certificates for completed phases (including Phase 1) on initial load
+      if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
+        try {
+          console.log('Checking for completed phases and issuing certificates on initial load...');
+          await checkAndIssuePhaseCertificates(session.user.id);
+          sessionStorage.setItem('phase_cert_check_done', 'true');
+          console.log('Phase certificate check completed');
+        } catch (error) {
+          console.error('Error checking phase certificates on initial load:', error);
+        }
+      }
+      
+      setAuthLoading(false);
+    }).catch((err) => {
+      console.error('Failed to get session:', err);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+        if (window.location.hash) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        if (location.pathname === '/') {
+          navigate('/overview', { replace: true });
+        }
+        
+        if (session?.user?.id && !sessionStorage.getItem('phase_cert_check_done')) {
+          try {
+            console.log('Checking for completed phases and issuing certificates...');
+            await checkAndIssuePhaseCertificates(session.user.id);
+            sessionStorage.setItem('phase_cert_check_done', 'true');
+            console.log('Phase certificate check completed');
+          } catch (error) {
+            console.error('Error checking phase certificates on auth:', error);
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        sessionStorage.removeItem('phase_cert_check_done');
+        navigate('/', { replace: true });
+      }
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SubscriptionProvider user={user}>
+      <AppContent user={user} setUser={setUser} authLoading={authLoading} />
+    </SubscriptionProvider>
+  );
+}
 
 export default App;
