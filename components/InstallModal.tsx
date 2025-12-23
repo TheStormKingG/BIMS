@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Download, Smartphone } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,16 +10,17 @@ export const InstallModal: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const promptHandledRef = useRef(false);
 
+  // Check if app is already installed
   useEffect(() => {
-    // Check if app is already installed
     const checkInstalled = () => {
-      // Check if running in standalone mode (iOS)
+      // Check if running in standalone mode (iOS/Android)
       if (window.matchMedia('(display-mode: standalone)').matches) {
         setIsInstalled(true);
         return true;
       }
-      // Check if running in standalone mode (Android)
+      // Check if running in standalone mode (iOS Safari)
       if ((window.navigator as any).standalone === true) {
         setIsInstalled(true);
         return true;
@@ -38,60 +39,81 @@ export const InstallModal: React.FC = () => {
       setDeferredPrompt(promptEvent);
       // Store globally for access
       (window as any).deferredPrompt = promptEvent;
-      
-      // If user is already logged in, show modal immediately
-      const hasLoggedIn = sessionStorage.getItem('user_logged_in') === 'true' || 
-                          localStorage.getItem('user_logged_in') === 'true';
-      if (hasLoggedIn && !isInstalled) {
-        const firstLoginShown = localStorage.getItem('pwa_first_login_shown');
-        if (!firstLoginShown) {
-          setShowModal(true);
-          localStorage.setItem('pwa_first_login_shown', 'true');
-        } else {
-          setShowModal(true);
-        }
-      }
+      console.log('beforeinstallprompt event captured');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Check if user has logged in and show modal accordingly
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Handle login and show modal
+  useEffect(() => {
+    if (isInstalled) {
+      return;
+    }
+
     const checkLoginAndShowModal = () => {
       const hasLoggedIn = sessionStorage.getItem('user_logged_in') === 'true' || 
                           localStorage.getItem('user_logged_in') === 'true';
       
-      if (hasLoggedIn && !isInstalled) {
-        // Check for deferredPrompt or global stored prompt
-        const prompt = deferredPrompt || (window as any).deferredPrompt;
+      if (!hasLoggedIn) {
+        return;
+      }
+
+      // Check for deferredPrompt or global stored prompt
+      const prompt = deferredPrompt || (window as any).deferredPrompt;
+      
+      if (prompt && !promptHandledRef.current) {
+        // Show modal on first login (only once, marked in localStorage)
+        const firstLoginShown = localStorage.getItem('pwa_first_login_shown');
         
-        if (prompt) {
-          const firstLoginShown = localStorage.getItem('pwa_first_login_shown');
-          
-          // Show modal on first login (only once)
-          if (!firstLoginShown) {
-            setShowModal(true);
-            localStorage.setItem('pwa_first_login_shown', 'true');
-          } else {
-            // Show modal on subsequent logins (every time until installed)
-            setShowModal(true);
-          }
+        if (!firstLoginShown) {
+          console.log('Showing PWA modal on first login');
+          setShowModal(true);
+          localStorage.setItem('pwa_first_login_shown', 'true');
+          promptHandledRef.current = true;
+        } else {
+          // Show modal on subsequent logins (every time until installed)
+          console.log('Showing PWA modal on subsequent login');
+          setShowModal(true);
+          promptHandledRef.current = true;
         }
+      } else if (!prompt) {
+        // No prompt available yet, but user is logged in - check again after delay
+        console.log('User logged in but prompt not available yet, checking again...');
+        setTimeout(() => {
+          const retryPrompt = deferredPrompt || (window as any).deferredPrompt;
+          if (retryPrompt && !promptHandledRef.current) {
+            const firstLoginShown = localStorage.getItem('pwa_first_login_shown');
+            if (!firstLoginShown) {
+              setShowModal(true);
+              localStorage.setItem('pwa_first_login_shown', 'true');
+              promptHandledRef.current = true;
+            } else {
+              setShowModal(true);
+              promptHandledRef.current = true;
+            }
+          }
+        }, 1500);
       }
     };
 
     // Check immediately
     checkLoginAndShowModal();
 
-    // Listen for custom login event (can be triggered from App.tsx after login)
+    // Listen for custom login event (triggered from App.tsx after login)
     const handleLogin = () => {
-      setTimeout(checkLoginAndShowModal, 1000); // Delay to ensure deferredPrompt is set
+      console.log('Login event received, checking PWA modal');
+      promptHandledRef.current = false; // Reset to allow showing modal again
+      setTimeout(checkLoginAndShowModal, 500); // Small delay to ensure deferredPrompt is set
     };
 
     window.addEventListener('user-logged-in', handleLogin);
 
-    // Cleanup
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('user-logged-in', handleLogin);
     };
   }, [deferredPrompt, isInstalled]);
