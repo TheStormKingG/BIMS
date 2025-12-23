@@ -1401,6 +1401,7 @@ function App() {
 
     return () => {
       mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, [navigate, location.pathname]);
