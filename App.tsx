@@ -1280,6 +1280,12 @@ const GoalsPageWrapper: React.FC<{
         emitEvent('GOAL_CREATED', { goalType: input.goalType, targetAmount: input.targetAmount }).catch(err => {
           console.error('Error emitting GOAL_CREATED event:', err);
         });
+        // Emit specific event for daily target set (Goal 13)
+        if (input.goalType === 'avg_daily') {
+          emitEvent('DAILY_TARGET_SET', { targetAmount: input.targetAmount }).catch(err => {
+            console.error('Error emitting DAILY_TARGET_SET event:', err);
+          });
+        }
       }
       setIsModalOpen(false);
       setEditingGoal(null);
