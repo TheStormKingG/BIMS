@@ -112,8 +112,8 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
   const handleShare = (platform: string) => {
-    const shareUrl = 'https://stashway.app/about';
-    const shareText = 'Stashway™ - Financial Intelligence App! https://stashway.app/about';
+    const shareUrl = 'https://stashway.app/about-share.html';
+    const shareText = 'Stashway™ - Financial Intelligence App! https://stashway.app/about-share.html';
 
     const shareUrls: Record<string, string> = {
       whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
@@ -128,7 +128,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText('https://stashway.app/about');
+    navigator.clipboard.writeText('https://stashway.app/about-share.html');
     alert('Link copied to clipboard!');
   };
 
@@ -380,7 +380,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    value="https://stashway.app/about"
+                    value="https://stashway.app/about-share.html"
                     readOnly
                     className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg text-sm border border-slate-600"
                   />
