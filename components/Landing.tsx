@@ -233,11 +233,17 @@ const LoginFormPreview: React.FC = () => {
           ) : (
             <>
               <LogIn className="w-5 h-5" />
-              <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+              <span>{isSignUp ? 'Sign Up' : 'Free 14 Day Trial'}</span>
             </>
           )}
         </button>
       </form>
+      
+      {!isSignUp && (
+        <p className="text-center text-sm text-slate-600 mt-2">
+          No card details needed
+        </p>
+      )}
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
