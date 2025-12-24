@@ -76,7 +76,7 @@ export const Goals: React.FC<GoalsProps> = ({
           </div>
 
           {/* Achievement Goals Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
 
           {/* Badge Progress Visual - Winding Road */}
           <div className="relative py-4 md:py-8 px-2 md:px-4 overflow-hidden" style={{
@@ -246,7 +246,7 @@ export const Goals: React.FC<GoalsProps> = ({
 
       {/* Goals List */}
       {goals.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-12 text-center">
           <Target className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">No goals yet</h3>
           <p className="text-slate-500 mb-6">Create your first goal to start tracking your financial progress!</p>
@@ -269,7 +269,7 @@ export const Goals: React.FC<GoalsProps> = ({
             return (
               <div
                 key={goal.id}
-                className={`bg-white rounded-xl shadow-sm border-2 ${
+                className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border-2 ${
                   achieved
                     ? 'border-emerald-500 bg-emerald-50/30'
                     : 'border-slate-200'

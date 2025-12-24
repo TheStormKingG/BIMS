@@ -36,7 +36,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in">
         {/* Close button */}
         <button
           onClick={onClose}

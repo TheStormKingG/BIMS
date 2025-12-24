@@ -238,7 +238,7 @@ export const Accounts: React.FC<AccountsProps> = ({
         </button>
 
         {/* Wallet Header Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
               <Wallet className="w-8 h-8" />
@@ -261,7 +261,7 @@ export const Accounts: React.FC<AccountsProps> = ({
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Transaction History</h3>
             {sortedTransactions.length > 0 && (
@@ -277,7 +277,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                 </button>
                 
                 {showWalletExportDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
                     <button
                       onClick={() => {
                         exportWalletTransactionsToCSV(sortedTransactions);
@@ -381,7 +381,7 @@ export const Accounts: React.FC<AccountsProps> = ({
         </button>
 
         {/* Bank Header Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
               <Building2 className="w-8 h-8" />
@@ -404,7 +404,7 @@ export const Accounts: React.FC<AccountsProps> = ({
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Transaction History</h3>
             {transactions.length > 0 && (
@@ -420,7 +420,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                 </button>
                 
                 {showBankExportDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
                     <button
                       onClick={() => {
                         exportBankTransactionsToCSV(transactions, viewingBank.name);
@@ -513,7 +513,7 @@ export const Accounts: React.FC<AccountsProps> = ({
     <div className="space-y-6 animate-fade-in pb-20">
 
       {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-lg border border-emerald-100">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-emerald-100 dark:border-emerald-900/30">
           <h3 className="font-semibold text-slate-800 mb-4">New Bank Account</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
@@ -727,7 +727,7 @@ export const Accounts: React.FC<AccountsProps> = ({
       {/* Add Funds Modal */}
       {showAddFundsModal && selectedBank && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseAddFunds}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-slate-900">Add Funds</h3>
               <button
@@ -798,8 +798,8 @@ export const Accounts: React.FC<AccountsProps> = ({
       {/* Wallet Add Funds Modal */}
       {showWalletAddFundsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseWalletAddFunds}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900">Add Funds to Wallet</h3>
               <button
                 onClick={handleCloseWalletAddFunds}

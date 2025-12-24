@@ -373,7 +373,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
               
               {/* Dropdown Menu */}
               {showExportDropdown && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
                   {canExportCSV ? (
                     <button
                       onClick={handleExportCSV}
@@ -440,7 +440,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-500 uppercase font-medium text-xs border-b border-slate-100">
@@ -567,8 +567,8 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       {/* Add/Edit Spend Modal */}
       {showAddModal && (onAddSpend || onUpdateSpend) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900">
                 {editingItem ? 'Edit Spending' : 'Add Spending'}
               </h3>

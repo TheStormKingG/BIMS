@@ -214,8 +214,8 @@ export const Pricing: React.FC = () => {
             return (
               <div
                 key={plan.id}
-                className={`bg-white rounded-xl shadow-lg border-2 overflow-hidden transition-all hover:shadow-xl ${
-                  plan.popular ? 'border-emerald-500 relative' : 'border-slate-200'
+                className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg border-2 overflow-hidden transition-all hover:shadow-xl ${
+                  plan.popular ? 'border-emerald-500 dark:border-emerald-400 relative' : 'border-slate-200 dark:border-slate-700'
                 } ${isCurrentPlan ? 'ring-2 ring-emerald-400 border-emerald-500' : ''}`}
                 style={plan.popular ? { marginTop: '-20px' } : {}}
               >

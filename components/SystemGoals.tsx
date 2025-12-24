@@ -156,7 +156,7 @@ export const SystemGoals: React.FC = () => {
       </div>
 
       {/* Overall Progress Summary */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
             <div className="text-3xl font-bold text-amber-600">
@@ -192,7 +192,7 @@ export const SystemGoals: React.FC = () => {
           : 0;
 
         return (
-          <div key={phase} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div key={phase} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             {/* Phase Header */}
             <div className={`p-6 border-b border-slate-200 ${!isUnlocked ? 'bg-slate-50' : ''}`}>
               <div className="flex items-center justify-between">

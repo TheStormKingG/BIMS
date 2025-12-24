@@ -105,7 +105,7 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTra
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50">
             <h3 className="font-semibold text-slate-700">Transaction History</h3>
           </div>
@@ -182,7 +182,7 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTra
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden p-6">
         <h3 className="font-semibold text-slate-700 mb-4">Cash Balance Breakdown</h3>
         
         <div className="space-y-3 mb-6">
@@ -215,8 +215,8 @@ export const CashWallet: React.FC<CashWalletProps> = ({ wallet, banks, walletTra
       {/* Add Funds Modal */}
       {showAddFundsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseAddFunds}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900">Add Funds to Wallet</h3>
               <button
                 onClick={handleCloseAddFunds}

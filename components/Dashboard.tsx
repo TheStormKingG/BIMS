@@ -357,7 +357,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Tips Section */}
       {tips.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
           <h3 className="text-lg font-bold text-slate-800 mb-4">💡 Spending Tips</h3>
           <Tips 
             tips={tips} 
@@ -397,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Spending Totals */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 24h</h3>
             <Clock className="w-5 h-5 text-emerald-600" />
@@ -408,7 +408,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-xs text-slate-500 mt-1">Rolling 24 hours</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h3>
             <Calendar className="w-5 h-5 text-emerald-600" />
@@ -419,7 +419,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h3>
             <DollarSign className="w-5 h-5 text-emerald-600" />
@@ -433,7 +433,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Spending Averages */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
             <Clock className="w-5 h-5 text-blue-600" />
@@ -444,7 +444,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Weekly</h3>
             <Calendar className="w-5 h-5 text-blue-600" />
@@ -455,7 +455,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Monthly</h3>
             <DollarSign className="w-5 h-5 text-blue-600" />
@@ -468,7 +468,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       </div>
 
       {/* Spending Over Time Graph */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-slate-800">Money Spent Over Time</h3>
           <div className="flex gap-2">
@@ -544,7 +544,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Spending Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="font-bold text-slate-800 mb-4">Spending by Category</h3>
           <div className="w-full" style={{ height: '256px', minHeight: '256px' }}>
             {categoryData.length > 0 ? (
@@ -579,7 +579,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         </div>
 
         {/* Recent Activity - Show 10 most recent items */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
            <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-800">Recent Activity</h3>
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
@@ -620,7 +620,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
       {/* Most Money Spent On Section - Show Top Category (Pro feature) */}
       {analytics.topCategory && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="font-bold text-slate-800 mb-6 text-xl">
             Most Money Spent On: <span className="text-emerald-600">{analytics.topCategory.name}</span>
           </h3>

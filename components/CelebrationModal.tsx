@@ -74,7 +74,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({ celebration,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
-      <div className="bg-white rounded-xl border-2 border-emerald-500 shadow-2xl p-6 max-w-md w-full mx-4 relative animate-scale-in">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border-2 border-emerald-500 dark:border-emerald-400 shadow-2xl p-6 max-w-md w-full mx-4 relative animate-scale-in">
         <div className="flex items-start gap-4 mb-6">
           {/* Badge or coin icon image on the left */}
           <div className="flex-shrink-0">

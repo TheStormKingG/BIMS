@@ -95,7 +95,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
 
   return (
     <div className="space-y-4 animate-fade-in pb-20">
-      <div className="flex flex-col md:flex-row gap-4 justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-100 sticky top-0 z-10">
+      <div className="flex flex-col md:flex-row gap-4 justify-between bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 sticky top-0 z-10">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
@@ -124,7 +124,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-500 uppercase font-medium border-b border-slate-100">
@@ -186,8 +186,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
       {/* Edit Modal */}
       {editingItem && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in">
-            <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in">
+            <div className="flex justify-between items-center p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700">
                <h3 className="font-bold text-slate-800">Edit Entry</h3>
                <button 
                  onClick={() => setEditingItem(null)}
