@@ -138,11 +138,12 @@ export const getReceipt = async (id: string): Promise<Receipt | null> => {
 
 /**
  * Get receipt by spent_table_id
+ * If direct lookup fails, also searches for receipts linked to other items from the same receipt scan
+ * (same transaction_datetime and source='SCAN_RECEIPT')
  */
 export const getReceiptBySpentTableId = async (spentTableId: string): Promise<Receipt | null> => {
-  // Use maybeSingle() to handle 0 or 1 rows gracefully
-  // Order by created_at descending and limit to 1 in case duplicates exist
-  const { data, error } = await supabase
+  // First, try direct lookup
+  const { data: directData, error: directError } = await supabase
     .from('receipts')
     .select('*')
     .eq('spent_table_id', spentTableId)
@@ -150,39 +151,114 @@ export const getReceiptBySpentTableId = async (spentTableId: string): Promise<Re
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    // maybeSingle() shouldn't throw PGRST116, but handle other errors
-    if (error.code === 'PGRST116') return null; // Not found
-    throw error;
+  if (directError && directError.code !== 'PGRST116') {
+    throw directError;
   }
 
-  if (!data) return null;
+  if (directData) {
+    // Parse receipt_data JSON if it exists
+    let receiptData: ReceiptScanResult | null = null;
+    if (directData.receipt_data) {
+      try {
+        receiptData = typeof directData.receipt_data === 'string' 
+          ? JSON.parse(directData.receipt_data) 
+          : directData.receipt_data;
+      } catch (err) {
+        console.error('Error parsing receipt_data:', err);
+      }
+    }
 
-  // Parse receipt_data JSON if it exists
-  let receiptData: ReceiptScanResult | null = null;
-  if (data.receipt_data) {
-    try {
-      receiptData = typeof data.receipt_data === 'string' 
-        ? JSON.parse(data.receipt_data) 
-        : data.receipt_data;
-    } catch (err) {
-      console.error('Error parsing receipt_data:', err);
+    return {
+      id: directData.id,
+      userId: directData.user_id,
+      spentTableId: directData.spent_table_id,
+      storagePath: directData.storage_path,
+      merchant: directData.merchant,
+      total: directData.total ? Number(directData.total) : null,
+      currency: directData.currency,
+      scannedAt: directData.scanned_at,
+      receiptData,
+      createdAt: directData.created_at,
+      updatedAt: directData.updated_at,
+    };
+  }
+
+  // If direct lookup failed, try to find receipt via related items from same receipt scan
+  // Get the spent_table item to find its transaction_datetime
+  const { data: spentItem, error: spentItemError } = await supabase
+    .from('spent_table')
+    .select('transaction_datetime, source')
+    .eq('id', spentTableId)
+    .maybeSingle();
+
+  if (spentItemError || !spentItem) {
+    return null; // Item not found or error
+  }
+
+  // Only search for related receipts if source is SCAN_RECEIPT
+  if (spentItem.source !== 'SCAN_RECEIPT') {
+    return null;
+  }
+
+  // Find receipt linked to any item from the same receipt scan
+  // Get user's receipts and check if any are linked to items with same transaction_datetime
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Get all receipts for this user (limit to recent ones to avoid performance issues)
+  const { data: allReceipts, error: allReceiptsError } = await supabase
+    .from('receipts')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(100); // Limit to recent 100 receipts for performance
+
+  if (allReceiptsError || !allReceipts || allReceipts.length === 0) {
+    return null;
+  }
+
+  // For each receipt, check if its linked spent_table item matches the transaction_datetime
+  for (const receipt of allReceipts) {
+    const { data: linkedItem, error: linkedItemError } = await supabase
+      .from('spent_table')
+      .select('transaction_datetime, source')
+      .eq('id', receipt.spent_table_id)
+      .maybeSingle();
+
+    if (linkedItemError) continue; // Skip if error
+
+    if (linkedItem && 
+        linkedItem.transaction_datetime === spentItem.transaction_datetime &&
+        linkedItem.source === 'SCAN_RECEIPT') {
+      // Found a matching receipt from the same receipt scan!
+      let receiptData: ReceiptScanResult | null = null;
+      if (receipt.receipt_data) {
+        try {
+          receiptData = typeof receipt.receipt_data === 'string' 
+            ? JSON.parse(receipt.receipt_data) 
+            : receipt.receipt_data;
+        } catch (err) {
+          console.error('Error parsing receipt_data:', err);
+        }
+      }
+
+      return {
+        id: receipt.id,
+        userId: receipt.user_id,
+        spentTableId: receipt.spent_table_id,
+        storagePath: receipt.storage_path,
+        merchant: receipt.merchant,
+        total: receipt.total ? Number(receipt.total) : null,
+        currency: receipt.currency,
+        scannedAt: receipt.scanned_at,
+        receiptData,
+        createdAt: receipt.created_at,
+        updatedAt: receipt.updated_at,
+      };
     }
   }
 
-  return {
-    id: data.id,
-    userId: data.user_id,
-    spentTableId: data.spent_table_id,
-    storagePath: data.storage_path,
-    merchant: data.merchant,
-    total: data.total ? Number(data.total) : null,
-    currency: data.currency,
-    scannedAt: data.scanned_at,
-    receiptData,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  };
+  return null;
 };
 
 /**
