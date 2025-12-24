@@ -582,7 +582,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
            <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-800 dark:text-slate-100">Recent Activity</h3>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full">
                 {spentItems.length} Total
               </span>
            </div>
@@ -621,8 +621,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       {/* Most Money Spent On Section - Show Top Category (Pro feature) */}
       {analytics.topCategory && (
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <h3 className="font-bold text-slate-800 mb-6 text-xl">
-            Most Money Spent On: <span className="text-emerald-600">{analytics.topCategory.name}</span>
+          <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-6 text-xl">
+            Most Money Spent On: <span className="text-emerald-600 dark:text-emerald-400">{analytics.topCategory.name}</span>
           </h3>
           <div className="mb-4">
             <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
