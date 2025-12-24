@@ -416,7 +416,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total spent this week</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
@@ -427,7 +427,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Total spent this month</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total spent this month</p>
         </div>
       </div>
 
@@ -441,7 +441,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per day (last 30 days)</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
@@ -452,7 +452,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per week (last 30 days)</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
@@ -463,7 +463,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Per month (last 30 days)</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per month (last 30 days)</p>
         </div>
       </div>
 
