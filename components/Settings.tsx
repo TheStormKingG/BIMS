@@ -140,7 +140,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {selectedOption === 'personal-info' && 'Personal Information'}
               {selectedOption === 'invite-contact' && 'Share in a post'}
               {selectedOption === 'tips-frequency' && 'Tips Frequency'}
@@ -393,8 +393,8 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">
-                          <p className="font-semibold text-slate-900 capitalize">{frequency === 'off' ? 'Off' : frequency}</p>
-                          <p className="text-sm text-slate-500">
+                          <p className="font-semibold text-slate-900 dark:text-slate-100 capitalize">{frequency === 'off' ? 'Off' : frequency}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
                             {frequency === 'daily' && 'Receive tips every day'}
                             {frequency === 'weekly' && 'Receive tips once per week'}
                             {frequency === 'monthly' && 'Receive tips once per month'}
@@ -403,7 +403,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                         </div>
                         {preferences?.tipsFrequency === frequency && (
                           <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-white"></div>
+                            <div className="w-2 h-2 rounded-full bg-white dark:bg-slate-300"></div>
                           </div>
                         )}
                       </div>
@@ -414,8 +414,8 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
               {/* Number of Tips */}
               {preferences?.tipsFrequency !== 'off' && (
-                <div className="pt-4 border-t border-slate-200">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Number of Tips to Show
                   </label>
                   <input
