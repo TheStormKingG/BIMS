@@ -370,7 +370,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
           {/* Tips Frequency */}
           {selectedOption === 'tips-frequency' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-6">
               <div>
                 <p className="text-slate-600 mb-4">Choose how often you'd like to receive spending tips based on your financial activity.</p>
                 <div className="space-y-3">
