@@ -593,15 +593,15 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
           <div className="flex items-center justify-between gap-[8px]">
             <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
               <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
-              <h1 className="text-[22.8px] font-bold text-slate-900 truncate">Stashway<sup className="text-xs">™</sup></h1>
+              <h1 className="text-[22.8px] font-bold text-slate-900 dark:text-slate-100 truncate">Stashway<sup className="text-xs">™</sup></h1>
             </div>
             <div className="flex items-center gap-[8px] flex-shrink-0">
               {location.pathname !== '/settings' && (
                 <button
                   onClick={() => navigate('/settings')}
-                  className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                  className="p-[6px] bg-white dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
                 >
-                  <SettingsIcon className="w-6 h-6 text-slate-600" />
+                  <SettingsIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                 </button>
               )}
               <button
@@ -615,7 +615,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-8 h-8 text-slate-500" />
+                  <User className="w-8 h-8 text-slate-500 dark:text-slate-400" />
                 )}
               </button>
             </div>
@@ -1045,11 +1045,11 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               key={item.id}
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center justify-center py-2 gap-1 transition-colors ${
-                activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
+                activeTab === item.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
               }`}
             >
               <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
             </button>
           ))}
         </div>
@@ -1073,11 +1073,11 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               key={item.id}
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center justify-center py-2 gap-1 transition-colors ${
-                activeTab === item.id ? 'text-emerald-600' : 'text-slate-400'
+                activeTab === item.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
               }`}
             >
               <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
             </button>
           ))}
         </div>
