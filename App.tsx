@@ -589,7 +589,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
 
       {/* Mobile Header */}
       {!isChatRoute && (
-        <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 pt-[15px] pb-[8px] px-[15px] mb-[15px] shadow-md">
+        <div className="md:hidden sticky top-0 z-30 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 pt-[15px] pb-[8px] px-[15px] mb-[15px] shadow-md">
           <div className="flex items-center justify-between gap-[8px]">
             <div className="flex items-center gap-[8px] flex-shrink-0 min-w-0">
               <img src="/stashway-logo.png" alt="Stashway" className="w-[47.5px] h-[47.5px] flex-shrink-0" />
@@ -606,7 +606,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               )}
               <button
                 onClick={() => navigate('/settings', { state: { openPersonalInfo: true } })}
-                className="p-[6px] bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                className="p-[6px] bg-white dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
               >
                 {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
                   <img
