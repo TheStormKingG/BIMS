@@ -388,8 +388,8 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                       }}
                       className={`w-full p-4 rounded-lg border-2 transition-all ${
                         preferences?.tipsFrequency === frequency
-                          ? 'border-emerald-500 bg-emerald-50'
-                          : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50'
+                          ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                          : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -509,12 +509,12 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           <div className="w-full p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-emerald-600" />
+                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium text-slate-900">Current Plan</span>
-                  <span className="text-xs text-slate-500 capitalize">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">Current Plan</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 capitalize">
                     {entitlement.isTrialActive 
                       ? 'PRO (Trial)' 
                       : entitlement.effectivePlan === 'none' 
@@ -524,7 +524,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </div>
               </div>
               {entitlement.isTrialActive && entitlement.daysLeftOnTrial !== null && (
-                <span className="text-xs font-semibold text-emerald-600">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                   {entitlement.daysLeftOnTrial} days left
                 </span>
               )}
@@ -548,7 +548,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
             {entitlement.isPaidActive && (
               <button
                 onClick={handleUpgradePlan}
-                className="w-full mt-2 border border-emerald-600 text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg font-semibold text-sm transition-colors"
+                className="w-full mt-2 border border-emerald-600 dark:border-emerald-400 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 py-2 rounded-lg font-semibold text-sm transition-colors"
               >
                 Change Plan
               </button>
@@ -572,15 +572,15 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {/* Tips Frequency */}
           <button
             onClick={handleTipsFrequency}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-700"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                <Lightbulb className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Lightbulb className="w-5 h-5 text-amber-600 dark:text-amber-500" />
               </div>
-              <span className="font-medium text-slate-900">Tips Frequency</span>
+              <span className="font-medium text-slate-900 dark:text-slate-100">Tips Frequency</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
           </button>
 
           {/* Invite a Contact */}
