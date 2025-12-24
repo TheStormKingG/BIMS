@@ -400,7 +400,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 24h</h3>
-            <Clock className="w-5 h-5 text-emerald-600" />
+            <Clock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${analytics.spentLast24Hours.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -410,7 +410,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 7 Days</h3>
             <Calendar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
@@ -421,7 +421,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 30 Days</h3>
             <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
@@ -435,7 +435,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Daily</h3>
             <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
@@ -446,7 +446,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Average Weekly</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Weekly</h3>
             <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
@@ -457,7 +457,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Average Monthly</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Monthly</h3>
             <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
