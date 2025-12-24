@@ -298,7 +298,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-slate-600">Loading spending data...</p>
+          <p className="text-slate-600 dark:text-slate-300">Loading spending data...</p>
         </div>
       </div>
     );
@@ -327,7 +327,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 searchEventEmittedRef.current = false;
               }
             }}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400"
           />
         </div>
       </div>
@@ -337,24 +337,24 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
         <div className="flex items-center gap-2">
           <button
             onClick={handlePreviousMonth}
-            className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title="Previous month"
           >
-            <ChevronLeft className="w-5 h-5 text-slate-600" />
+            <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           <button
             onClick={handleToday}
-            className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium"
+            className="px-3 py-1 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors font-medium"
             title="Go to current month"
           >
             {currentMonthName}
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title="Next month"
           >
-            <ChevronRight className="w-5 h-5 text-slate-600" />
+            <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -363,7 +363,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
             <div className="relative" ref={exportDropdownRef}>
               <button
                 onClick={() => setShowExportDropdown(!showExportDropdown)}
-                className="text-emerald-600 border border-emerald-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                className="text-emerald-600 dark:text-emerald-400 border border-emerald-600 dark:border-emerald-400 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center gap-2"
                 title="Export spending data"
               >
                 <Download className="w-4 h-4" />
@@ -377,7 +377,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   {canExportCSV ? (
                     <button
                       onClick={handleExportCSV}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
                       CSV
@@ -389,7 +389,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                         setShowPaywall(true);
                         setShowExportDropdown(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-400 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
                       title="Requires Pro plan"
                     >
                       <Download className="w-4 h-4" />
@@ -399,7 +399,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                   {canExportExcel ? (
                     <button
                       onClick={handleExportExcel}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
                       XLS
@@ -411,7 +411,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                         setShowPaywall(true);
                         setShowExportDropdown(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-400 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
                       title="Requires Pro plan"
                     >
                       <Download className="w-4 h-4" />
@@ -443,7 +443,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase font-medium text-xs border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-medium text-xs border-b border-slate-100 dark:border-slate-700">
               <tr>
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Item</th>
@@ -457,49 +457,49 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                       {formatDateTime(item.transactionDateTime)}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">{item.item}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100">{item.item}</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                    <td className="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-100">
                       ${item.itemTotal.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-600">
+                    <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                       {item.itemQty}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-700 font-medium">
+                    <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-200 font-medium">
                       ${item.itemCost.toLocaleString()}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-600 text-slate-800 dark:text-slate-200">
                         {item.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                       {item.paymentMethod || 'N/A'}
                     </td>
                     <td className="px-4 py-3">
                       {item.source === 'SCAN_RECEIPT' ? (
                         <button
                           onClick={() => setSelectedReceiptItem(item)}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer transition-colors"
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 cursor-pointer transition-colors"
                           title="View receipt"
                         >
                           {item.source}
                         </button>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400">
                           {item.source}
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs whitespace-nowrap">
                       {formatEntryDate(item.entryDate)}
                     </td>
                     <td className="px-4 py-3">
@@ -507,7 +507,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                         {onUpdateSpend && (
                           <button
                             onClick={() => handleEditClick(item)}
-                            className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
                             title="Edit item"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -532,8 +532,8 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                             disabled={!canDeleteTransactions}
                             className={`p-2 rounded-lg transition-colors ${
                               canDeleteTransactions
-                                ? 'text-slate-600 hover:text-red-600 hover:bg-red-50'
-                                : 'text-slate-300 cursor-not-allowed'
+                                ? 'text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                : 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
                             }`}
                             title={canDeleteTransactions ? 'Delete item' : 'Transaction deletion requires Pro plan'}
                           >
@@ -546,7 +546,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-slate-400">
+                  <td colSpan={10} className="px-4 py-12 text-center text-slate-400 dark:text-slate-500">
                     <div className="flex flex-col items-center gap-2">
                       <ShoppingBag className="w-8 h-8 opacity-20" />
                       <p>
@@ -569,40 +569,40 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 {editingItem ? 'Edit Spending' : 'Add Spending'}
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 
             <form onSubmit={editingItem ? handleUpdateSubmit : handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Transaction Date/Time <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="datetime-local"
                     value={formData.transactionDateTime}
                     onChange={(e) => handleInputChange('transactionDateTime', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                    className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                    className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                     required
                   >
                     {DEFAULT_CATEGORIES.map(cat => (
@@ -628,7 +628,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Item Cost (GYD) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -637,13 +637,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                     min="0"
                     value={formData.itemCost}
                     onChange={(e) => handleInputChange('itemCost', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                    className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Quantity <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -652,13 +652,13 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                     min="1"
                     value={formData.itemQty}
                     onChange={(e) => handleInputChange('itemQty', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                    className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Item Total (GYD)
                   </label>
                   <input
@@ -667,7 +667,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                     min="0"
                     value={formData.itemTotal}
                     onChange={(e) => handleInputChange('itemTotal', e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded-lg bg-slate-50 text-black font-semibold"
+                    className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-600 text-black dark:text-slate-100 font-semibold"
                     readOnly
                   />
                 </div>
@@ -702,7 +702,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>

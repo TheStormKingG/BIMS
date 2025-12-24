@@ -1037,7 +1037,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
       {!isChatRoute && <ChatButton className="md:hidden fixed bottom-20 right-4 w-12 h-12" />}
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 flex justify-between items-end z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-2 py-2 flex justify-between items-end z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         {/* Left side items */}
         <div className="flex flex-1 justify-around">
           {NAV_ITEMS.filter(item => item.id !== 'scan' && ['dashboard', 'accounts'].includes(item.id)).map(item => (
