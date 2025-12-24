@@ -79,9 +79,7 @@ export const Goals: React.FC<GoalsProps> = ({
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
 
           {/* Badge Progress Visual - Winding Road */}
-          <div className="relative py-4 md:py-8 px-2 md:px-4 overflow-hidden" style={{
-            background: 'linear-gradient(to bottom, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(255, 255, 255, 0) 100%)'
-          }}>
+          <div className="relative py-4 md:py-8 px-2 md:px-4 overflow-hidden bg-gradient-to-b from-emerald-50/20 via-emerald-50/10 to-transparent dark:from-emerald-900/20 dark:via-emerald-900/10 dark:to-transparent">
             {/* Winding Road SVG */}
             <svg className="absolute inset-0 w-full h-[160px] md:h-[200px]" preserveAspectRatio="none" viewBox="0 0 1200 200">
               <defs>
