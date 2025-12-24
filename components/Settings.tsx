@@ -489,7 +489,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               )}
               <button
                 onClick={handleProfilePhotoClick}
-                className="absolute bottom-0 right-0 w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg hover:bg-emerald-700 transition-colors"
+                className="absolute bottom-0 right-0 w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-800 shadow-lg hover:bg-emerald-700 transition-colors"
               >
                 <Camera className="w-5 h-5 text-white" />
               </button>
