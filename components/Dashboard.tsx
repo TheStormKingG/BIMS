@@ -347,7 +347,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       <div className="flex justify-end">
         <button
           onClick={handleExportPdf}
-          className="text-emerald-600 border border-emerald-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 transition-colors flex items-center gap-2"
+          className="text-emerald-600 dark:text-emerald-400 border border-emerald-600 dark:border-emerald-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center gap-2"
           title="Export Overview as PDF"
         >
           <Download className="w-4 h-4" />
@@ -405,13 +405,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${analytics.spentLast24Hours.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Rolling 24 hours</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Rolling 24 hours</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h3>
-            <Calendar className="w-5 h-5 text-emerald-600" />
+            <Calendar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -422,7 +422,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h3>
-            <DollarSign className="w-5 h-5 text-emerald-600" />
+            <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -436,7 +436,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
-            <Clock className="w-5 h-5 text-blue-600" />
+            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -447,7 +447,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Weekly</h3>
-            <Calendar className="w-5 h-5 text-blue-600" />
+            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -458,7 +458,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">Average Monthly</h3>
-            <DollarSign className="w-5 h-5 text-blue-600" />
+            <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -628,7 +628,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               ${analytics.topCategory.amount.toLocaleString()} GYD
             </p>
-            <p className="text-sm text-slate-500 mt-1">Total spent on {analytics.topCategory.name} category</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Total spent on {analytics.topCategory.name} category</p>
           </div>
         </div>
       )}
@@ -704,70 +704,70 @@ const TopSpendingItemSection: React.FC<{
             <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Today</h4>
-                <Clock className="w-4 h-4 text-emerald-600" />
+                <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Total spent today</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total spent today</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h4>
-                <Calendar className="w-4 h-4 text-emerald-600" />
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 7 Days</h4>
+                <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total spent this week</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h4>
-                <DollarSign className="w-4 h-4 text-emerald-600" />
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 30 Days</h4>
+                <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Total spent this month</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total spent this month</p>
             </div>
           </div>
 
           {/* Spending Averages for Top Item */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Average Daily</h4>
-                <Clock className="w-4 h-4 text-blue-600" />
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Daily</h4>
+                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per day (last 30 days)</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Average Weekly</h4>
-                <Calendar className="w-4 h-4 text-blue-600" />
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Weekly</h4>
+                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per week (last 30 days)</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Average Monthly</h4>
-                <DollarSign className="w-4 h-4 text-blue-600" />
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Average Monthly</h4>
+                <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Per month (last 30 days)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Per month (last 30 days)</p>
             </div>
           </div>
         </div>
