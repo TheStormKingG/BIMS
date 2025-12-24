@@ -372,7 +372,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {selectedOption === 'tips-frequency' && (
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-6">
               <div>
-                <p className="text-slate-600 mb-4">Choose how often you'd like to receive spending tips based on your financial activity.</p>
+                <p className="text-slate-600 dark:text-slate-300 mb-4">Choose how often you'd like to receive spending tips based on your financial activity.</p>
                 <div className="space-y-3">
                   {(['daily', 'weekly', 'monthly', 'off'] as const).map((frequency) => (
                     <button
@@ -437,7 +437,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                     }}
                     className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Choose how many tips to display at once (1-20)</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Choose how many tips to display at once (1-20)</p>
                 </div>
               )}
             </div>
@@ -506,7 +506,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           {/* Current Plan / Upgrade Plan */}
-          <div className="w-full p-4 border-b border-slate-200">
+          <div className="w-full p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -620,7 +620,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
         </button>
 
         {/* Copyright and Address Information */}
-        <div className="mt-8 text-center text-sm text-slate-600 space-y-2">
+        <div className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400 space-y-2">
           <p>Dr. Stefan Gravesande | Preqal Inc © 2025-26</p>
           <div className="space-y-1">
             <p>90 Waiakabra</p>
