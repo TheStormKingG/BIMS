@@ -358,7 +358,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       {/* Tips Section */}
       {tips.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">💡 Spending Tips</h3>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">💡 Spending Tips</h3>
           <Tips 
             tips={tips} 
             onMarkAsRead={markAsRead}
@@ -399,10 +399,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">Spent Last 24h</h3>
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Last 24h</h3>
             <Clock className="w-5 h-5 text-emerald-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${analytics.spentLast24Hours.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Rolling 24 hours</p>
@@ -413,7 +413,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <h3 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h3>
             <Calendar className="w-5 h-5 text-emerald-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
@@ -424,7 +424,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <h3 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h3>
             <DollarSign className="w-5 h-5 text-emerald-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Total spent this month</p>
@@ -438,7 +438,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <h3 className="text-sm font-medium text-slate-600">Average Daily</h3>
             <Clock className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
@@ -449,7 +449,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <h3 className="text-sm font-medium text-slate-600">Average Weekly</h3>
             <Calendar className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
@@ -460,7 +460,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <h3 className="text-sm font-medium text-slate-600">Average Monthly</h3>
             <DollarSign className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             ${spendingMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs text-slate-500 mt-1">Per month (last 30 days)</p>
@@ -470,12 +470,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       {/* Spending Over Time Graph */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-slate-800">Money Spent Over Time</h3>
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">Money Spent Over Time</h3>
           <div className="flex gap-2">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -485,7 +485,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             <select
               value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value as '7days' | '1month' | '90days' | '3months' | '6months' | '1year' | 'alltime')}
-              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="7days">7 Days</option>
               <option value="1month">1 Month</option>
@@ -545,7 +545,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Spending Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <h3 className="font-bold text-slate-800 mb-4">Spending by Category</h3>
+          <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Spending by Category</h3>
           <div className="w-full" style={{ height: '256px', minHeight: '256px' }}>
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height={256}>
@@ -581,7 +581,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
         {/* Recent Activity - Show 10 most recent items */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-800">Recent Activity</h3>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">Recent Activity</h3>
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
                 {spentItems.length} Total
               </span>
@@ -590,22 +590,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
            <div className="space-y-3 max-h-[600px] overflow-y-auto">
              {analytics.recentActivity.length > 0 ? (
                analytics.recentActivity.slice(0, 10).map(item => (
-                 <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors">
+                 <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                       <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
+                       <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500 flex items-center justify-center flex-shrink-0">
                           <ArrowDownRight className="w-5 h-5 text-rose-500" />
                        </div>
                        <div className="flex-1 min-w-0">
-                         <p className="font-semibold text-slate-900 truncate">{item.item}</p>
+                         <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">{item.item}</p>
                          <div className="flex items-center gap-2 mt-1">
-                           <p className="text-xs text-slate-500">{new Date(item.transactionDateTime).toLocaleString()}</p>
-                           <span className="text-xs px-2 py-0.5 bg-slate-200 text-slate-700 rounded">{item.category}</span>
+                           <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(item.transactionDateTime).toLocaleString()}</p>
+                           <span className="text-xs px-2 py-0.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 rounded">{item.category}</span>
                          </div>
                        </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-3">
-                      <p className="font-bold text-slate-900">${item.itemTotal.toLocaleString()}</p>
-                      <p className="text-xs text-slate-500">Qty: {item.itemQty}</p>
+                      <p className="font-bold text-slate-900 dark:text-slate-100">${item.itemTotal.toLocaleString()}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {item.itemQty}</p>
                     </div>
                  </div>
                ))
@@ -625,7 +625,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ accounts, spentItems, tota
             Most Money Spent On: <span className="text-emerald-600">{analytics.topCategory.name}</span>
           </h3>
           <div className="mb-4">
-            <p className="text-3xl font-bold text-slate-900">
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               ${analytics.topCategory.amount.toLocaleString()} GYD
             </p>
             <p className="text-sm text-slate-500 mt-1">Total spent on {analytics.topCategory.name} category</p>
@@ -694,19 +694,19 @@ const TopSpendingItemSection: React.FC<{
   }, [hasBeenViewed, topItem.name, topItem.totalSpent]);
 
   return (
-    <div ref={sectionRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <h3 className="font-bold text-slate-800 mb-6 text-xl">
-            Top Spending Item: <span className="text-emerald-600">{topItem.name}</span>
+    <div ref={sectionRef} className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-6 text-xl">
+            Top Spending Item: <span className="text-emerald-600 dark:text-emerald-400">{topItem.name}</span>
           </h3>
           
           {/* Spending Totals for Top Item */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-slate-600">Spent Today</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">Spent Today</h4>
                 <Clock className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentToday.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Total spent today</p>
@@ -717,7 +717,7 @@ const TopSpendingItemSection: React.FC<{
                 <h4 className="text-sm font-medium text-slate-600">Spent Last 7 Days</h4>
                 <Calendar className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentLast7Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Total spent this week</p>
@@ -728,7 +728,7 @@ const TopSpendingItemSection: React.FC<{
                 <h4 className="text-sm font-medium text-slate-600">Spent Last 30 Days</h4>
                 <DollarSign className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.spentLast30Days.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Total spent this month</p>
@@ -742,7 +742,7 @@ const TopSpendingItemSection: React.FC<{
                 <h4 className="text-sm font-medium text-slate-600">Average Daily</h4>
                 <Clock className="w-4 h-4 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgDaily.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Per day (last 30 days)</p>
@@ -753,7 +753,7 @@ const TopSpendingItemSection: React.FC<{
                 <h4 className="text-sm font-medium text-slate-600">Average Weekly</h4>
                 <Calendar className="w-4 h-4 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgWeekly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Per week (last 30 days)</p>
@@ -764,7 +764,7 @@ const TopSpendingItemSection: React.FC<{
                 <h4 className="text-sm font-medium text-slate-600">Average Monthly</h4>
                 <DollarSign className="w-4 h-4 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${topItemMetrics.avgMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-slate-500 mt-1">Per month (last 30 days)</p>
