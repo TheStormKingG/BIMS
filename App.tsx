@@ -31,6 +31,7 @@ import { useBanks } from './hooks/useBanks';
 import { useSpentItems } from './hooks/useSpentItems';
 import { useGoals } from './hooks/useGoals';
 import { SubscriptionProvider, useSubscription } from './hooks/useSubscription';
+import { ThemeProvider } from './hooks/useTheme';
 import { addFundsOut, updateFundsOutBySpentTableId } from './services/fundsOutDatabase';
 import { getSupabase } from './services/supabaseClient';
 import { saveReceipt } from './services/receiptService';
@@ -1437,10 +1438,12 @@ function App() {
   }
 
   return (
-    <SubscriptionProvider user={user}>
-      <InstallModal />
-      <AppContent user={user} authLoading={authLoading} />
-    </SubscriptionProvider>
+    <ThemeProvider>
+      <SubscriptionProvider user={user}>
+        <InstallModal />
+        <AppContent user={user} authLoading={authLoading} />
+      </SubscriptionProvider>
+    </ThemeProvider>
   );
 }
 

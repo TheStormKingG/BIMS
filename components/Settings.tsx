@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown } from 'lucide-react';
+import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown, Moon, Sun } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
 import { useSubscription } from '../hooks/useSubscription';
+import { useTheme } from '../hooks/useTheme';
 
 interface SettingsProps {
   user: any;
@@ -451,7 +452,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
       <div className="max-w-2xl mx-auto">
 
         {/* Profile Photo Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-4">
           <div className="flex flex-col items-center">
             <div className="relative mb-4">
               {profileImage ? (
@@ -482,7 +483,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           {/* Current Plan / Upgrade Plan */}
           <div className="w-full p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-2">
@@ -536,15 +537,15 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {/* Personal Information */}
           <button
             onClick={handlePersonalInformation}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-200"
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-700"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-slate-600" />
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <User className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               </div>
-              <span className="font-medium text-slate-900">Personal Information</span>
+              <span className="font-medium text-slate-900 dark:text-slate-100">Personal Information</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
           </button>
 
           {/* Tips Frequency */}
@@ -564,20 +565,20 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {/* Invite a Contact */}
           <button
             onClick={handleInviteContact}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <span className="font-medium text-slate-900">Invite a Contact</span>
+              <span className="font-medium text-slate-900 dark:text-slate-100">Invite a Contact</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
           </button>
         </div>
 
         {/* App Version */}
-        <div className="text-center text-sm text-slate-500 mt-4 mb-4">
+        <div className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4 mb-4">
           App Version 1.0.0
         </div>
 
