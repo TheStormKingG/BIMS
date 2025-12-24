@@ -161,7 +161,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <select
                   value={personalInfo.country}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, country: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                 >
                   {countries.map((country) => (
                     <option key={country} value={country}>
@@ -172,12 +172,12 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full name (First and Last name)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Full name (First and Last name)</label>
                 <input
                   type="text"
                   value={personalInfo.fullName}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, fullName: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -195,7 +195,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="text"
                   value={personalInfo.streetAddress2}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, streetAddress2: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Address line 2"
                 />
               </div>
@@ -206,7 +206,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="text"
                   value={personalInfo.city}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, city: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Enter your city"
                 />
               </div>
@@ -217,7 +217,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="text"
                   value={personalInfo.state}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, state: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Enter state/province/region"
                 />
               </div>
@@ -228,7 +228,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="tel"
                   value={personalInfo.phoneNumber}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, phoneNumber: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -239,7 +239,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="date"
                   value={personalInfo.dateOfBirth}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, dateOfBirth: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                 />
               </div>
 
@@ -248,7 +248,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <select
                   value={personalInfo.gender}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black bg-white"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                 >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
@@ -264,7 +264,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="text"
                   value={personalInfo.occupation}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, occupation: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   placeholder="Enter your occupation"
                 />
               </div>
@@ -275,9 +275,9 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                 />
-                <p className="text-xs text-slate-500 mt-1">Email cannot be changed here</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Email cannot be changed here</p>
               </div>
 
               <button 
@@ -434,7 +434,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                         }
                       }
                     }}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black"
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                   />
                   <p className="text-xs text-slate-500 mt-1">Choose how many tips to display at once (1-20)</p>
                 </div>
@@ -610,14 +610,14 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           <div className="flex items-center justify-center gap-2 mt-4">
             <button 
               onClick={() => navigate('/settings/privacy')}
-              className="text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
             >
               Privacy
             </button>
-            <span className="text-slate-400">|</span>
+            <span className="text-slate-400 dark:text-slate-500">|</span>
             <button 
               onClick={() => navigate('/settings/terms')}
-              className="text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
             >
               Terms
             </button>

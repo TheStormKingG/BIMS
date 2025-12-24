@@ -8,6 +8,7 @@ export default {
     "./services/**/*.{js,ts,jsx,tsx}",
     "./*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Enable dark mode via class strategy
   theme: {
     extend: {},
   },
