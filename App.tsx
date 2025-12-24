@@ -1049,7 +1049,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               }`}
             >
               <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-              <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
         </div>
@@ -1077,7 +1077,7 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
               }`}
             >
               <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'fill-current opacity-20' : ''}`} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-              <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
         </div>
