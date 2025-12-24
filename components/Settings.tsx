@@ -16,6 +16,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const { preferences, updatePreferences } = useTips();
   const { entitlement } = useSubscription();
+  const { theme, toggleTheme } = useTheme();
 
   // Check if we should open personal info from navigation state
   useEffect(() => {
@@ -155,9 +156,9 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
 
           {/* Personal Information */}
           {selectedOption === 'personal-info' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Country/Region</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Country/Region</label>
                 <select
                   value={personalInfo.country}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, country: e.target.value })}
@@ -183,12 +184,12 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Street address</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Street address</label>
                 <input
                   type="text"
                   value={personalInfo.streetAddress1}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, streetAddress1: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black mb-2"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700 mb-2"
                   placeholder="Address line 1"
                 />
                 <input
@@ -201,7 +202,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">City</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">City</label>
                 <input
                   type="text"
                   value={personalInfo.city}
@@ -212,7 +213,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">State / Province / Region</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">State / Province / Region</label>
                 <input
                   type="text"
                   value={personalInfo.state}
@@ -223,7 +224,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone number</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phone number</label>
                 <input
                   type="tel"
                   value={personalInfo.phoneNumber}
@@ -234,7 +235,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Date of Birth</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Date of Birth</label>
                 <input
                   type="date"
                   value={personalInfo.dateOfBirth}
@@ -244,7 +245,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Gender</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Gender</label>
                 <select
                   value={personalInfo.gender}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}
@@ -259,7 +260,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Occupation</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Occupation</label>
                 <input
                   type="text"
                   value={personalInfo.occupation}
@@ -270,7 +271,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
                 <input
                   type="email"
                   value={user?.email || ''}
@@ -448,8 +449,28 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 pb-24">
       <div className="max-w-2xl mx-auto">
+        {/* Theme Toggle Button - Top Left */}
+        <div className="mb-4">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Dark Mode</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Profile Photo Section */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-4">
@@ -462,7 +483,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                   className="w-44 h-44 rounded-full object-cover border-4 border-slate-200"
                 />
               ) : (
-                <div className="w-44 h-44 rounded-full bg-emerald-600 flex items-center justify-center border-4 border-slate-200">
+                <div className="w-44 h-44 rounded-full bg-emerald-600 flex items-center justify-center border-4 border-slate-200 dark:border-slate-600">
                   <User className="w-20 h-20 text-white" />
                 </div>
               )}
