@@ -58,17 +58,17 @@ export const Goals: React.FC<GoalsProps> = ({
           {/* Achievement Goals Header - Outside the card */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Award className="w-5 h-5 text-emerald-600" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Achievements
               </h3>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                 {completedSystemGoals} of {totalSystemGoals} goals completed ({systemProgressPercent}%)
               </p>
             </div>
             <button
               onClick={() => navigate('/system-goals')}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+              className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
             >
               View All
               <Target className="w-4 h-4" />
@@ -169,14 +169,14 @@ export const Goals: React.FC<GoalsProps> = ({
                 // Alternate text position (above/below) on both mobile and desktop
                 const isTextAbove = index % 2 === 0; // Even indices (0,2,4) = above, odd (1,3) = below
                 const textLabel = (
-                  <div className="text-center bg-white/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
+                  <div className="text-center bg-white/90 dark:bg-slate-800/90 px-1 md:px-2 py-0.5 md:py-1 rounded backdrop-blur-sm">
                     {/* Mobile text reduced by 9%: 9px -> 8.19px ≈ 8px, 8px -> 7.28px ≈ 7px */}
-                    <div className="font-semibold text-slate-900 text-[8px] md:text-xs">Phase {phase}</div>
-                    <div className="text-slate-600 text-[7px] md:text-[10px] leading-tight mt-0.5 max-w-[55px] md:max-w-[100px]">
+                    <div className="font-semibold text-slate-900 dark:text-slate-100 text-[8px] md:text-xs">Phase {phase}</div>
+                    <div className="text-slate-600 dark:text-slate-300 text-[7px] md:text-[10px] leading-tight mt-0.5 max-w-[55px] md:max-w-[100px]">
                       {phaseNames[phase]}
                     </div>
                     {phaseUnlocked && (
-                      <div className="text-slate-600 mt-0.5 md:mt-1 text-[7px] md:text-xs">{phaseProgress}%</div>
+                      <div className="text-slate-600 dark:text-slate-300 mt-0.5 md:mt-1 text-[7px] md:text-xs">{phaseProgress}%</div>
                     )}
                   </div>
                 );
@@ -215,7 +215,7 @@ export const Goals: React.FC<GoalsProps> = ({
 
           {/* Progress Bar */}
           <div className="mt-4">
-            <div className="w-full bg-slate-200 rounded-full h-3">
+            <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-3">
               <div
                 className="bg-emerald-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${systemProgressPercent}%` }}
@@ -229,8 +229,8 @@ export const Goals: React.FC<GoalsProps> = ({
       {/* Goals Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Goals</h2>
-          <p className="text-slate-500 text-sm mt-1">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Goals</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             {activeGoals.length} active goal{activeGoals.length !== 1 ? 's' : ''}
             {achievedGoals.length > 0 && ` • ${achievedGoals.length} achieved`}
           </p>
@@ -247,9 +247,9 @@ export const Goals: React.FC<GoalsProps> = ({
       {/* Goals List */}
       {goals.length === 0 ? (
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-12 text-center">
-          <Target className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">No goals yet</h3>
-          <p className="text-slate-500 mb-6">Create your first goal to start tracking your financial progress!</p>
+          <Target className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No goals yet</h3>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">Create your first goal to start tracking your financial progress!</p>
           <button
             onClick={onAddGoal}
             className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center gap-2"
@@ -271,34 +271,34 @@ export const Goals: React.FC<GoalsProps> = ({
                 key={goal.id}
                 className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border-2 ${
                   achieved
-                    ? 'border-emerald-500 bg-emerald-50/30'
-                    : 'border-slate-200'
+                    ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-50/30 dark:bg-emerald-900/20'
+                    : 'border-slate-200 dark:border-slate-700'
                 } p-6`}
               >
                 {/* Goal Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                       <GoalIcon className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-slate-900 text-lg">
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">
                           {goalLabel}
                         </h3>
                         {achieved && (
-                          <Trophy className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                          <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                         )}
                       </div>
                       {goal.category && goal.goalType === 'top_category_spent' && (
-                        <p className="text-slate-600 text-sm">
+                        <p className="text-slate-600 dark:text-slate-300 text-sm">
                           Category: {goal.category}
                         </p>
                       )}
                     </div>
                   </div>
                   {!goal.active && (
-                    <span className="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-600 rounded">
+                    <span className="px-2 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">
                       Inactive
                     </span>
                   )}
@@ -307,12 +307,12 @@ export const Goals: React.FC<GoalsProps> = ({
                 {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-slate-700">Current</span>
-                    <span className="text-sm font-bold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Current</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       ${goal.currentProgress.toLocaleString(undefined, { maximumFractionDigits: 0 })} / ${goal.targetAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })} GYD
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-3 overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
                         achieved
@@ -327,11 +327,11 @@ export const Goals: React.FC<GoalsProps> = ({
                     />
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {progressPercentage.toFixed(1)}% of target
                     </span>
                     {achieved && (
-                      <span className="text-xs font-semibold text-emerald-600">
+                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         ✓ Achieved!
                       </span>
                     )}
@@ -339,10 +339,10 @@ export const Goals: React.FC<GoalsProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-4 border-t border-slate-200">
+                <div className="flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
                   <button
                     onClick={() => onEditGoal(goal)}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Edit2 className="w-4 h-4" />
                     Edit
@@ -350,7 +350,7 @@ export const Goals: React.FC<GoalsProps> = ({
                   {onToggleActive && (
                     <button
                       onClick={() => onToggleActive(goal.id)}
-                      className="px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                      className="px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
                       title={goal.active ? 'Deactivate' : 'Activate'}
                     >
                       {goal.active ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
@@ -362,7 +362,7 @@ export const Goals: React.FC<GoalsProps> = ({
                         onDeleteGoal(goal.id);
                       }
                     }}
-                    className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
