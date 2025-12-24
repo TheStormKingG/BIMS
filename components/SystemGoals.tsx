@@ -127,7 +127,7 @@ export const SystemGoals: React.FC = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-600">Loading goals...</p>
+            <p className="text-slate-600 dark:text-slate-300">Loading goals...</p>
           </div>
         </div>
       </div>
@@ -141,14 +141,14 @@ export const SystemGoals: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/goals')}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title="Back to Goals"
           >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Achievement Goals</h2>
-            <p className="text-slate-500 text-sm mt-1">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Achievement Goals</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
               Complete goals to earn badges and level up your financial skills
             </p>
           </div>
@@ -159,22 +159,22 @@ export const SystemGoals: React.FC = () => {
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-3xl font-bold text-amber-600">
+            <div className="text-3xl font-bold text-amber-600 dark:text-amber-500">
               {badges.length}
             </div>
-            <div className="text-sm text-slate-600 mt-1">Badges Earned</div>
+            <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Badges Earned</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
               {Object.values(phaseUnlocks).filter(Boolean).length}
             </div>
-            <div className="text-sm text-slate-600 mt-1">Phases Unlocked</div>
+            <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Phases Unlocked</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-slate-900">
+            <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               {Math.round(progress.reduce((sum, p) => sum + p.progress_percentage, 0) / Math.max(progress.length, 1))}%
             </div>
-            <div className="text-sm text-slate-600 mt-1">Average Progress</div>
+            <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Average Progress</div>
           </div>
         </div>
       </div>
@@ -194,14 +194,14 @@ export const SystemGoals: React.FC = () => {
         return (
           <div key={phase} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             {/* Phase Header */}
-            <div className={`p-6 border-b border-slate-200 ${!isUnlocked ? 'bg-slate-50' : ''}`}>
+            <div className={`p-6 border-b border-slate-200 dark:border-slate-700 ${!isUnlocked ? 'bg-slate-50 dark:bg-slate-700/50' : ''}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {!isUnlocked && (
-                    <Lock className="w-6 h-6 text-slate-400" />
+                    <Lock className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                   )}
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       Phase {phase}
                       {phase === 1 && ' - The Quick-Start Sprint'}
                       {phase === 2 && ' - Basic Engagement'}
@@ -209,7 +209,7 @@ export const SystemGoals: React.FC = () => {
                       {phase === 4 && ' - Advanced Budgeting'}
                       {phase === 5 && ' - Financial Mastery'}
                     </h3>
-                    <p className="text-sm text-slate-600 mt-1">
+                    <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                       {phaseCompleted} of {phaseGoals.length} goals completed ({phaseProgress}%)
                     </p>
                   </div>
@@ -220,8 +220,8 @@ export const SystemGoals: React.FC = () => {
                     <div className="flex flex-col items-center gap-2">
                       {/* Certificate Earned with Checkmark */}
                       <div className="flex items-center gap-1.5">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                        <span className="text-xs font-semibold text-emerald-600">Certificate Earned</span>
+                        <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Certificate Earned</span>
                       </div>
                       
                       {/* Coin Icon */}
@@ -261,7 +261,7 @@ export const SystemGoals: React.FC = () => {
                     </div>
                   )}
                   {!isUnlocked && (
-                    <div className="px-4 py-2 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">
+                    <div className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg text-sm font-medium">
                       Locked
                     </div>
                   )}
@@ -270,7 +270,7 @@ export const SystemGoals: React.FC = () => {
               {/* Phase Progress Bar */}
               {isUnlocked && (
                 <div className="mt-4">
-                  <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
                     <div
                       className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${phaseProgress}%` }}
@@ -295,16 +295,16 @@ export const SystemGoals: React.FC = () => {
                         key={goal.id}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           isCompleted
-                            ? 'border-emerald-500 bg-emerald-50/30'
-                            : 'border-slate-200 hover:border-emerald-300'
+                            ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-50/30 dark:bg-emerald-900/20'
+                            : 'border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3 flex-1">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                               isCompleted
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-emerald-500 dark:bg-emerald-400 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                             }`}>
                               {isCompleted ? (
                                 <Check className="w-5 h-5" />
@@ -314,29 +314,29 @@ export const SystemGoals: React.FC = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-bold text-slate-900">
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100">
                                   {goal.title}
                                 </h4>
                                 {isCompleted && (
-                                  <Trophy className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                                  <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                 )}
                               </div>
-                              <p className="text-sm text-slate-600 mb-2">
+                              <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
                                 {goal.description}
                               </p>
                               {(!isCompleted || !hasBadge) && (
                                 <div className="space-y-1">
-                                  <div className="w-full bg-slate-200 rounded-full h-2">
+                                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
                                     <div
                                       className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
                                       style={{ width: `${Math.min(100, progressPercent)}%` }}
                                     />
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-xs text-slate-500">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400">
                                       {progressPercent}% complete
                                     </span>
-                                    <span className="text-xs font-medium text-slate-700">
+                                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                                       Badge: {goal.badge_name}
                                     </span>
                                   </div>
@@ -349,7 +349,7 @@ export const SystemGoals: React.FC = () => {
                           {isCompleted && hasBadge ? (
                             <div className="flex flex-col items-center flex-shrink-0 gap-2">
                               <div className="flex flex-col items-center">
-                                <span className="text-xs font-semibold text-emerald-600 mb-1 text-center">
+                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1 text-center">
                                   ✓ Badge Earned:
                                 </span>
                                 <img
@@ -357,7 +357,7 @@ export const SystemGoals: React.FC = () => {
                                   alt={`${goal.badge_name} badge`}
                                   className="w-16 h-16 object-contain"
                                 />
-                                <span className="text-xs font-semibold text-emerald-600 mt-1 text-center max-w-[80px]">
+                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1 text-center max-w-[80px]">
                                   {goal.badge_name}
                                 </span>
                               </div>
@@ -388,9 +388,9 @@ export const SystemGoals: React.FC = () => {
               </div>
             ) : (
               <div className="p-12 text-center">
-                <Lock className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h4 className="text-lg font-semibold text-slate-900 mb-2">Phase {phase} is Locked</h4>
-                <p className="text-slate-500">
+                <Lock className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Phase {phase} is Locked</h4>
+                <p className="text-slate-500 dark:text-slate-400">
                   Complete all goals in Phase {phase - 1} to unlock Phase {phase}
                 </p>
               </div>
