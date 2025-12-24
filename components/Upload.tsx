@@ -185,9 +185,9 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
       />
 
       {!scanResult && !isScanning && (
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Upload Receipt</h2>
-          <p className="text-slate-600 mb-6">Upload a receipt image to extract transaction details automatically</p>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Upload Receipt</h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-6">Upload a receipt image to extract transaction details automatically</p>
           
           {/* Drag and Drop Zone */}
           <div
@@ -198,15 +198,15 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
             onClick={() => fileInputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all ${
               isDragging
-                ? 'border-emerald-500 bg-emerald-50'
-                : 'border-slate-300 hover:border-emerald-400 hover:bg-slate-50'
+                ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                : 'border-slate-300 dark:border-slate-600 hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-slate-50 dark:hover:bg-slate-700/50'
             }`}
           >
-            <UploadIcon className={`w-16 h-16 mx-auto mb-4 ${isDragging ? 'text-emerald-600' : 'text-slate-400'}`} />
-            <p className="text-lg font-semibold text-slate-900 mb-2">
+            <UploadIcon className={`w-16 h-16 mx-auto mb-4 ${isDragging ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`} />
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
               {isDragging ? 'Drop your receipt here' : 'Drag and drop your receipt here'}
             </p>
-            <p className="text-sm text-slate-500 mb-4">or</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">or</p>
             <button
               type="button"
               className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
@@ -214,23 +214,23 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
               <FileImage className="w-5 h-5" />
               Browse Files
             </button>
-            <p className="text-xs text-slate-400 mt-4">Supports JPG, PNG, and other image formats</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">Supports JPG, PNG, and other image formats</p>
           </div>
         </div>
       )}
 
       {isScanning && (
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-12">
-          <div className="flex flex-col items-center justify-center text-slate-500">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-12">
+          <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
             <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mb-4" />
-            <p className="text-lg font-semibold">Analyzing receipt with AI...</p>
-            <p className="text-sm mt-2">This may take a few moments</p>
+            <p className="text-lg font-semibold dark:text-slate-200">Analyzing receipt with AI...</p>
+            <p className="text-sm mt-2 dark:text-slate-300">This may take a few moments</p>
           </div>
         </div>
       )}
 
       {error && !isScanning && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl flex items-start gap-3">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 p-6 rounded-xl flex items-start gap-3">
           <AlertCircle className="w-6 h-6 mt-0.5 shrink-0" />
           <div className="flex-1">
             <h4 className="font-semibold mb-1">Upload Failed</h4>
@@ -251,13 +251,13 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
       {scanResult && !isScanning && (
         <>
           {(!scanResult.total || scanResult.total === 0 || !scanResult.items || scanResult.items.length === 0) ? (
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="relative h-48 bg-slate-100 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="relative h-48 bg-slate-100 dark:bg-slate-700 overflow-hidden">
                 {previewUrl && (
                   <img src={previewUrl} alt="Receipt Preview" className="w-full h-full object-cover opacity-50" />
                 )}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-amber-100/90 backdrop-blur px-4 py-2 rounded-full shadow-sm text-sm font-semibold text-amber-800 flex items-center gap-2">
+                  <div className="bg-amber-100/90 dark:bg-amber-900/60 backdrop-blur px-4 py-2 rounded-full shadow-sm text-sm font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" /> No Data Found
                   </div>
                 </div>
@@ -265,18 +265,18 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
 
               <div className="p-6">
                 <div className="text-center mb-6">
-                  <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
+                  <AlertCircle className="w-12 h-12 text-amber-600 dark:text-amber-500 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
                     Oops—this receipt played<br />hide-and-seek.
                   </h3>
-                  <p className="text-slate-700 mb-4">
+                  <p className="text-slate-700 dark:text-slate-300 mb-4">
                     I found zero data—more like art or random paper. Maybe it's not even a receipt.
                   </p>
                 </div>
 
-                <div className="bg-amber-50 rounded-lg p-4 text-left border border-amber-200 mb-6">
-                  <p className="text-sm font-semibold text-amber-900 mb-2">Try again, but before ensure:</p>
-                  <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-left border border-amber-200 dark:border-amber-800 mb-6">
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-2">Try again, but before ensure:</p>
+                  <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1 list-disc list-inside">
                     <li>Merchant name visible</li>
                     <li>Totals readable</li>
                     <li>Flat surface</li>
@@ -301,7 +301,7 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-8 py-3 rounded-lg font-semibold transition-colors"
+                    className="bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 px-8 py-3 rounded-lg font-semibold transition-colors"
                   >
                     Cancel
                   </button>
@@ -309,13 +309,13 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="relative h-48 bg-slate-100 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="relative h-48 bg-slate-100 dark:bg-slate-700 overflow-hidden">
                 {previewUrl && (
                   <img src={previewUrl} alt="Receipt Preview" className="w-full h-full object-cover opacity-50" />
                 )}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm text-sm font-semibold text-emerald-700 flex items-center gap-2">
+                  <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 py-2 rounded-full shadow-sm text-sm font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                     <Check className="w-4 h-4" /> Scan Successful
                   </div>
                 </div>
@@ -324,51 +324,51 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Merchant</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Merchant</label>
                     <input
                       type="text"
                       value={scanResult.merchant || ''}
                       readOnly
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Date</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Date</label>
                     <input
                       type="date"
                       value={scanResult.date || ''}
                       readOnly
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
                     />
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Total</label>
-                  <div className="text-3xl font-bold text-emerald-600">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Total</label>
+                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                     ${scanResult.total.toLocaleString()} GYD
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-3">Items</label>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Items</label>
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50">
+                      <thead className="bg-slate-50 dark:bg-slate-700/50">
                         <tr>
-                          <th className="px-4 py-2 text-left text-slate-600 font-medium">Item</th>
-                          <th className="px-4 py-2 text-right text-slate-600 font-medium">Qty</th>
-                          <th className="px-4 py-2 text-right text-slate-600 font-medium">Price</th>
-                          <th className="px-4 py-2 text-right text-slate-600 font-medium">Total</th>
+                          <th className="px-4 py-2 text-left text-slate-600 dark:text-slate-300 font-medium">Item</th>
+                          <th className="px-4 py-2 text-right text-slate-600 dark:text-slate-300 font-medium">Qty</th>
+                          <th className="px-4 py-2 text-right text-slate-600 dark:text-slate-300 font-medium">Price</th>
+                          <th className="px-4 py-2 text-right text-slate-600 dark:text-slate-300 font-medium">Total</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                         {scanResult.items.map((item, idx) => (
-                          <tr key={idx}>
-                            <td className="px-4 py-2">{item.description}</td>
-                            <td className="px-4 py-2 text-right">{item.quantity}</td>
-                            <td className="px-4 py-2 text-right">${item.unitPrice.toLocaleString()}</td>
-                            <td className="px-4 py-2 text-right font-medium">${item.total.toLocaleString()}</td>
+                          <tr key={idx} className="dark:bg-slate-800">
+                            <td className="px-4 py-2 dark:text-slate-200">{item.description}</td>
+                            <td className="px-4 py-2 text-right dark:text-slate-200">{item.quantity}</td>
+                            <td className="px-4 py-2 text-right dark:text-slate-200">${item.unitPrice.toLocaleString()}</td>
+                            <td className="px-4 py-2 text-right font-medium dark:text-slate-200">${item.total.toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -377,13 +377,13 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Payment Method <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Payment Method <span className="text-red-500 dark:text-red-400">*</span>
                   </label>
                   <select
                     value={selectedAccountId}
                     onChange={(e) => setSelectedAccountId(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-black"
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                     required
                   >
                     <option value="">Select payment method</option>
@@ -397,7 +397,7 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
                     )}
                   </select>
                   {accountsWithFunds.length === 0 && scanResult && (
-                    <p className="text-sm text-red-600 mt-2">
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-2">
                       No accounts have sufficient funds for this transaction (${scanResult.total.toLocaleString()} GYD required)
                     </p>
                   )}
@@ -407,13 +407,13 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
                   <button
                     onClick={handleSave}
                     disabled={!selectedAccountId}
-                    className="flex-1 bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
+                    className="flex-1 bg-emerald-600 dark:bg-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
                   >
                     Save Transaction
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+                    className="px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                   >
                     Cancel
                   </button>
