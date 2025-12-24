@@ -13,16 +13,17 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [
         react(),
-        // Copy static HTML files to dist folder after build
+        // Copy static HTML files and service worker to dist folder after build
         {
-          name: 'copy-static-html',
+          name: 'copy-static-files',
           closeBundle() {
             try {
               copyFileSync('404.html', 'dist/404.html');
               copyFileSync('public/about-share.html', 'dist/about-share.html');
               copyFileSync('public/about-share-wa.html', 'dist/about-share-wa.html');
+              copyFileSync('public/service-worker.js', 'dist/service-worker.js');
             } catch (err) {
-              console.warn('Could not copy static HTML files:', err);
+              console.warn('Could not copy static files:', err);
             }
           }
         }
