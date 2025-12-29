@@ -159,7 +159,7 @@ export const InstallModal: React.FC = () => {
         if (!firstLoginShown) {
           console.log('Showing PWA modal on first login');
           setShowModal(true);
-          setShowManualInstructions(!prompt); // Show manual instructions if no native prompt
+          setShowManualInstructions(false); // Always show install button first
           localStorage.setItem('pwa_first_login_shown', 'true');
           promptHandledRef.current = true;
         } else {
@@ -169,7 +169,7 @@ export const InstallModal: React.FC = () => {
           if (!dismissedThisSession) {
             console.log('Showing PWA modal on subsequent login');
             setShowModal(true);
-            setShowManualInstructions(!prompt);
+            setShowManualInstructions(false); // Always show install button first
             promptHandledRef.current = true;
           }
         }
@@ -237,7 +237,18 @@ export const InstallModal: React.FC = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    const prompt = deferredPrompt || (window as any).deferredPrompt;
+    // Try to get the prompt from state or global storage
+    let prompt = deferredPrompt || (window as any).deferredPrompt;
+    
+    // If we don't have a prompt yet, wait a bit and check again (for browsers that delay the event)
+    if (!prompt) {
+      // Wait up to 2 seconds for the prompt to become available
+      for (let i = 0; i < 4; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        prompt = deferredPrompt || (window as any).deferredPrompt;
+        if (prompt) break;
+      }
+    }
     
     if (prompt) {
       try {
@@ -260,11 +271,12 @@ export const InstallModal: React.FC = () => {
         promptHandledRef.current = false;
       } catch (error) {
         console.error('Error showing install prompt:', error);
-        // If native prompt fails, show manual instructions
+        // If native prompt fails, show manual instructions as fallback
         setShowManualInstructions(true);
       }
     } else {
-      // No native prompt available, show manual instructions
+      // No native prompt available after waiting, show manual instructions as fallback
+      console.log('Native install prompt not available, showing manual instructions');
       setShowManualInstructions(true);
     }
   };
@@ -352,7 +364,7 @@ export const InstallModal: React.FC = () => {
           )}
         </div>
 
-        {!showManualInstructions && !deferredPrompt && (
+        {!showManualInstructions && (
           <button
             onClick={handleShowInstructions}
             className="w-full mt-3 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
