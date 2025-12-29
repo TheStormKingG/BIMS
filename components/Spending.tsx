@@ -32,6 +32,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallFeature, setPaywallFeature] = useState<string>('');
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const searchEventEmittedRef = useRef(false); // Track if we've emitted search event for this search
   
@@ -39,6 +40,11 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
   const canExportExcel = canUse('export_excel', entitlement);
   const canEditTransactions = canUse('transaction_editing', entitlement);
   const canDeleteTransactions = canUse('transaction_deletion', entitlement);
+
+  // Clear selected items when filtered items change (e.g., month change)
+  useEffect(() => {
+    setSelectedItems(new Set());
+  }, [selectedMonth, searchTerm]);
   const [formData, setFormData] = useState({
     transactionDateTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
     category: 'Other',
@@ -293,6 +299,50 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
     }
   };
 
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.size === filteredItems.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(filteredItems.map(item => item.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!onDeleteSpend || selectedItems.size === 0) return;
+
+    if (!canDeleteTransactions) {
+      setPaywallFeature('Transaction Deletion');
+      setShowPaywall(true);
+      return;
+    }
+
+    const count = selectedItems.size;
+    if (!window.confirm(`Are you sure you want to delete ${count} selected item${count > 1 ? 's' : ''}?`)) {
+      return;
+    }
+
+    try {
+      // Delete all selected items
+      const deletePromises = Array.from(selectedItems).map(itemId => onDeleteSpend(itemId));
+      await Promise.all(deletePromises);
+      setSelectedItems(new Set());
+    } catch (err) {
+      alert('Failed to delete items: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -358,6 +408,16 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
           </button>
         </div>
         <div className="flex items-center gap-2">
+          {/* Bulk Delete Button */}
+          {selectedItems.size > 0 && onDeleteSpend && (
+            <button
+              onClick={handleBulkDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete ({selectedItems.size})</span>
+            </button>
+          )}
           {/* Export Dropdown Button */}
           {filteredItems.length > 0 && (
             <div className="relative" ref={exportDropdownRef}>
@@ -445,6 +505,14 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
           <table className="w-full text-sm">
             <thead className="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-medium text-xs border-b border-slate-100 dark:border-slate-700">
               <tr>
+                <th className="px-4 py-3 text-left w-12">
+                  <input
+                    type="checkbox"
+                    checked={filteredItems.length > 0 && selectedItems.size === filteredItems.length}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-emerald-600 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-emerald-500 focus:ring-2 cursor-pointer"
+                  />
+                </th>
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Item</th>
                 <th className="px-4 py-3 text-right">Total</th>
@@ -460,7 +528,15 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  <tr key={item.id} className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${selectedItems.has(item.id) ? 'bg-emerald-50 dark:bg-emerald-900/20' : ''}`}>
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(item.id)}
+                        onChange={() => handleSelectItem(item.id)}
+                        className="w-4 h-4 text-emerald-600 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-emerald-500 focus:ring-2 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                       {formatDateTime(item.transactionDateTime)}
                     </td>
@@ -546,7 +622,7 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-slate-400 dark:text-slate-500">
+                  <td colSpan={11} className="px-4 py-12 text-center text-slate-400 dark:text-slate-500">
                     <div className="flex flex-col items-center gap-2">
                       <ShoppingBag className="w-8 h-8 opacity-20" />
                       <p>
