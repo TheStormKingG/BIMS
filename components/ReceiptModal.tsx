@@ -201,7 +201,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
                             </div>
                           ))
                         ) : (
-                          <div className="text-sm text-slate-500 text-center py-2">
+                          <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">
                             No items found in receipt data
                           </div>
                         )}
