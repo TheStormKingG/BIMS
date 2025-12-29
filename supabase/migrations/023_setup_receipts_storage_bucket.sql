@@ -10,19 +10,21 @@ DROP POLICY IF EXISTS "Users can delete receipts from their own folder" ON stora
 
 -- Policy: Users can upload receipt images to their own folder
 -- Receipts are stored with path pattern: userId/timestamp-randomUUID.extension
+-- Using split_part to handle path extraction more reliably
 CREATE POLICY "Users can upload receipts to their own folder"
 ON storage.objects FOR INSERT
 WITH CHECK (
   bucket_id = 'receipts'
-  AND (storage.foldername(name))[1]::text = auth.uid()::text
+  AND split_part(name, '/', 1) = auth.uid()::text
 );
 
 -- Policy: Users can read (including create signed URLs) receipt images from their own folder
+-- This policy allows users to read their own receipt images, which is required for createSignedUrl
 CREATE POLICY "Users can read receipts from their own folder"
 ON storage.objects FOR SELECT
 USING (
   bucket_id = 'receipts'
-  AND (storage.foldername(name))[1]::text = auth.uid()::text
+  AND split_part(name, '/', 1) = auth.uid()::text
 );
 
 -- Policy: Users can delete receipt images from their own folder
@@ -30,7 +32,7 @@ CREATE POLICY "Users can delete receipts from their own folder"
 ON storage.objects FOR DELETE
 USING (
   bucket_id = 'receipts'
-  AND (storage.foldername(name))[1]::text = auth.uid()::text
+  AND split_part(name, '/', 1) = auth.uid()::text
 );
 
 -- Note: COMMENT ON POLICY is not supported for storage.objects policies in Supabase

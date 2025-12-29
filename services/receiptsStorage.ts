@@ -59,7 +59,20 @@ export const getReceiptImageUrl = async (storagePath: string): Promise<string> =
       .from(RECEIPTS_BUCKET)
       .createSignedUrl(storagePath, 3600); // 1 hour expiry
     
-    if (error) throw error;
+    if (error) {
+      console.error('Storage error details:', {
+        message: error.message,
+        statusCode: error.statusCode,
+        error: error
+      });
+      
+      // Provide helpful error message for RLS policy errors
+      if (error.message?.includes('row-level security policy') || error.message?.includes('RLS')) {
+        throw new Error('Storage access denied. Please ensure the receipts storage bucket RLS policies are configured correctly. Check migration 023_setup_receipts_storage_bucket.sql');
+      }
+      
+      throw error;
+    }
     if (!data?.signedUrl) throw new Error('No signed URL returned');
     
     return data.signedUrl;
