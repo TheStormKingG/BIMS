@@ -1,84 +1,50 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.2.1';
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-interface ReceiptScanResult {
-  merchant: string;
-  date: string;
-  total: number;
-  items: Array<{
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    total: number;
-    category: string;
-  }>;
-}
-
 serve(async (req) => {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    // Check API key
+    const apiKey = (Deno.env.get("GEMINI_API_KEY") ?? "").trim();
+
+    if (!apiKey || !apiKey.startsWith("AIza")) {
       return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: "Bad or missing GEMINI_API_KEY", 
+          key_prefix: apiKey.slice(0, 4), 
+          key_len: apiKey.length 
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
+    // Read JSON body
+    const bodyText = await req.text();
+    let body: any = {};
+    try { 
+      body = bodyText ? JSON.parse(bodyText) : {}; 
+    } catch (parseError) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Invalid JSON body", detail: String(parseError) }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Get request body
-    const { base64Image } = await req.json();
-    
+    const base64Image = body.base64Image;
     if (!base64Image) {
       return new Response(
-        JSON.stringify({ error: 'Missing base64Image in request body' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Missing base64Image in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
-    // Get Gemini API key from environment
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      console.error('GEMINI_API_KEY not configured in Supabase Edge Function secrets');
-      return new Response(
-        JSON.stringify({ error: 'Service configuration error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Initialize Gemini AI
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 Analyze this image of a receipt (or text message/email receipt).
@@ -106,55 +72,112 @@ Return ONLY a JSON object with these exact keys:
 }
 `;
 
-    // Call Gemini API - match the working function pattern
-    const result = await model.generateContent([prompt, {
-      inlineData: {
-        data: base64Image,
-        mimeType: 'image/jpeg',
-      },
-    }]);
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent" +
+      `?key=${encodeURIComponent(apiKey)}`;
 
-    const response = await result.response;
-    const text = response.text();
-    
-    if (!text) {
-      throw new Error('No response from AI');
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  data: base64Image,
+                  mimeType: "image/jpeg",
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    const dataText = await r.text(); // keep raw for debugging
+    if (!r.ok) {
+      return new Response(
+        JSON.stringify({
+          error: "Gemini upstream error",
+          upstream_status: r.status,
+          upstream_body: dataText,
+        }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Try to extract JSON from the response (handle cases where AI adds extra text)
+    // Parse the response
+    let data: any;
+    try {
+      data = JSON.parse(dataText);
+    } catch (parseError) {
+      return new Response(
+        JSON.stringify({
+          error: "Failed to parse Gemini response",
+          raw_response: dataText,
+          detail: String(parseError),
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Extract text from Gemini response
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      return new Response(
+        JSON.stringify({
+          error: "No text in Gemini response",
+          raw_response: dataText,
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Try to extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('No JSON found in AI response:', text);
-      throw new Error('Invalid response format from AI');
+      return new Response(
+        JSON.stringify({
+          error: "No JSON found in AI response",
+          ai_response: text,
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Parse JSON response
-    let data: ReceiptScanResult;
+    // Parse the receipt data
+    let receiptData: any;
     try {
-      data = JSON.parse(jsonMatch[0]) as ReceiptScanResult;
+      receiptData = JSON.parse(jsonMatch[0]);
     } catch (parseError) {
-      console.error('Failed to parse AI response:', text);
-      throw new Error('Invalid response format from AI');
+      return new Response(
+        JSON.stringify({
+          error: "Failed to parse receipt JSON",
+          json_extract: jsonMatch[0],
+          detail: String(parseError),
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
-    
-    // Fallback/Cleanup if AI misses something critical
-    if (!data.date) data.date = new Date().toISOString().split('T')[0];
-    if (!data.items) data.items = [];
-    
-    return new Response(
-      JSON.stringify(data),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
 
-  } catch (error) {
-    console.error('Error in gemini-scan-receipt:', error);
+    // Ensure required fields exist
+    if (!receiptData.date) receiptData.date = new Date().toISOString().split('T')[0];
+    if (!receiptData.items) receiptData.items = [];
+
+    return new Response(JSON.stringify(receiptData), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  } catch (e) {
     return new Response(
-      JSON.stringify({ 
-        error: 'Failed to scan receipt', 
-        details: error.message 
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "Unhandled exception", detail: String(e), stack: e?.stack }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 });
-
