@@ -797,28 +797,28 @@ export const Accounts: React.FC<AccountsProps> = ({
 
       {/* Wallet Add Funds Modal */}
       {showWalletAddFundsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseWalletAddFunds}>
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4" onClick={handleCloseWalletAddFunds}>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-900">Add Funds to Wallet</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Add Funds to Wallet</h3>
               <button
                 onClick={handleCloseWalletAddFunds}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 
             <form onSubmit={handleSubmitWalletFunds} className="p-6 space-y-6">
               {/* Source Dropdown */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Source <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={walletFundSource}
                   onChange={(e) => setWalletFundSource(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black"
+                  className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100"
                   required
                 >
                   <option value="">Select source...</option>
@@ -836,7 +836,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                   )}
                 </select>
                 {walletFundSource && walletFundSource !== 'Cash-In (Payments, Gifts, Etc.)' && (
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     💡 Withdrawing from {walletFundSource}
                   </p>
                 )}
@@ -844,7 +844,7 @@ export const Accounts: React.FC<AccountsProps> = ({
 
               {/* Amount Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Amount (GYD) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -854,7 +854,7 @@ export const Accounts: React.FC<AccountsProps> = ({
                   placeholder="0.00"
                   step="0.01"
                   min="0"
-                  className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white text-black text-lg"
+                  className="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-700 text-black dark:text-slate-100 text-lg"
                   required
                 />
               </div>
@@ -864,14 +864,14 @@ export const Accounts: React.FC<AccountsProps> = ({
                 <button
                   type="button"
                   onClick={handleCloseWalletAddFunds}
-                  className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!walletFundSource || !walletFundAmount || Number(walletFundAmount) <= 0}
-                  className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
                 >
                   Add Funds
                 </button>
