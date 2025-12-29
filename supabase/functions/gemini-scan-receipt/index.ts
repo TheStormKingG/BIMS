@@ -78,56 +78,41 @@ serve(async (req) => {
 
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'object',
-          properties: {
-            merchant: { type: 'string' },
-            date: { type: 'string', description: 'YYYY-MM-DD format' },
-            total: { type: 'number' },
-            items: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  description: { type: 'string' },
-                  quantity: { type: 'number' },
-                  unitPrice: { type: 'number' },
-                  total: { type: 'number' },
-                  category: { type: 'string' }
-                },
-                required: ['description', 'quantity', 'unitPrice', 'total', 'category']
-              }
-            }
-          },
-          required: ['merchant', 'date', 'items', 'total']
-        }
-      }
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
-      Analyze this image of a receipt (or text message/email receipt).
-      Extract the merchant name, transaction date (YYYY-MM-DD), and a list of purchased items.
-      For each item, extract the description, quantity (default to 1 if not found), unit price, and total price.
-      Infer a category for each item from this list: [Groceries, Dining Out, Transport, Utilities, Entertainment, Shopping, Health, Education, Other].
-      Return the total amount of the receipt.
-      If the image is not a receipt or unclear, do your best to extract what looks like transaction data.
-      Values should be in numbers (GYD).
-    `;
+Analyze this image of a receipt (or text message/email receipt).
+Extract the merchant name, transaction date (YYYY-MM-DD), and a list of purchased items.
+For each item, extract the description, quantity (default to 1 if not found), unit price, and total price.
+Infer a category for each item from this list: [Groceries, Dining Out, Transport, Utilities, Entertainment, Shopping, Health, Education, Other].
+Return the total amount of the receipt.
+If the image is not a receipt or unclear, do your best to extract what looks like transaction data.
+Values should be in numbers (GYD).
 
-    // Call Gemini API
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Image,
-          mimeType: 'image/jpeg',
-        },
+Return ONLY a JSON object with these exact keys:
+{
+  "merchant": string,
+  "date": string (YYYY-MM-DD format),
+  "total": number,
+  "items": [
+    {
+      "description": string,
+      "quantity": number,
+      "unitPrice": number,
+      "total": number,
+      "category": string
+    }
+  ]
+}
+`;
+
+    // Call Gemini API - match the working function pattern
+    const result = await model.generateContent([prompt, {
+      inlineData: {
+        data: base64Image,
+        mimeType: 'image/jpeg',
       },
-      prompt,
-    ]);
+    }]);
 
     const response = await result.response;
     const text = response.text();
@@ -136,10 +121,17 @@ serve(async (req) => {
       throw new Error('No response from AI');
     }
 
+    // Try to extract JSON from the response (handle cases where AI adds extra text)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('No JSON found in AI response:', text);
+      throw new Error('Invalid response format from AI');
+    }
+
     // Parse JSON response
     let data: ReceiptScanResult;
     try {
-      data = JSON.parse(text) as ReceiptScanResult;
+      data = JSON.parse(jsonMatch[0]) as ReceiptScanResult;
     } catch (parseError) {
       console.error('Failed to parse AI response:', text);
       throw new Error('Invalid response format from AI');
