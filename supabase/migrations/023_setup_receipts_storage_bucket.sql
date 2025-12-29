@@ -10,7 +10,7 @@ DROP POLICY IF EXISTS "Users can delete receipts from their own folder" ON stora
 
 -- Policy: Users can upload receipt images to their own folder
 -- Receipts are stored with path pattern: userId/timestamp-randomUUID.extension
--- Using split_part to handle path extraction more reliably
+-- Using split_part to get the first segment of the path (userId)
 CREATE POLICY "Users can upload receipts to their own folder"
 ON storage.objects FOR INSERT
 WITH CHECK (
@@ -19,7 +19,7 @@ WITH CHECK (
 );
 
 -- Policy: Users can read (including create signed URLs) receipt images from their own folder
--- This policy allows users to read their own receipt images, which is required for createSignedUrl
+-- Using split_part to get the first segment of the path (userId)
 CREATE POLICY "Users can read receipts from their own folder"
 ON storage.objects FOR SELECT
 USING (
@@ -28,6 +28,7 @@ USING (
 );
 
 -- Policy: Users can delete receipt images from their own folder
+-- Using split_part to get the first segment of the path (userId)
 CREATE POLICY "Users can delete receipts from their own folder"
 ON storage.objects FOR DELETE
 USING (
