@@ -55,22 +55,28 @@ export const uploadReceiptImage = async (file: File | Blob, userId: string): Pro
  */
 export const getReceiptImageUrl = async (storagePath: string): Promise<string> => {
   try {
+    // Get current user to verify authentication
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     const { data, error } = await supabase.storage
       .from(RECEIPTS_BUCKET)
       .createSignedUrl(storagePath, 3600); // 1 hour expiry
     
     if (error) {
-      console.error('Storage error details:', {
-        message: error.message,
-        statusCode: error.statusCode,
-        error: error
-      });
+      console.error('Storage signed URL error:', error);
+      console.error('Storage path:', storagePath);
+      console.error('User ID:', user.id);
       
-      // Provide helpful error message for RLS policy errors
-      if (error.message?.includes('row-level security policy') || error.message?.includes('RLS')) {
-        throw new Error('Storage access denied. Please ensure the receipts storage bucket RLS policies are configured correctly. Check migration 023_setup_receipts_storage_bucket.sql');
+      // Provide more helpful error messages
+      if (error.message?.includes('row-level security') || error.message?.includes('RLS')) {
+        throw new Error('Storage access denied. Please ensure Row Level Security policies are configured for the receipts bucket. See migration file: supabase/migrations/023_setup_receipts_storage_bucket.sql');
       }
-      
+      if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
+        throw new Error(`Storage bucket '${RECEIPTS_BUCKET}' not found. Please create it in Supabase Dashboard > Storage.`);
+      }
       throw error;
     }
     if (!data?.signedUrl) throw new Error('No signed URL returned');

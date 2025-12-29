@@ -39,7 +39,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
         setReceiptImageUrl(imageUrl);
       } catch (err) {
         console.error('Error loading receipt:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load receipt');
+        let errorMessage = 'Failed to load receipt';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+          // Provide more helpful message for RLS errors
+          if (err.message.includes('row-level security') || err.message.includes('RLS')) {
+            errorMessage = 'Storage access error. Please ensure the receipts storage bucket RLS policies are configured. Contact support if this issue persists.';
+          } else if (err.message.includes('not found')) {
+            errorMessage = 'Receipt image not found in storage.';
+          }
+        }
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -201,7 +211,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ spentItem, onClose }
                             </div>
                           ))
                         ) : (
-                          <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">
+                          <div className="text-sm text-slate-500 text-center py-2">
                             No items found in receipt data
                           </div>
                         )}
