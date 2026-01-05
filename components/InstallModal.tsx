@@ -68,6 +68,7 @@ export const InstallModal: React.FC = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [showManualInstructions, setShowManualInstructions] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
   const promptHandledRef = useRef(false);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -95,6 +96,7 @@ export const InstallModal: React.FC = () => {
     setCanInstall(canInstallPWA());
 
     // Listen for the beforeinstallprompt event (Chrome, Edge, Samsung Internet on newer versions)
+    // This listener must be active at all times to capture the prompt whenever it fires
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
@@ -102,6 +104,11 @@ export const InstallModal: React.FC = () => {
       // Store globally for access
       (window as any).deferredPrompt = promptEvent;
       console.log('beforeinstallprompt event captured');
+      
+      // If modal is already showing, ensure the button can use this prompt
+      if (showModal) {
+        setIsInstalling(false); // Reset installing state if we were waiting
+      }
       
       // If user is already logged in, trigger modal check
       const hasLoggedIn = sessionStorage.getItem('user_logged_in') === 'true' || 
@@ -122,7 +129,7 @@ export const InstallModal: React.FC = () => {
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, []);
+  }, [showModal]);
 
   // Handle login and show modal with improved retry logic
   useEffect(() => {
@@ -237,24 +244,34 @@ export const InstallModal: React.FC = () => {
   }, []);
 
   const handleInstallClick = async () => {
+    setIsInstalling(true);
+    
     // Try to get the prompt from state or global storage
     let prompt = deferredPrompt || (window as any).deferredPrompt;
     
-    // If we don't have a prompt yet, wait longer and check again (for browsers that delay the event)
+    // If we don't have a prompt yet, wait aggressively for it to become available
+    // Some browsers delay the beforeinstallprompt event, so we wait up to 5 seconds
     if (!prompt) {
-      // Wait up to 3 seconds for the prompt to become available
-      for (let i = 0; i < 6; i++) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Waiting for install prompt to become available...');
+      // Wait up to 5 seconds, checking every 200ms for faster response
+      for (let i = 0; i < 25; i++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
         prompt = deferredPrompt || (window as any).deferredPrompt;
-        if (prompt) break;
+        if (prompt) {
+          console.log('Install prompt found after waiting');
+          break;
+        }
       }
     }
     
     if (prompt) {
       try {
         // Always try to trigger the native install prompt
+        console.log('Triggering native install prompt');
         await prompt.prompt();
         const { outcome } = await prompt.userChoice;
+        
+        setIsInstalling(false);
         
         if (outcome === 'accepted') {
           console.log('User accepted the PWA install prompt');
@@ -272,30 +289,92 @@ export const InstallModal: React.FC = () => {
         promptHandledRef.current = false;
       } catch (error) {
         console.error('Error showing install prompt:', error);
-        // Only show manual instructions if the prompt actually fails
-        // Don't show instructions if prompt is just not available yet
+        setIsInstalling(false);
+        
+        // Only show manual instructions for iOS (which truly can't be programmatic)
         const { isIOS } = getBrowserInfo();
         if (isIOS) {
-          // iOS doesn't support programmatic installation, show instructions
           setShowManualInstructions(true);
         } else {
-          // For other browsers, close modal and let user try browser's native install button
-          setShowModal(false);
-          sessionStorage.setItem('pwa_modal_dismissed', 'true');
+          // For other browsers, retry once more after a short delay
+          // The prompt might have become available
+          setTimeout(async () => {
+            const retryPrompt = deferredPrompt || (window as any).deferredPrompt;
+            if (retryPrompt) {
+              try {
+                await retryPrompt.prompt();
+                const { outcome } = await retryPrompt.userChoice;
+                if (outcome === 'accepted') {
+                  setIsInstalled(true);
+                  setShowModal(false);
+                  localStorage.setItem('pwa_installed', 'true');
+                } else {
+                  setShowModal(false);
+                  sessionStorage.setItem('pwa_modal_dismissed', 'true');
+                }
+                setDeferredPrompt(null);
+                (window as any).deferredPrompt = null;
+              } catch (retryError) {
+                console.error('Retry also failed:', retryError);
+                setShowModal(false);
+                sessionStorage.setItem('pwa_modal_dismissed', 'true');
+              }
+            } else {
+              setShowModal(false);
+              sessionStorage.setItem('pwa_modal_dismissed', 'true');
+            }
+          }, 1000);
         }
       }
     } else {
-      // No native prompt available - check if it's iOS (which requires manual install)
+      // No native prompt available after waiting
+      setIsInstalling(false);
       const { isIOS } = getBrowserInfo();
+      
       if (isIOS) {
         // iOS doesn't support beforeinstallprompt, show instructions
         setShowManualInstructions(true);
       } else {
-        // For other browsers, the prompt might not be available yet
-        // Close modal and suggest user look for browser's install button
-        console.log('Native install prompt not available yet. User can use browser\'s install button.');
-        setShowModal(false);
-        sessionStorage.setItem('pwa_modal_dismissed', 'true');
+        // For other browsers, keep waiting in the background
+        // The prompt might still arrive, so we'll keep checking
+        console.log('Install prompt not available yet, but will keep checking...');
+        // Don't close the modal - let user try again or wait for prompt
+        // Set up a listener to automatically trigger when prompt arrives
+        let checkCount = 0;
+        const maxChecks = 20; // Check for 10 seconds (20 * 500ms)
+        
+        const checkForPrompt = setInterval(() => {
+          checkCount++;
+          const newPrompt = deferredPrompt || (window as any).deferredPrompt;
+          if (newPrompt) {
+            clearInterval(checkForPrompt);
+            console.log('Prompt became available, triggering installation');
+            setIsInstalling(true);
+            // Use the prompt directly instead of calling handleInstallClick recursively
+            newPrompt.prompt().then(() => {
+              return newPrompt.userChoice;
+            }).then(({ outcome }) => {
+              setIsInstalling(false);
+              if (outcome === 'accepted') {
+                setIsInstalled(true);
+                setShowModal(false);
+                localStorage.setItem('pwa_installed', 'true');
+              } else {
+                setShowModal(false);
+                sessionStorage.setItem('pwa_modal_dismissed', 'true');
+              }
+              setDeferredPrompt(null);
+              (window as any).deferredPrompt = null;
+            }).catch((error) => {
+              console.error('Error with auto-triggered prompt:', error);
+              setIsInstalling(false);
+            });
+          } else if (checkCount >= maxChecks) {
+            clearInterval(checkForPrompt);
+            console.log('Prompt did not become available after waiting');
+            // Keep modal open so user can try clicking Install again
+          }
+        }, 500);
       }
     }
   };
@@ -368,11 +447,20 @@ export const InstallModal: React.FC = () => {
           {!showManualInstructions ? (
             <button
               onClick={handleInstallClick}
-              className="flex-1 px-4 py-3 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!deferredPrompt && !(window as any).deferredPrompt}
+              className="flex-1 px-4 py-3 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-wait"
+              disabled={isInstalling}
             >
-              <Download className="w-5 h-5" />
-              Install
+              {isInstalling ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Installing...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  Install
+                </>
+              )}
             </button>
           ) : (
             <button
