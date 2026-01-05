@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Download, Smartphone, HelpCircle } from 'lucide-react';
+import { X, Download, HelpCircle } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -408,8 +408,12 @@ export const InstallModal: React.FC = () => {
         </button>
 
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
-            <Smartphone className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+          <div className="w-20 h-20 mb-4 flex items-center justify-center">
+            <img 
+              src="/stashway-logo.png" 
+              alt="Stashway Logo" 
+              className="w-20 h-20 object-contain"
+            />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             Install Stashway™
