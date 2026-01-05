@@ -149,8 +149,8 @@ export const InstallModal: React.FC = () => {
       const prompt = deferredPrompt || (window as any).deferredPrompt;
       
       // Show modal if:
-      // 1. We have a native prompt available, OR
-      // 2. PWA is installable but we don't have the prompt yet (show manual instructions)
+      // 1. We have a native prompt available (preferred), OR
+      // 2. PWA is installable (might get prompt later, or iOS which needs manual install)
       const shouldShow = (prompt || canInstall) && !promptHandledRef.current;
       
       if (shouldShow) {
@@ -240,10 +240,10 @@ export const InstallModal: React.FC = () => {
     // Try to get the prompt from state or global storage
     let prompt = deferredPrompt || (window as any).deferredPrompt;
     
-    // If we don't have a prompt yet, wait a bit and check again (for browsers that delay the event)
+    // If we don't have a prompt yet, wait longer and check again (for browsers that delay the event)
     if (!prompt) {
-      // Wait up to 2 seconds for the prompt to become available
-      for (let i = 0; i < 4; i++) {
+      // Wait up to 3 seconds for the prompt to become available
+      for (let i = 0; i < 6; i++) {
         await new Promise(resolve => setTimeout(resolve, 500));
         prompt = deferredPrompt || (window as any).deferredPrompt;
         if (prompt) break;
@@ -252,6 +252,7 @@ export const InstallModal: React.FC = () => {
     
     if (prompt) {
       try {
+        // Always try to trigger the native install prompt
         await prompt.prompt();
         const { outcome } = await prompt.userChoice;
         
@@ -271,13 +272,31 @@ export const InstallModal: React.FC = () => {
         promptHandledRef.current = false;
       } catch (error) {
         console.error('Error showing install prompt:', error);
-        // If native prompt fails, show manual instructions as fallback
-        setShowManualInstructions(true);
+        // Only show manual instructions if the prompt actually fails
+        // Don't show instructions if prompt is just not available yet
+        const { isIOS } = getBrowserInfo();
+        if (isIOS) {
+          // iOS doesn't support programmatic installation, show instructions
+          setShowManualInstructions(true);
+        } else {
+          // For other browsers, close modal and let user try browser's native install button
+          setShowModal(false);
+          sessionStorage.setItem('pwa_modal_dismissed', 'true');
+        }
       }
     } else {
-      // No native prompt available after waiting, show manual instructions as fallback
-      console.log('Native install prompt not available, showing manual instructions');
-      setShowManualInstructions(true);
+      // No native prompt available - check if it's iOS (which requires manual install)
+      const { isIOS } = getBrowserInfo();
+      if (isIOS) {
+        // iOS doesn't support beforeinstallprompt, show instructions
+        setShowManualInstructions(true);
+      } else {
+        // For other browsers, the prompt might not be available yet
+        // Close modal and suggest user look for browser's install button
+        console.log('Native install prompt not available yet. User can use browser\'s install button.');
+        setShowModal(false);
+        sessionStorage.setItem('pwa_modal_dismissed', 'true');
+      }
     }
   };
 
@@ -349,7 +368,8 @@ export const InstallModal: React.FC = () => {
           {!showManualInstructions ? (
             <button
               onClick={handleInstallClick}
-              className="flex-1 px-4 py-3 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!deferredPrompt && !(window as any).deferredPrompt}
             >
               <Download className="w-5 h-5" />
               Install
