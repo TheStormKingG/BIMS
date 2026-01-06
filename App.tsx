@@ -1350,21 +1350,41 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
-      // Ignore INITIAL_SESSION events with undefined session or duplicate tokens
-      if (event === 'INITIAL_SESSION') {
-        if (!session?.user || !session?.access_token) {
-          setAuthLoading(false); // Ensure loading stops even if we return early
-          return; // Don't process incomplete sessions
-        }
-        // Ignore if we've already seen this token
-        if (lastSessionTokenRef.current === session.access_token) {
-          setAuthLoading(false);
-          return;
-        }
-        lastSessionTokenRef.current = session.access_token;
-      }
-      
       if (timeoutId) clearTimeout(timeoutId);
+      
+      // Handle INITIAL_SESSION - important for mobile devices
+      if (event === 'INITIAL_SESSION') {
+        if (session?.user && session?.access_token) {
+          // Only process if we haven't seen this token (avoid duplicate processing)
+          if (lastSessionTokenRef.current !== session.access_token) {
+            lastSessionTokenRef.current = session.access_token;
+            setUser(session.user);
+            
+            // Mark user as logged in for PWA install modal
+            sessionStorage.setItem('user_logged_in', 'true');
+            localStorage.setItem('user_logged_in', 'true');
+            window.dispatchEvent(new Event('user-logged-in'));
+            
+            // Navigate if on login page
+            if (location.pathname === '/') {
+              navigate('/overview', { replace: true });
+            }
+            
+            // Check and issue phase certificates
+            if (session.user.id && !certificateCheckRef.current && !sessionStorage.getItem('phase_cert_check_done')) {
+              certificateCheckRef.current = true;
+              checkAndIssuePhaseCertificates(session.user.id).then(() => {
+                sessionStorage.setItem('phase_cert_check_done', 'true');
+              }).catch((error) => {
+                console.error('Error checking phase certificates on initial session:', error);
+                certificateCheckRef.current = false;
+              });
+            }
+          }
+        }
+        setAuthLoading(false);
+        return;
+      }
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session?.access_token) {
@@ -1402,6 +1422,8 @@ function App() {
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         sessionStorage.removeItem('phase_cert_check_done');
+        sessionStorage.removeItem('user_logged_in');
+        localStorage.removeItem('user_logged_in');
         certificateCheckRef.current = false;
         lastSessionTokenRef.current = null;
         navigate('/', { replace: true });

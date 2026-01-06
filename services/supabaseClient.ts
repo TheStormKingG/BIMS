@@ -28,9 +28,16 @@ const getSupabaseAnonKey = (): string => {
 // Initialize Supabase client
 let supabase: ReturnType<typeof createClient> | null = null;
 
-// Get production redirect URL - NEVER use localhost
-const getProductionRedirectUrl = (): string => {
-  // Always use production URL for OAuth redirects
+// Get redirect URL - use current origin, fallback to production
+const getRedirectUrl = (): string => {
+  // Use current origin for better mobile compatibility
+  // Fallback to production URL if on localhost
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'https://stashway.app/overview';
+    }
+    return `${window.location.origin}/overview`;
+  }
   return 'https://stashway.app/overview';
 };
 
@@ -39,8 +46,7 @@ export const getSupabase = () => {
     try {
       const supabaseUrl = getSupabaseUrl();
       const supabaseAnonKey = getSupabaseAnonKey();
-      // Always use production URL for redirects - NEVER localhost
-      const redirectUrl = getProductionRedirectUrl();
+      const redirectUrl = getRedirectUrl();
       
       supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
@@ -48,6 +54,8 @@ export const getSupabase = () => {
           persistSession: true,
           detectSessionInUrl: true,
           redirectTo: redirectUrl,
+          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+          storageKey: 'sb-auth-token',
         },
       });
     } catch (error) {
@@ -59,8 +67,7 @@ export const getSupabase = () => {
       if (url && key) {
         localStorage.setItem('SUPABASE_URL', url);
         localStorage.setItem('SUPABASE_ANON_KEY', key);
-        // Always use production URL for redirects - NEVER localhost
-        const redirectUrl = getProductionRedirectUrl();
+        const redirectUrl = getRedirectUrl();
         
         supabase = createClient(url, key, {
           auth: {
@@ -68,6 +75,8 @@ export const getSupabase = () => {
             persistSession: true,
             detectSessionInUrl: true,
             redirectTo: redirectUrl,
+            storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+            storageKey: 'sb-auth-token',
           },
         });
       } else {

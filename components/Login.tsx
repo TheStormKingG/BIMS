@@ -22,8 +22,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setError(null);
     setMessage(null);
 
-    // Always use production URL for redirects - NEVER localhost
-    const redirectUrl = 'https://stashway.app/overview';
+    // Use current origin for redirects (works on mobile and desktop)
+    const redirectUrl = `${window.location.origin}/overview`;
 
     try {
       if (isSignUp) {
@@ -39,7 +39,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
         if (data.user && !data.session) {
           setMessage('Please check your email to confirm your account before signing in.');
-        } else {
+        } else if (data.session) {
+          // If we got a session immediately, call success handler
           onLoginSuccess();
         }
       } else {
@@ -51,10 +52,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         if (signInError) throw signInError;
 
         if (data.session) {
-          onLoginSuccess();
+          // Small delay to ensure session is fully set
+          setTimeout(() => {
+            onLoginSuccess();
+          }, 100);
+        } else {
+          setError('Login failed - no session created');
         }
       }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'An error occurred during authentication');
     } finally {
       setLoading(false);
@@ -65,12 +72,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     setError(null);
 
-    // Always use production URL for redirects - NEVER localhost
-    // Use absolute URL with full path to prevent Supabase from using current origin
-    const redirectUrl = 'https://stashway.app/overview';
+    // Use current origin for redirects (works on mobile and desktop)
+    // Fallback to production URL if on localhost
+    const redirectUrl = window.location.hostname === 'localhost' 
+      ? 'https://stashway.app/overview'
+      : `${window.location.origin}/overview`;
 
     try {
-      // Ensure we're using the production URL by explicitly setting it
       console.log('Initiating OAuth with redirect URL:', redirectUrl);
       
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
