@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Crown, Moon, Sun } from 'lucide-react';
+import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Moon, Sun } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
-import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../hooks/useTheme';
 
 interface SettingsProps {
@@ -15,7 +14,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const { preferences, updatePreferences } = useTips();
-  const { entitlement } = useSubscription();
   const { theme, toggleTheme } = useTheme();
 
   // Check if we should open personal info from navigation state
@@ -108,11 +106,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const handleTipsFrequency = () => {
     setSelectedOption('tips-frequency');
   };
-
-  const handleUpgradePlan = () => {
-    navigate('/settings/pricing');
-  };
-
 
   const handleShare = (platform: string) => {
     const whatsappUrl = 'https://stashway.app/about-share-wa.html';
@@ -505,56 +498,6 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          {/* Current Plan / Upgrade Plan */}
-          <div className="w-full p-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-medium text-slate-900 dark:text-slate-100">Current Plan</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                    {entitlement.isTrialActive 
-                      ? 'PRO (Trial)' 
-                      : entitlement.effectivePlan === 'none' 
-                        ? 'Free Trial' 
-                        : entitlement.effectivePlan.replace('_', ' ').toUpperCase()}
-                  </span>
-                </div>
-              </div>
-              {entitlement.isTrialActive && entitlement.daysLeftOnTrial !== null && (
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  {entitlement.daysLeftOnTrial} days left
-                </span>
-              )}
-            </div>
-            {entitlement.isTrialActive && (
-              <button
-                onClick={handleUpgradePlan}
-                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors"
-              >
-                Upgrade Now
-              </button>
-            )}
-            {(entitlement.status === 'expired' || entitlement.effectivePlan === 'none') && !entitlement.isTrialActive && (
-              <button
-                onClick={handleUpgradePlan}
-                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors"
-              >
-                Choose Plan
-              </button>
-            )}
-            {entitlement.isPaidActive && (
-              <button
-                onClick={handleUpgradePlan}
-                className="w-full mt-2 border border-emerald-600 dark:border-emerald-400 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 py-2 rounded-lg font-semibold text-sm transition-colors"
-              >
-                Change Plan
-              </button>
-            )}
-          </div>
-
           {/* Personal Information */}
           <button
             onClick={handlePersonalInformation}
