@@ -274,21 +274,13 @@ function AppContent({ user, authLoading }: { user: any; authLoading: boolean }) 
 
   const activeTab = getActiveTab();
 
-  // Protected route wrapper component with subscription check
+  // Protected route wrapper component (login required, but no subscription check)
   const ProtectedRoute = ({ children, requiresSubscription = true }: { children: React.ReactNode; requiresSubscription?: boolean }) => {
     const loading = walletLoading || banksLoading || spentItemsLoading || subscriptionLoading;
     const error = walletError || banksError || spentItemsError;
     
-    // Check if subscription is required and user has access
-    if (requiresSubscription && !subscriptionLoading) {
-      const hasAccess = entitlement.isTrialActive || entitlement.isPaidActive || entitlement.effectivePlan !== 'none';
-      const isAllowedRoute = location.pathname === '/settings' || location.pathname.startsWith('/settings/');
-      
-      // If no access and not on an allowed route, redirect to pricing
-      if (!hasAccess && !isAllowedRoute) {
-        return <Navigate to="/settings/pricing" replace />;
-      }
-    }
+    // All features are now free - no subscription check needed
+    // Just ensure user is logged in (handled by parent component)
     
     if (loading) {
       return (

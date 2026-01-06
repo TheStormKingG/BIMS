@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { parseReceiptImage } from '../services/geminiService';
 import { ReceiptScanResult, Account, LineItem } from '../types';
 import { Camera, Upload, Loader2, Check, AlertCircle, X } from 'lucide-react';
-import { useSubscription } from '../hooks/useSubscription';
-import { canUse } from '../services/subscriptionService';
-import { PaywallModal } from './PaywallModal';
 
 interface ScannerProps {
   accounts: Account[];
@@ -15,18 +12,14 @@ interface ScannerProps {
 
 export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerScan }) => {
   const navigate = useNavigate();
-  const { entitlement } = useSubscription();
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null); // Store the original file for receipt storage
-  const [showPaywall, setShowPaywall] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const canScanReceipts = canUse('receipt_scan', entitlement);
 
   // Calculate available balance for each account
   const accountsWithBalance = useMemo(() => {
@@ -59,13 +52,6 @@ export const Scanner: React.FC<ScannerProps> = ({ accounts, onSave, onTriggerSca
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Check subscription before scanning
-    if (!canScanReceipts) {
-      setShowPaywall(true);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
 
     // Store the file for later receipt storage
     setReceiptFile(file);

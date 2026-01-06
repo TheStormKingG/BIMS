@@ -4,9 +4,6 @@ import { parseReceiptImage } from '../services/geminiService';
 import { ReceiptScanResult, Account } from '../types';
 import { Upload as UploadIcon, Loader2, Check, AlertCircle, X, FileImage } from 'lucide-react';
 import { emitEvent } from '../services/eventService';
-import { useSubscription } from '../hooks/useSubscription';
-import { canUse } from '../services/subscriptionService';
-import { PaywallModal } from './PaywallModal';
 
 interface UploadProps {
   accounts: Account[];
@@ -15,7 +12,6 @@ interface UploadProps {
 
 export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   const navigate = useNavigate();
-  const { entitlement } = useSubscription();
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ReceiptScanResult | null>(null);
@@ -23,12 +19,9 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null); // Store the original file for receipt storage
-  const [showPaywall, setShowPaywall] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-  
-  const canScanReceipts = canUse('receipt_scan', entitlement);
 
   // Calculate available balance for each account
   const accountsWithBalance = useMemo(() => {
@@ -75,12 +68,6 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
   };
 
   const handleFileProcess = async (file: File) => {
-    // Check subscription before scanning
-    if (!canScanReceipts) {
-      setShowPaywall(true);
-      return;
-    }
-
     // Store the file for later receipt storage
     setReceiptFile(file);
 
@@ -424,12 +411,6 @@ export const Upload: React.FC<UploadProps> = ({ accounts, onSave }) => {
         </>
       )}
 
-      <PaywallModal
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        requiredPlan="pro"
-        featureName="AI Receipt Scanning"
-      />
     </div>
   );
 };

@@ -141,45 +141,38 @@ export function getUserEntitlement(subscription: UserSubscription | null): UserE
 
 /**
  * Check if user can use a specific feature
+ * All features are now free for all logged-in users
  */
 export function canUse(
   featureKey: FeatureKey,
   entitlement: UserEntitlement
 ): boolean {
-  const requiredPlan = FEATURE_PLAN_MAP[featureKey];
-  
-  // If no requirement, allow (shouldn't happen, but safe fallback)
-  if (!requiredPlan) {
-    return true;
-  }
-
-  // Compare effective plan with required plan
-  return comparePlans(entitlement.effectivePlan, requiredPlan);
+  // All features are free - return true for all logged-in users
+  return true;
 }
 
 /**
  * Require a feature - throws error if not available
+ * All features are now free for all logged-in users
  */
 export function requireFeature(
   featureKey: FeatureKey,
   entitlement: UserEntitlement
 ): void {
-  if (!canUse(featureKey, entitlement)) {
-    const requiredPlan = FEATURE_PLAN_MAP[featureKey];
-    throw new Error(`Feature "${featureKey}" requires ${requiredPlan} plan or higher.`);
-  }
+  // All features are free - no restrictions
+  return;
 }
 
 /**
  * Require a minimum plan
+ * All features are now free for all logged-in users
  */
 export function requirePlan(
   minPlan: SubscriptionPlan,
   entitlement: UserEntitlement
 ): void {
-  if (!comparePlans(entitlement.effectivePlan, minPlan)) {
-    throw new Error(`This feature requires ${minPlan} plan or higher.`);
-  }
+  // All features are free - no restrictions
+  return;
 }
 
 /**
