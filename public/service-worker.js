@@ -1,9 +1,10 @@
-const CACHE_NAME = 'stashway-cache-v1'; // Update version to force cache refresh
+const CACHE_NAME = 'stashway-cache-v2'; // Update version to force cache refresh
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
   '/stashway-logo.png',
+  '/browserconfig.xml',
 ];
 
 // Install event - cache resources
