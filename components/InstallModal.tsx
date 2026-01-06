@@ -24,12 +24,15 @@ const canInstallPWA = (): boolean => {
   return hasServiceWorker && hasHTTPS;
 };
 
-// Helper function to detect browser type
-const getBrowserInfo = (): { name: string; isSamsung: boolean; isIOS: boolean; isAndroid: boolean } => {
+// Helper function to detect browser type and platform
+const getBrowserInfo = (): { name: string; isSamsung: boolean; isIOS: boolean; isAndroid: boolean; isWindows: boolean; isMac: boolean; isDesktop: boolean } => {
   const userAgent = navigator.userAgent.toLowerCase();
   const isSamsung = /samsungbrowser/i.test(userAgent);
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
   const isAndroid = /android/.test(userAgent);
+  const isWindows = /win/.test(navigator.platform.toLowerCase());
+  const isMac = /mac/.test(navigator.platform.toLowerCase());
+  const isDesktop = !isIOS && !isAndroid;
   
   let name = 'unknown';
   if (isSamsung) {
@@ -44,12 +47,12 @@ const getBrowserInfo = (): { name: string; isSamsung: boolean; isIOS: boolean; i
     name = 'Edge';
   }
   
-  return { name, isSamsung, isIOS, isAndroid };
+  return { name, isSamsung, isIOS, isAndroid, isWindows, isMac, isDesktop };
 };
 
-// Get manual installation instructions based on browser
+// Get manual installation instructions based on browser and platform
 const getManualInstallInstructions = (): string => {
-  const { name, isSamsung, isIOS, isAndroid } = getBrowserInfo();
+  const { name, isSamsung, isIOS, isAndroid, isWindows, isMac, isDesktop } = getBrowserInfo();
   
   if (isIOS) {
     return 'Tap the Share button (square with arrow) at the bottom, then scroll down and tap "Add to Home Screen".';
@@ -57,8 +60,22 @@ const getManualInstallInstructions = (): string => {
     return 'Tap the Menu button (three dots) in the top right, then tap "Add page to" and select "Home screen".';
   } else if (isAndroid) {
     return 'Tap the Menu button (three dots) in the top right, then tap "Add to Home screen" or "Install app".';
+  } else if (isWindows && isDesktop) {
+    if (name === 'Chrome' || name === 'Edge') {
+      return 'Click the install icon (⊕) in the address bar, or go to Menu (⋮) > Apps > Install this site as an app. The app will appear in your Start Menu.';
+    } else {
+      return 'Look for an install icon in your browser\'s address bar. After installation, the app will appear in your Start Menu.';
+    }
+  } else if (isMac && isDesktop) {
+    if (name === 'Chrome' || name === 'Edge') {
+      return 'Click the install icon (⊕) in the address bar, or go to Menu (⋮) > Apps > Install this site as an app. The app will appear in your Applications folder.';
+    } else if (name === 'Safari') {
+      return 'Go to File > Add to Dock, or use Share > Add to Home Screen. The app will appear in your Applications folder.';
+    } else {
+      return 'Look for an install icon in your browser\'s address bar. After installation, the app will appear in your Applications folder.';
+    }
   } else {
-    return 'Look for an install icon in your browser\'s address bar, or use the browser menu to add this page to your home screen.';
+    return 'Look for an install icon in your browser\'s address bar, or use the browser menu to install this app.';
   }
 };
 

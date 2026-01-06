@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
               copyFileSync('public/about-share.html', 'dist/about-share.html');
               copyFileSync('public/about-share-wa.html', 'dist/about-share-wa.html');
               copyFileSync('public/service-worker.js', 'dist/service-worker.js');
+              copyFileSync('public/browserconfig.xml', 'dist/browserconfig.xml');
             } catch (err) {
               console.warn('Could not copy static files:', err);
             }
