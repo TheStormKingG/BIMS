@@ -358,7 +358,7 @@ export const InstallModal: React.FC = () => {
         } else {
           // Show error message to user
           alert('Unable to show install prompt. Please try using the browser\'s install button in the address bar, or see the installation instructions below.');
-          setShowManualInstructions(true);
+        setShowManualInstructions(true);
         }
       }
     } else {
@@ -377,7 +377,7 @@ export const InstallModal: React.FC = () => {
         setShowManualInstructions(true);
       } else {
         // For mobile browsers, show instructions
-        setShowManualInstructions(true);
+      setShowManualInstructions(true);
       }
     }
   };
@@ -464,8 +464,8 @@ export const InstallModal: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5" />
-                  Install
+              <Download className="w-5 h-5" />
+              Install
                 </>
               )}
             </button>

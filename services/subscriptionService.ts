@@ -148,7 +148,7 @@ export function canUse(
   entitlement: UserEntitlement
 ): boolean {
   // All features are free - return true for all logged-in users
-  return true;
+    return true;
 }
 
 /**

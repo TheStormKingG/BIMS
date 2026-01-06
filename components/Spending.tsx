@@ -400,20 +400,20 @@ export const Spending: React.FC<SpendingProps> = ({ spentItems, loading = false,
               {/* Dropdown Menu */}
               {showExportDropdown && (
                 <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
-                  <button
-                    onClick={handleExportCSV}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    CSV
-                  </button>
-                  <button
-                    onClick={handleExportExcel}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    XLS
-                  </button>
+                    <button
+                      onClick={handleExportCSV}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV
+                    </button>
+                    <button
+                      onClick={handleExportExcel}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      XLS
+                    </button>
                   <button
                     onClick={handleExportPDF}
                     className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
