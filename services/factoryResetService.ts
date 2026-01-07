@@ -53,7 +53,16 @@ export const performFactoryReset = async (userId: string): Promise<void> => {
     
     if (accountsError) {
       console.error('Error deleting accounts:', accountsError);
-      // Continue even if this fails (accounts table might not exist in all setups)
+      // Check if it's a table-not-found error
+      const isTableNotFound = accountsError.message?.includes('Could not find the table') || 
+                              accountsError.message?.includes('schema cache') ||
+                              accountsError.code === 'PGRST202' ||
+                              accountsError.code === '42P01';
+      if (isTableNotFound) {
+        console.log('⚠ Accounts table does not exist, skipping...');
+      } else {
+        console.warn('⚠ Failed to delete accounts, continuing...');
+      }
     } else {
       console.log('✓ Accounts deleted');
     }
@@ -155,9 +164,20 @@ export const performFactoryReset = async (userId: string): Promise<void> => {
     
     if (transactionsError) {
       console.error('Error deleting transactions:', transactionsError);
-      throw new Error(`Failed to delete transactions: ${transactionsError.message}`);
+      // Check if it's a table-not-found error (404 or schema cache error)
+      const isTableNotFound = transactionsError.message?.includes('Could not find the table') || 
+                              transactionsError.message?.includes('schema cache') ||
+                              transactionsError.code === 'PGRST202' ||
+                              transactionsError.code === '42P01';
+      if (isTableNotFound) {
+        console.log('⚠ Transactions table does not exist, skipping...');
+      } else {
+        // Continue even if this fails (table might not exist in all setups)
+        console.warn('⚠ Failed to delete transactions, continuing...');
+      }
+    } else {
+      console.log('✓ Transactions deleted');
     }
-    console.log('✓ Transactions deleted');
     
     // 8. Delete all tips
     const { error: tipsError } = await supabase
