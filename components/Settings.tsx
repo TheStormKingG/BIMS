@@ -665,7 +665,7 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
                       setFactoryResetEmail(e.target.value);
                       setFactoryResetError(null);
                     }}
-                    placeholder={user?.email || 'your@email.com'}
+                    placeholder="Enter your full email address..."
                     className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
                     disabled={factoryResetLoading}
                   />
