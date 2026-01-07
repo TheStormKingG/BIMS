@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Moon, Sun } from 'lucide-react';
+import { User, UserPlus, Camera, ChevronRight, X, Share2, Facebook, LogOut, Lightbulb, Star, Moon, Sun, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSupabase } from '../services/supabaseClient';
 import { useTips } from '../hooks/useTips';
 import { useTheme } from '../hooks/useTheme';
+import { performFactoryReset } from '../services/factoryResetService';
 
 interface SettingsProps {
   user: any;
@@ -13,6 +14,10 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [showFactoryResetModal, setShowFactoryResetModal] = useState(false);
+  const [factoryResetEmail, setFactoryResetEmail] = useState('');
+  const [factoryResetLoading, setFactoryResetLoading] = useState(false);
+  const [factoryResetError, setFactoryResetError] = useState<string | null>(null);
   const { preferences, updatePreferences } = useTips();
   const { theme, toggleTheme } = useTheme();
 
@@ -125,6 +130,41 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
   const handleCopyLink = () => {
     navigator.clipboard.writeText('https://stashway.app/about-share.html');
     alert('Link copied to clipboard!');
+  };
+
+  const handleFactoryReset = async () => {
+    if (!user) return;
+    
+    // Verify email matches logged-in user
+    const emailToVerify = factoryResetEmail.trim().toLowerCase();
+    const userEmail = user.email?.toLowerCase();
+    
+    if (emailToVerify !== userEmail) {
+      setFactoryResetError('Email does not match your account email. Please enter the email you used to sign in.');
+      return;
+    }
+    
+    setFactoryResetLoading(true);
+    setFactoryResetError(null);
+    
+    try {
+      await performFactoryReset(user.id);
+      
+      // Show success message
+      alert('Factory reset completed successfully. The app will now refresh.');
+      
+      // Close modal
+      setShowFactoryResetModal(false);
+      setFactoryResetEmail('');
+      
+      // Refresh the page to reload all data
+      window.location.href = '/overview';
+    } catch (error: any) {
+      console.error('Factory reset error:', error);
+      setFactoryResetError(error.message || 'Failed to perform factory reset. Please try again.');
+    } finally {
+      setFactoryResetLoading(false);
+    }
   };
 
 
@@ -529,13 +569,27 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           {/* Invite a Contact */}
           <button
             onClick={handleInviteContact}
-            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-700"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                 <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <span className="font-medium text-slate-900 dark:text-slate-100">Invite a Contact</span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+          </button>
+
+          {/* Factory Reset */}
+          <button
+            onClick={() => setShowFactoryResetModal(true)}
+            className="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <span className="font-medium text-slate-900 dark:text-slate-100">Factory Reset</span>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
           </button>
@@ -561,6 +615,99 @@ export const Settings: React.FC<SettingsProps> = ({ user }) => {
           <LogOut className="w-5 h-5" />
           <span>Log Out</span>
         </button>
+
+        {/* Factory Reset Modal */}
+        {showFactoryResetModal && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6 relative">
+              <button
+                onClick={() => {
+                  setShowFactoryResetModal(false);
+                  setFactoryResetEmail('');
+                  setFactoryResetError(null);
+                }}
+                className="absolute top-4 right-4 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  Factory Reset
+                </h2>
+                <p className="text-slate-600 dark:text-slate-300 mb-4">
+                  This will permanently delete all your data including:
+                </p>
+                <ul className="text-left text-sm text-slate-600 dark:text-slate-300 space-y-1 mb-4">
+                  <li>• All bank accounts (wallet will be emptied)</li>
+                  <li>• All scanned receipts and images</li>
+                  <li>• All spending records</li>
+                  <li>• All goals and achievements</li>
+                  <li>• All transactions</li>
+                  <li>• All chat history</li>
+                </ul>
+                <p className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">
+                  This action cannot be undone!
+                </p>
+                <div className="w-full">
+                  <label htmlFor="reset-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Type your email to confirm:
+                  </label>
+                  <input
+                    id="reset-email"
+                    type="email"
+                    value={factoryResetEmail}
+                    onChange={(e) => {
+                      setFactoryResetEmail(e.target.value);
+                      setFactoryResetError(null);
+                    }}
+                    placeholder={user?.email || 'your@email.com'}
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-black dark:text-slate-100 bg-white dark:bg-slate-700"
+                    disabled={factoryResetLoading}
+                  />
+                  {factoryResetError && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-2">{factoryResetError}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowFactoryResetModal(false);
+                    setFactoryResetEmail('');
+                    setFactoryResetError(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  disabled={factoryResetLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleFactoryReset}
+                  disabled={factoryResetLoading || !factoryResetEmail.trim()}
+                  className="flex-1 px-4 py-3 bg-red-600 dark:bg-red-500 text-white rounded-lg font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {factoryResetLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Resetting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-5 h-5" />
+                      <span>Reset All Data</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Copyright and Address Information */}
         <div className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400 space-y-2">
